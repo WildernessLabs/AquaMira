@@ -1,0 +1,14 @@
+<Project>
+    <PropertyGroup>
+        <BuildingInVisualStudio Condition="'$(BuildingInsideVisualStudio)' == 'true'">true</BuildingInVisualStudio>
+        <BuildingInVisualStudio Condition="'$(BuildingInsideVisualStudio)' == ''">false</BuildingInVisualStudio>
+        <Configurations>Debug;Release;Debug-ProjectRef</Configurations>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="$(Configuration.Contains('ProjectRef'))">
+        <UseProjectReference>true</UseProjectReference>
+    </PropertyGroup>
+    <PropertyGroup Condition="!$(Configuration.Contains('ProjectRef'))">
+        <UseProjectReference>false</UseProjectReference>
+    </PropertyGroup>
+</Project>

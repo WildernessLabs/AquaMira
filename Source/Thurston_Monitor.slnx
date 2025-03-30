@@ -1,0 +1,76 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="Debug-ProjectRef" />
+    <BuildType Name="Release" />
+  </Configurations>
+  <Folder Name="/docs/" />
+  <Folder Name="/_meadow_refs/">
+  <Project Path="../../Meadow.Contracts/Source/Meadow.Contracts/Meadow.Contracts.csproj">
+    <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
+    <Deploy />
+  </Project>
+  <Project Path="../../Meadow.Core/Source/implementations/desktop/Meadow.Desktop/Meadow.Desktop.csproj">
+    <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
+  </Project>
+  <Project Path="../../Meadow.Core/Source/implementations/f7/Meadow.F7/Meadow.F7.csproj">
+    <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
+    <Deploy />
+  </Project>
+  <Project Path="../../Meadow.Core/Source/implementations/windows/Meadow.Windows/Meadow.Windows.csproj">
+    <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
+  </Project>
+  <Project Path="../../Meadow.Core/Source/Meadow.Core/Meadow.Core.csproj">
+    <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
+    <Deploy />
+  </Project>
+  <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Core/Meadow.Foundation.Core.csproj">
+    <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
+    <Deploy />
+  </Project>
+  <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Libraries_and_Frameworks/Graphics.MicroGraphics/Driver/Graphics.MicroGraphics.csproj">
+    <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
+    <Deploy />
+  </Project>
+  <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Libraries_and_Frameworks/Graphics.MicroLayout/Driver/Graphics.MicroLayout.csproj">
+    <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
+  </Project>
+  <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Libraries_and_Frameworks/Serialization.MicroJson/Driver/Serialization.MicroJson.csproj">
+    <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
+  </Project>
+  <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/Motors.StepperOnline/Driver/Motors.StepperOnline.csproj">
+    <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
+  </Project>
+  <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/Sensors.Flow.HallEffect/Driver/Sensors.Flow.HallEffect.csproj">
+    <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
+    <Deploy />
+  </Project>
+  <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/Sensors.Hid.Keyboard/Driver/Sensors.Hid.Keyboard.csproj">
+    <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
+  </Project>
+  <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/Sensors.Power.CurrentTransducer/Driver/Sensors.Power.CurrentTransducer.csproj">
+    <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
+    <Deploy />
+  </Project>
+  <Project Path="../../Meadow.Modbus/src/Meadow.Modbus/Meadow.Modbus.csproj">
+    <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
+  </Project>
+  <Project Path="../../Meadow.ProjectLab/Source/Meadow.ProjectLab/Meadow.ProjectLab.csproj">
+    <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
+    <Deploy />
+  </Project>
+  <Project Path="../../Meadow.Units/Source/Meadow.Units/Meadow.Units.csproj">
+    <Deploy />
+  </Project>
+  <Project Path="../../MQTTnet/Source/MQTTnet/MQTTnet.csproj">
+    <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
+  </Project>
+</Folder>
+  <Project Path="Thurston_Monitor.Core/Thurston_Monitor.Core.csproj">
+    <Deploy />
+  </Project>
+  <Project Path="Thurston_Monitor.Desktop/Thurston_Monitor.Desktop.csproj" />
+  <Project Path="Thurston_Monitor.F7/Thurston_Monitor.ProjLab.csproj">
+    <Deploy />
+  </Project>
+</Solution>
