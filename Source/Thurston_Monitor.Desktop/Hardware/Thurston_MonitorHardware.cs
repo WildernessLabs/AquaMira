@@ -1,7 +1,4 @@
-﻿
-using System;
-using System.Threading.Tasks;
-using Meadow;
+﻿using Meadow;
 using Meadow.Foundation.Sensors;
 using Meadow.Foundation.Sensors.Buttons;
 using Meadow.Foundation.Sensors.Hid;
@@ -27,6 +24,7 @@ namespace Thurston_Monitor.DT
         public ITemperatureSensor? TemperatureSensor { get; }
         public IButton? RightButton { get; }
         public IButton? LeftButton { get; }
+        public Core.IInputController InputController { get; }
 
         public Thurston_MonitorHardware(Desktop device)
         {

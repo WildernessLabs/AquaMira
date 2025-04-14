@@ -1,13 +1,7 @@
-﻿using System;
-using System.Threading.Tasks;
-using Meadow;
-using Meadow.Devices;
-using Meadow.Foundation.Leds;
-using Meadow.Foundation.Sensors;
+﻿using Meadow.Devices;
 using Meadow.Peripherals.Displays;
 using Meadow.Peripherals.Sensors;
 using Meadow.Peripherals.Sensors.Buttons;
-using Meadow.Units;
 using Thurston_Monitor.Core;
 using Thurston_Monitor.Core.Contracts;
 
@@ -25,9 +19,19 @@ namespace Thurston_Monitor.F7
         public IPixelDisplay? Display => projLab.Display;
         public INetworkController NetworkController { get; }
 
+        public Core.IInputController InputController { get; }
+
         public Thurston_MonitorProjectLabHardware(F7CoreComputeV2 device)
         {
             projLab = ProjectLab.Create();
+
+            InputController = new InputController(new[]
+            {
+                projLab.MikroBus1.Pins.PWM,
+                projLab.MikroBus1.Pins.RST,
+                projLab.MikroBus1.Pins.RX,
+//                projLab.MikroBus1.Pins.TX
+            });
 
             OutputController = new OutputController(projLab.RgbLed);
             NetworkController = new NetworkController(device);

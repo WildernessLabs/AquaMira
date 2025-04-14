@@ -1,7 +1,7 @@
-﻿using System;
-using System.Threading.Tasks;
-using Meadow;
+﻿using Meadow;
 using Meadow.Units;
+using System;
+using System.Threading.Tasks;
 using Thurston_Monitor.Core.Contracts;
 
 namespace Thurston_Monitor.Core
@@ -13,11 +13,11 @@ namespace Thurston_Monitor.Core
         private CloudController cloudController;
         private ConfigurationController configurationController;
         private DisplayController displayController;
-        private InputController inputController;
         private SensorController sensorController;
 
         private IOutputController OutputController => hardware.OutputController;
         private INetworkController NetworkController => hardware.NetworkController;
+        private IInputController InputController => hardware.InputController;
 
         private Temperature.UnitType units;
         private Temperature currentTemperature;
@@ -37,7 +37,6 @@ namespace Thurston_Monitor.Core
             configurationController = new ConfigurationController();
             cloudController = new CloudController(Resolver.CommandService);
             sensorController = new SensorController(hardware);
-            inputController = new InputController(hardware);
 
             units = configurationController.Units;
             thresholdTemperature = configurationController.ThresholdTemp;
@@ -51,13 +50,18 @@ namespace Thurston_Monitor.Core
             sensorController.CurrentTemperatureChanged += OnCurrentTemperatureChanged;
             cloudController.UnitsChangeRequested += OnUnitsChangeChangeRequested;
             cloudController.ThresholdTemperatureChangeRequested += OnThresholdTemperatureChangeRequested;
-            inputController.UnitDownRequested += OnUnitDownRequested;
-            inputController.UnitUpRequested += OnUnitUpRequested;
+
             NetworkController.NetworkStatusChanged += OnNetworkStatusChanged;
 
             NetworkController.Connect();
 
+            InputController.Configure(configurationController);
+
             return Task.CompletedTask;
+        }
+
+        private void ConfigureAnalyzers(ConfigurationController configuration)
+        {
         }
 
         private void OnNetworkStatusChanged(object sender, EventArgs e)

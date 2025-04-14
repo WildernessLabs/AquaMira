@@ -1,9 +1,5 @@
-﻿using System;
-using System.Threading.Tasks;
-using Meadow.Foundation.Graphics;
-using Meadow.Peripherals.Displays;
+﻿using Meadow.Peripherals.Displays;
 using Meadow.Peripherals.Sensors;
-using Meadow.Peripherals.Sensors.Atmospheric;
 using Meadow.Peripherals.Sensors.Buttons;
 
 namespace Thurston_Monitor.Core.Contracts
@@ -13,6 +9,8 @@ namespace Thurston_Monitor.Core.Contracts
         // basic hardware
         IButton? LeftButton { get; }
         IButton? RightButton { get; }
+
+        Core.IInputController InputController { get; }
 
         // complex hardware
         ITemperatureSensor? TemperatureSensor { get; }
