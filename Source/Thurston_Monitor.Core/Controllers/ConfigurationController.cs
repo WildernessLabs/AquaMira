@@ -1,59 +1,68 @@
-﻿using System;
-using System.IO;
-using System.Threading.Tasks;
+﻿using Meadow.Foundation;
 using Meadow.Foundation.Serialization;
-using Meadow.Units;
+using System;
+using System.IO;
+using System.Runtime.CompilerServices;
 
-namespace Thurston_Monitor.Core
+[assembly: InternalsVisibleTo("Thurston_Monitor.Tests")]
+
+namespace Thurston_Monitor.Core;
+
+public class ModbusDeviceConfig
 {
-    public class AppConfigSettings
+    public string Driver { get; set; }
+    public int Address { get; set; }
+    public string Description { get; set; }
+}
+
+public class FrequencyInput
+{
+    public int ChannelNumber { get; set; }
+    public string UnitType { get; set; }
+    public double Scale { get; set; }
+    public double Offset { get; set; }
+    public string Description { get; set; }
+    public bool IsSimulated { get; set; }
+}
+
+public class SensorConfiguration
+{
+    public ChannelConfig[] ChannelConfigurations { get; set; } = Array.Empty<ChannelConfig>();
+    public FrequencyInput[] FrequencyInputs { get; set; } = Array.Empty<FrequencyInput>();
+    public ModbusDeviceConfig[] ModbusDevices { get; set; } = Array.Empty<ModbusDeviceConfig>();
+}
+
+public class ConfigurationController
+{
+    public const string DefaultSettingsFileName = "sensor-config.json";
+
+    private string SettingsFileName { get; set; }
+
+    public SensorConfiguration SensorConfiguration { get; private set; }
+
+    internal ConfigurationController(string? configPath)
     {
-        public Temperature.UnitType Units { get; set; }
-        public double ThresholdC { get; set; }
+        SettingsFileName = configPath ?? DefaultSettingsFileName;
+
+        if (!File.Exists(SettingsFileName))
+        {
+            throw new ArgumentException();
+        }
+
+        Load();
     }
 
-    public class ConfigurationController
+    public ConfigurationController()
+        : this(null)
     {
-        private const string SettingsFileName = "settings.json";
+    }
 
-        public Temperature.UnitType Units { get; set; }
-        public Temperature ThresholdTemp { get; set; }
-
-        public ConfigurationController()
+    private void Load()
+    {
+        if (File.Exists(SettingsFileName))
         {
-            Units = Temperature.UnitType.Celsius;
-            ThresholdTemp = 22.5.Celsius();
-
-            Load();
-        }
-
-        public void Load()
-        {
-            if (File.Exists(SettingsFileName))
-            {
-                var json = File.ReadAllText(SettingsFileName);
-                var s = MicroJson.Deserialize<AppConfigSettings>(json);
-                Units = s.Units;
-                ThresholdTemp = s.ThresholdC.Celsius();
-            }
-        }
-
-        public Task Save()
-        {
-            return Task.Run(() =>
-            {
-                var cfg = new AppConfigSettings
-                {
-                    Units = Units,
-                    ThresholdC = ThresholdTemp.Celsius
-                };
-                var json = MicroJson.Serialize(cfg);
-                if (File.Exists(SettingsFileName))
-                {
-                    File.Delete(SettingsFileName);
-                }
-                File.WriteAllText(SettingsFileName, json);
-            });
+            var json = File.ReadAllText(SettingsFileName);
+            SensorConfiguration = MicroJson.Deserialize<SensorConfiguration>(json);
         }
     }
 }

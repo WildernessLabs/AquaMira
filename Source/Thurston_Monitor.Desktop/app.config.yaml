@@ -16,3 +16,6 @@ Logging:
 
     # Enable Logging, Events, Command + Control
 #    Enabled: false
+
+Simulation:
+    SimulateFlowSensor: true    

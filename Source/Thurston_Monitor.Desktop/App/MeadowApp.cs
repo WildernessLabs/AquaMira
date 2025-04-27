@@ -1,8 +1,7 @@
-using System;
-using System.Threading.Tasks;
 using Meadow;
 using Meadow.Foundation.Displays;
 using Meadow.Logging;
+using System.Threading.Tasks;
 using Thurston_Monitor.Core;
 
 namespace Thurston_Monitor.DT

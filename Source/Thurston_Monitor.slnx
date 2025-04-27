@@ -55,6 +55,9 @@
       <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
       <Deploy />
     </Project>
+    <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/Sensors.Flow.HallEffect/Simulation/Sensors.Flow.HallEffect.Simulation/Sensors.Flow.HallEffect.Simulation.csproj">
+      <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
+    </Project>
     <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/Sensors.Hid.Keyboard/Driver/Sensors.Hid.Keyboard.csproj">
       <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
     </Project>
@@ -62,9 +65,16 @@
       <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
       <Deploy />
     </Project>
+    <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/Sensors.Temperature.Thermistor/Driver/Sensors.Temperature.Thermistor.csproj">
+      <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
+      <Deploy />
+    </Project>
     <Project Path="../../Meadow.Foundation/Source/Product/ProgrammableAnalogInput/Driver/ProgramableAnalogInput.csproj">
       <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
       <Deploy />
+    </Project>
+    <Project Path="../../Meadow.Logging/Source/Meadow.Logging/lib/Meadow.Logging.csproj">
+      <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
     </Project>
     <Project Path="../../Meadow.Modbus/src/Meadow.Modbus/Meadow.Modbus.csproj">
       <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
@@ -95,4 +105,5 @@
   <Project Path="Thurston_Monitor.F7/Thurston_Monitor.ProjLab.csproj">
     <Deploy />
   </Project>
+  <Project Path="Thurston_Monitor.Tests/Thurston_Monitor.Tests.csproj" Id="db40a163-759c-4086-9410-66d968f66abc" />
 </Solution>

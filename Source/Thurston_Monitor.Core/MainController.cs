@@ -19,7 +19,7 @@ namespace Thurston_Monitor.Core
         private INetworkController NetworkController => hardware.NetworkController;
         private IInputController InputController => hardware.InputController;
 
-        private Temperature.UnitType units;
+        private readonly Temperature.UnitType units;
         private Temperature currentTemperature;
         private Temperature thresholdTemperature;
 
@@ -38,24 +38,19 @@ namespace Thurston_Monitor.Core
             cloudController = new CloudController(Resolver.CommandService);
             sensorController = new SensorController(hardware);
 
-            units = configurationController.Units;
-            thresholdTemperature = configurationController.ThresholdTemp;
-
             displayController = new DisplayController(
                 this.hardware.Display,
                 this.hardware.DisplayRotation,
                 units);
 
             // connect events
-            sensorController.CurrentTemperatureChanged += OnCurrentTemperatureChanged;
-            cloudController.UnitsChangeRequested += OnUnitsChangeChangeRequested;
-            cloudController.ThresholdTemperatureChangeRequested += OnThresholdTemperatureChangeRequested;
-
             NetworkController.NetworkStatusChanged += OnNetworkStatusChanged;
 
             NetworkController.Connect();
 
-            InputController.Configure(configurationController);
+            InputController?.Configure(configurationController);
+
+            sensorController.ApplySensorConfig(configurationController.SensorConfiguration);
 
             return Task.CompletedTask;
         }
@@ -83,46 +78,6 @@ namespace Thurston_Monitor.Core
 
             // update the UI
             displayController.UpdateCurrentTemperature(currentTemperature);
-        }
-
-        private void OnUnitsChangeChangeRequested(object sender, Temperature.UnitType units)
-        {
-            displayController.UpdateDisplayUnits(units);
-        }
-
-        private void OnThresholdTemperatureChangeRequested(object sender, Temperature e)
-        {
-            thresholdTemperature = e;
-            configurationController.ThresholdTemp = e;
-            configurationController.Save();
-        }
-
-        private void OnUnitDownRequested(object sender, EventArgs e)
-        {
-            units = units switch
-            {
-                Temperature.UnitType.Celsius => Temperature.UnitType.Kelvin,
-                Temperature.UnitType.Fahrenheit => Temperature.UnitType.Celsius,
-                _ => Temperature.UnitType.Fahrenheit,
-            };
-
-            displayController.UpdateDisplayUnits(units);
-            configurationController.Units = units;
-            configurationController.Save();
-        }
-
-        private void OnUnitUpRequested(object sender, EventArgs e)
-        {
-            units = units switch
-            {
-                Temperature.UnitType.Celsius => Temperature.UnitType.Fahrenheit,
-                Temperature.UnitType.Fahrenheit => Temperature.UnitType.Kelvin,
-                _ => Temperature.UnitType.Celsius,
-            };
-
-            displayController.UpdateDisplayUnits(units);
-            configurationController.Units = units;
-            configurationController.Save();
         }
 
         public async Task Run()

@@ -1,0 +1,12 @@
+{
+  "FrequencyInputs": [
+    {
+      "ChannelNumber": 0,
+      "UnitType": "VolumetricFlow",
+      "Scale": 1.0,
+      "Offset": 0,
+      "Description": "Pump1 Output",
+      "IsSimulated": true
+    }
+  ]
+}
