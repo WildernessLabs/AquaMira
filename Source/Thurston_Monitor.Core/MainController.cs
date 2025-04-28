@@ -14,6 +14,7 @@ namespace Thurston_Monitor.Core
         private ConfigurationController configurationController;
         private DisplayController displayController;
         private SensorController sensorController;
+        private StorageController storageController;
 
         private IOutputController OutputController => hardware.OutputController;
         private INetworkController NetworkController => hardware.NetworkController;
@@ -33,10 +34,19 @@ namespace Thurston_Monitor.Core
 
             this.thresholdTemperature = 68.Fahrenheit();
 
+            var a = Resolver.Device.NetworkAdapters;
+
             // create generic services
             configurationController = new ConfigurationController();
-            cloudController = new CloudController(Resolver.CommandService);
-            sensorController = new SensorController(hardware);
+            storageController = new StorageController(configurationController);
+
+            cloudController = new CloudController(
+                Resolver.MeadowCloudService,
+                Resolver.CommandService,
+                storageController,
+                NetworkController);
+
+            sensorController = new SensorController(hardware, storageController);
 
             displayController = new DisplayController(
                 this.hardware.Display,
@@ -50,7 +60,10 @@ namespace Thurston_Monitor.Core
 
             InputController?.Configure(configurationController);
 
-            sensorController.ApplySensorConfig(configurationController.SensorConfiguration);
+            sensorController.ApplySensorConfig(
+                configurationController.SensorConfiguration);
+
+            _ = cloudController.ReportDeviceStartup();
 
             return Task.CompletedTask;
         }

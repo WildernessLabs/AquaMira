@@ -6,7 +6,18 @@
       "Scale": 1.0,
       "Offset": 0,
       "Description": "Pump1 Output",
-      "IsSimulated": true
+      "IsSimulated": true,
+      "SenseIntervalSeconds": 1
+    },
+    {
+      "ChannelNumber": 1,
+      "UnitType": "VolumetricFlow",
+      "Scale": 1.0,
+      "Offset": 0,
+      "Description": "Pump2 Output",
+      "IsSimulated": true,
+      "SenseIntervalSeconds": 5
     }
+
   ]
 }

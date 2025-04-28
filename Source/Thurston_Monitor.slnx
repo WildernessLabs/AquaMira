@@ -87,6 +87,7 @@
       <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
     </Project>
     <Project Path="../../Meadow.Units/Source/Meadow.Units/Meadow.Units.csproj">
+      <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
       <Deploy />
     </Project>
     <Project Path="../../MQTTnet/Source/MQTTnet/MQTTnet.csproj">
