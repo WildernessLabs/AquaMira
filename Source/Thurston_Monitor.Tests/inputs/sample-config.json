@@ -18,7 +18,9 @@
   "Sensors": [
 
   ],
-  "ChannelConfigurations": [
+  "ConfigurableAnalogs": {
+    "IsSimulated": true,
+    "Channels": [
       {
         "ChannelNumber": 0,
         "ChannelType": "Current_4_20",
@@ -44,4 +46,5 @@
         "Description": "0-30psi Pressure Sensor (0-10V)"
       }
     ]
+  }
 }

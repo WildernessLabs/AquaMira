@@ -1,4 +1,5 @@
 ﻿using Meadow;
+using Meadow.Foundation;
 using Meadow.Peripherals.Sensors;
 using Meadow.Units;
 using Sensors.Flow.HallEffect.Simulation;
@@ -11,6 +12,14 @@ using Thurston_Monitor.Core.Contracts;
 
 namespace Thurston_Monitor.Core;
 
+public class Simulated4_40mAPressureSensor : Simulated4_40mASensor
+{
+}
+
+public abstract class Simulated4_40mASensor
+{
+}
+
 public class SensorController
 {
     private readonly IThurston_MonitorHardware hardware;
@@ -18,19 +27,36 @@ public class SensorController
 
     private readonly Dictionary<int, List<(int ID, object Sensor, Func<object> ReadDelegate)>> queryPeriodDictionary = new();
     private readonly Dictionary<int, Enum?> canonicalUnitsForSensorsMap = new();
+    private readonly Dictionary<int, string> sensorIdToNameMap = new();
 
     public Dictionary<int, IVolumetricFlowSensor> FlowSensors { get; } = new();
+    public IProgrammableAnalogInputModule? ProgrammableAnalogInputModule { get; private set; }
 
     public SensorController(IThurston_MonitorHardware hardware, StorageController storageController)
     {
         this.hardware = hardware;
+        this.storageController = storageController;
 
         _ = Task.Run(SensorReadProc);
     }
 
     private int GenerateSensorId(object sensor, string sensorName)
     {
-        return sensor.GetType().GetHashCode() | sensorName.GetHashCode();
+        var id = sensor.GetType().GetHashCode() | sensorName.GetHashCode();
+        if (!sensorIdToNameMap.ContainsKey(id))
+        {
+            sensorIdToNameMap.Add(id, sensorName);
+        }
+        return id;
+    }
+
+    public string? GetSensorName(int sensorId)
+    {
+        if (sensorIdToNameMap.ContainsKey(sensorId))
+        {
+            return sensorIdToNameMap[sensorId];
+        }
+        return null;
     }
 
     public void ApplySensorConfig(SensorConfiguration configuration)
@@ -38,7 +64,41 @@ public class SensorController
         foreach (var modbusConfig in configuration.ModbusDevices)
         {
         }
-        foreach (var input in configuration.FrequencyInputs)
+
+        ConfigureFrequencyInputs(configuration.FrequencyInputs);
+        ConfigureConfigurableAnalogs(configuration.ConfigurableAnalogs);
+    }
+
+    private void ConfigureConfigurableAnalogs(AnalogModuleConfig? moduleConfig)
+    {
+        if (moduleConfig.IsSimulated)
+        {
+            var m = new SimulatedProgrammableAnalogInputModule();
+            m.StartSimulation();
+            ProgrammableAnalogInputModule = m;
+        }
+        else
+        {
+            throw new NotSupportedException();
+            //module = new ProgrammableAnalogInputModule();
+        }
+
+        foreach (var analog in moduleConfig.Channels)
+        {
+            ProgrammableAnalogInputModule.ConfigureChannel(analog);
+            var id = GenerateSensorId(analog, analog.Description);
+            if (!queryPeriodDictionary.ContainsKey(analog.SenseIntervalSeconds))
+            {
+                queryPeriodDictionary.Add(analog.SenseIntervalSeconds, new List<(int ID, object Sensor, Func<object>)>());
+            }
+            queryPeriodDictionary[analog.SenseIntervalSeconds].Add(new(id, ProgrammableAnalogInputModule,
+                () => ProgrammableAnalogInputModule.ReadChannelAsConfiguredUnit(analog.ChannelNumber)));
+        }
+    }
+
+    private void ConfigureFrequencyInputs(IEnumerable<FrequencyInput> inputConfigs)
+    {
+        foreach (var input in inputConfigs)
         {
             if (input.IsSimulated)
             {
@@ -54,11 +114,8 @@ public class SensorController
             }
             else
             {
-                throw new NotSupportedException("Non-simulated frequency inputs are not supported on the desktop");
+                throw new NotSupportedException("Non-simulated frequency inputs are not supported on this platform");
             }
-        }
-        foreach (var analog in configuration.ChannelConfigurations)
-        {
         }
     }
 
@@ -66,8 +123,12 @@ public class SensorController
     {
         int tick = 0;
 
+        var telemetryList = new Dictionary<int, object>();
+
         while (true)
         {
+            telemetryList.Clear();
+
             foreach (var period in queryPeriodDictionary.Keys)
             {
                 if (tick % period == 0)
@@ -81,11 +142,15 @@ public class SensorController
                             var canonicalUnit = GetCanonicalUnitTypeValue(value);
                             canonicalUnitsForSensorsMap.Add(sensor.ID, canonicalUnit);
                         }
+
                         Resolver.Log.Info($"[{tick:D4}]Read sensor: {sensor.ID}:{sensor.GetType().Name}:{value}:{canonicalUnitsForSensorsMap[sensor.ID]}");
 
+                        telemetryList.Add(sensor.ID, value);
                     }
                 }
             }
+
+            storageController.RecordSensorValues(telemetryList);
 
             tick++;
             await Task.Delay(1000);

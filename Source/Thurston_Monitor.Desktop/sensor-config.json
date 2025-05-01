@@ -7,7 +7,8 @@
       "Offset": 0,
       "Description": "Pump1 Output",
       "IsSimulated": true,
-      "SenseIntervalSeconds": 1
+      "SenseIntervalSeconds": 1,
+      "PublicationInterval": 60
     },
     {
       "ChannelNumber": 1,
@@ -18,6 +19,19 @@
       "IsSimulated": true,
       "SenseIntervalSeconds": 5
     }
-
-  ]
+  ],
+  "ConfigurableAnalogs": {
+    "IsSimulated": true,
+    "Channels": [
+      {
+        "ChannelNumber": 0,
+        "ChannelType": "Current_4_20",
+        "Scale": 1,
+        "Offset": 0,
+        "UnitType": "Pressure",
+        "Description": "0-100psi Pressure Sensor (4-20mA)",
+        "SenseIntervalSeconds": 4
+      }
+    ]
+  }
 }

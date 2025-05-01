@@ -27,9 +27,20 @@ public class FrequencyInput
     public int SenseIntervalSeconds { get; set; }
 }
 
+public class AnalogModuleConfig
+{
+    public bool IsSimulated { get; set; }
+    public ExtendedChannelConfig[] Channels { get; set; }
+}
+
+public class ExtendedChannelConfig : ChannelConfig
+{
+    public int SenseIntervalSeconds { get; set; }
+}
+
 public class SensorConfiguration
 {
-    public ChannelConfig[] ChannelConfigurations { get; set; } = Array.Empty<ChannelConfig>();
+    public AnalogModuleConfig? ConfigurableAnalogs { get; set; }
     public FrequencyInput[] FrequencyInputs { get; set; } = Array.Empty<FrequencyInput>();
     public ModbusDeviceConfig[] ModbusDevices { get; set; } = Array.Empty<ModbusDeviceConfig>();
 }
