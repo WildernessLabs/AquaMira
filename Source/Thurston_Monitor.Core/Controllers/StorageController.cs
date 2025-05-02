@@ -6,21 +6,31 @@ namespace Thurston_Monitor.Core;
 
 public class SensorRecord
 {
-    public int SensorID { get; set; }
+    public string? SensorName { get; set; }
     public DateTimeOffset? LastRecordTime { get; set; }
     public object? LastRecordValue { get; set; }
 }
 
+public class RecordBatch
+{
+    public DateTimeOffset BatchTime { get; set; } = DateTimeOffset.UtcNow;
+    public Dictionary<string, object> Values { get; set; } = new();
+}
+
 public class StorageController
 {
-    private readonly Dictionary<int, SensorRecord> _lastValues = new();
-    private CircularBuffer<
+    private readonly Dictionary<string, SensorRecord> _lastValues = new();
+
+    public CircularBuffer<RecordBatch> Records { get; } = new CircularBuffer<RecordBatch>(50);
+
     public StorageController(ConfigurationController configurationController)
     {
     }
 
-    public void RecordSensorValues(Dictionary<int, object> values)
+    public void RecordSensorValues(Dictionary<string, object> values)
     {
+        var batch = new RecordBatch();
+
         // only record values that have changed
         foreach (var v in values)
         {
@@ -28,27 +38,33 @@ public class StorageController
 
             if (_lastValues.ContainsKey(v.Key))
             {
-                _lastValues.Add(v.Key, new SensorRecord
-                {
-                    SensorID = v.Key,
-                    LastRecordTime = DateTimeOffset.UtcNow,
-                    LastRecordValue = v.Value
-                });
-                changed = true;
-            }
-            else
-            {
                 if (_lastValues[v.Key].LastRecordValue != v.Value)
                 {
                     _lastValues[v.Key].LastRecordValue = v.Value;
                     changed = true;
                 }
             }
+            else
+            {
+                _lastValues.Add(v.Key, new SensorRecord
+                {
+                    SensorName = v.Key,
+                    LastRecordTime = DateTimeOffset.UtcNow,
+                    LastRecordValue = v.Value
+                });
+                changed = true;
+            }
 
             if (changed)
             {
-                Resolver.Log.Info($"Store: {v.Key}:{v.Value}");
+                batch.Values.Add(v.Key, v.Value);
             }
+        }
+
+        if (batch.Values.Count > 0)
+        {
+            Resolver.Log.Info($"batched {batch.Values.Count} records");
+            Records.Append(batch);
         }
     }
 }

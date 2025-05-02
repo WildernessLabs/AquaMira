@@ -91,8 +91,12 @@ public class SensorController
             {
                 queryPeriodDictionary.Add(analog.SenseIntervalSeconds, new List<(int ID, object Sensor, Func<object>)>());
             }
+            var capture = analog;
             queryPeriodDictionary[analog.SenseIntervalSeconds].Add(new(id, ProgrammableAnalogInputModule,
-                () => ProgrammableAnalogInputModule.ReadChannelAsConfiguredUnit(analog.ChannelNumber)));
+                () =>
+                {
+                    return ProgrammableAnalogInputModule.ReadChannelAsConfiguredUnit(capture.ChannelNumber);
+                }));
         }
     }
 
@@ -123,7 +127,7 @@ public class SensorController
     {
         int tick = 0;
 
-        var telemetryList = new Dictionary<int, object>();
+        var telemetryList = new Dictionary<string, object>();
 
         while (true)
         {
@@ -145,7 +149,20 @@ public class SensorController
 
                         Resolver.Log.Info($"[{tick:D4}]Read sensor: {sensor.ID}:{sensor.GetType().Name}:{value}:{canonicalUnitsForSensorsMap[sensor.ID]}");
 
-                        telemetryList.Add(sensor.ID, value);
+                        try
+                        {
+                            if (value is IUnit unit)
+                            {
+                                telemetryList.Add(sensorIdToNameMap[sensor.ID], unit.ToCanonical());
+                            }
+                            else
+                            {
+                                telemetryList.Add(sensorIdToNameMap[sensor.ID], value);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                        }
                     }
                 }
             }

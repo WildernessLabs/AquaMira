@@ -11,6 +11,7 @@ public class CloudController
     public enum EventIds
     {
         DeviceStarted = 101,
+        DeviceData = 201,
     }
 
     private readonly IMeadowCloudService cloudService;
@@ -28,6 +29,40 @@ public class CloudController
         this.commandService = commandService;
         this.storageController = storageController;
         this.networkController = networkController;
+
+        storageController.Records.ItemAdded += Records_ItemAdded;
+    }
+
+    private void Records_ItemAdded(object sender, EventArgs e)
+    {
+        // TODO: use a periodic timer instead to send at a slower rate?
+
+        var batch = storageController.Records.Peek();
+
+        while (batch != null)
+        {
+            var evt = new CloudEvent
+            {
+                EventId = (int)EventIds.DeviceData,
+                Description = "Device Data",
+                Measurements = batch.Values,
+                Timestamp = batch.BatchTime
+            };
+            try
+            {
+                cloudService.SendEvent(evt);
+                storageController.Records.Remove(1);
+
+                batch = storageController.Records.Peek();
+            }
+            catch (Exception ex)
+            {
+                // error sending or some such
+                Resolver.Log.Info($"Failed to send to cloud: {ex.Message}");
+                break;
+            }
+        }
+
     }
 
     public Task LogError()

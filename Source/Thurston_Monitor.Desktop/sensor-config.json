@@ -29,8 +29,17 @@
         "Scale": 1,
         "Offset": 0,
         "UnitType": "Pressure",
-        "Description": "0-100psi Pressure Sensor (4-20mA)",
+        "Description": "Pressure 1",
         "SenseIntervalSeconds": 4
+      },
+      {
+        "ChannelNumber": 1,
+        "ChannelType": "Current_4_20",
+        "Scale": 1,
+        "Offset": 0,
+        "UnitType": "Pressure",
+        "Description": "Pressure 2",
+        "SenseIntervalSeconds": 7
       }
     ]
   }
