@@ -1,11 +1,20 @@
 {
+  "ModbusDevices": [
+    {
+      "Driver": "FranklinElectric.XDrive",
+      "Address": 1,
+      "Name": "Pump1",
+      "IsSimulated": "True",
+      "SenseIntervalSeconds": 10
+    }
+  ],
   "FrequencyInputs": [
     {
       "ChannelNumber": 0,
       "UnitType": "VolumetricFlow",
       "Scale": 1.0,
       "Offset": 0,
-      "Description": "Pump1 Output",
+      "Name": "Pump1 Output",
       "IsSimulated": true,
       "SenseIntervalSeconds": 1,
       "PublicationInterval": 60
@@ -15,7 +24,7 @@
       "UnitType": "VolumetricFlow",
       "Scale": 1.0,
       "Offset": 0,
-      "Description": "Pump2 Output",
+      "Name": "Pump2 Output",
       "IsSimulated": true,
       "SenseIntervalSeconds": 5
     }
@@ -29,7 +38,7 @@
         "Scale": 1,
         "Offset": 0,
         "UnitType": "Pressure",
-        "Description": "Pressure 1",
+        "Name": "Pressure 1",
         "SenseIntervalSeconds": 4
       },
       {
@@ -38,7 +47,7 @@
         "Scale": 1,
         "Offset": 0,
         "UnitType": "Pressure",
-        "Description": "Pressure 2",
+        "Name": "Pressure 2",
         "SenseIntervalSeconds": 7
       }
     ]

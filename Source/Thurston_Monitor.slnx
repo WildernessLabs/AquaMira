@@ -48,6 +48,9 @@
       <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
       <Deploy />
     </Project>
+    <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/Motors.FranklinElectric/Driver/Motors.FranklinElectric.csproj">
+      <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
+    </Project>
     <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/Motors.StepperOnline/Driver/Motors.StepperOnline.csproj">
       <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
     </Project>

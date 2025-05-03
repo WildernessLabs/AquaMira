@@ -50,6 +50,7 @@ public class CloudController
             };
             try
             {
+                Resolver.Log.Info($"Sending {evt.Measurements.Count} values");
                 cloudService.SendEvent(evt);
                 storageController.Records.Remove(1);
 

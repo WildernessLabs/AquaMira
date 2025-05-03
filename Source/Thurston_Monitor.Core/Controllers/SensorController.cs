@@ -31,6 +31,7 @@ public class SensorController
 
     public Dictionary<int, IVolumetricFlowSensor> FlowSensors { get; } = new();
     public IProgrammableAnalogInputModule? ProgrammableAnalogInputModule { get; private set; }
+    public Dictionary<int, ICompositeSensor> ModbusSensors { get; } = new();
 
     public SensorController(IThurston_MonitorHardware hardware, StorageController storageController)
     {
@@ -61,12 +62,37 @@ public class SensorController
 
     public void ApplySensorConfig(SensorConfiguration configuration)
     {
-        foreach (var modbusConfig in configuration.ModbusDevices)
-        {
-        }
-
+        ConfigureModbusDevices(configuration.ModbusDevices);
         ConfigureFrequencyInputs(configuration.FrequencyInputs);
         ConfigureConfigurableAnalogs(configuration.ConfigurableAnalogs);
+    }
+
+    private void ConfigureModbusDevices(IEnumerable<ModbusDeviceConfig> modbusDevices)
+    {
+        foreach (var device in modbusDevices)
+        {
+            try
+            {
+                var sensor = ModbusDeviceFactory.CreateSensor(device);
+                var id = GenerateSensorId(sensor, device.Name);
+                ModbusSensors.Add(id, sensor);
+                if (!queryPeriodDictionary.ContainsKey(device.SenseIntervalSeconds))
+                {
+                    queryPeriodDictionary.Add(device.SenseIntervalSeconds, new List<(int ID, object Sensor, Func<object>)>());
+                }
+                var capture = device;
+                queryPeriodDictionary[device.SenseIntervalSeconds].Add(new(id, sensor,
+                    () =>
+                    {
+                        return sensor.GetCurrentValues();
+                    }));
+            }
+            catch (Exception ex)
+            {
+                // TODO: log this to the cloud (it's probably an unsupported device/bad config)
+            }
+
+        }
     }
 
     private void ConfigureConfigurableAnalogs(AnalogModuleConfig? moduleConfig)
@@ -86,7 +112,7 @@ public class SensorController
         foreach (var analog in moduleConfig.Channels)
         {
             ProgrammableAnalogInputModule.ConfigureChannel(analog);
-            var id = GenerateSensorId(analog, analog.Description);
+            var id = GenerateSensorId(analog, analog.Name);
             if (!queryPeriodDictionary.ContainsKey(analog.SenseIntervalSeconds))
             {
                 queryPeriodDictionary.Add(analog.SenseIntervalSeconds, new List<(int ID, object Sensor, Func<object>)>());
@@ -108,7 +134,7 @@ public class SensorController
             {
                 var sensor = new SimulatedHallEffectFlowSensor();
                 sensor.StartSimulation(SimulationBehavior.Sawtooth);
-                var id = GenerateSensorId(sensor, input.Description);
+                var id = GenerateSensorId(sensor, input.Name);
                 FlowSensors.Add(id, sensor);
                 if (!queryPeriodDictionary.ContainsKey(input.SenseIntervalSeconds))
                 {
@@ -140,28 +166,63 @@ public class SensorController
                     foreach (var sensor in queryPeriodDictionary[period])
                     {
                         var value = sensor.ReadDelegate();
-                        if (!canonicalUnitsForSensorsMap.ContainsKey(sensor.ID))
-                        {
-                            // var unit = GetUnitTypeFromReading(value);
-                            var canonicalUnit = GetCanonicalUnitTypeValue(value);
-                            canonicalUnitsForSensorsMap.Add(sensor.ID, canonicalUnit);
-                        }
 
-                        Resolver.Log.Info($"[{tick:D4}]Read sensor: {sensor.ID}:{sensor.GetType().Name}:{value}:{canonicalUnitsForSensorsMap[sensor.ID]}");
-
-                        try
+                        if (value is Dictionary<string, object> valueDictionary)
                         {
-                            if (value is IUnit unit)
+                            Resolver.Log.Info($"[{tick:D4}]Composite sensor returned {valueDictionary.Count} values");
+
+                            foreach (var sensorItem in valueDictionary)
                             {
-                                telemetryList.Add(sensorIdToNameMap[sensor.ID], unit.ToCanonical());
-                            }
-                            else
-                            {
-                                telemetryList.Add(sensorIdToNameMap[sensor.ID], value);
+                                // we have to create a separate ID for each value because the units can vary between items
+                                var valueId = GenerateSensorId(sensorItem, sensorItem.Key);
+                                if (!canonicalUnitsForSensorsMap.ContainsKey(valueId))
+                                {
+                                    var canonicalUnit = GetCanonicalUnitTypeValue(sensorItem.Value);
+                                    canonicalUnitsForSensorsMap.Add(valueId, canonicalUnit);
+                                }
+
+                                try
+                                {
+                                    if (sensorItem.Value is IUnit unit)
+                                    {
+                                        telemetryList.Add(sensorIdToNameMap[valueId], unit.ToCanonical());
+                                    }
+                                    else
+                                    {
+                                        telemetryList.Add(sensorIdToNameMap[valueId], value);
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    // TODO: log this
+                                }
                             }
                         }
-                        catch (Exception ex)
+                        else
                         {
+                            if (!canonicalUnitsForSensorsMap.ContainsKey(sensor.ID))
+                            {
+                                var canonicalUnit = GetCanonicalUnitTypeValue(value);
+                                canonicalUnitsForSensorsMap.Add(sensor.ID, canonicalUnit);
+                            }
+
+                            Resolver.Log.Info($"[{tick:D4}]Read sensor: {sensor.ID}:{sensor.GetType().Name}:{value}:{canonicalUnitsForSensorsMap[sensor.ID]}");
+
+                            try
+                            {
+                                if (value is IUnit unit)
+                                {
+                                    telemetryList.Add(sensorIdToNameMap[sensor.ID], unit.ToCanonical());
+                                }
+                                else
+                                {
+                                    telemetryList.Add(sensorIdToNameMap[sensor.ID], value);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                // TODO: log this
+                            }
                         }
                     }
                 }

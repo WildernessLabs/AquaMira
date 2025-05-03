@@ -1,9 +1,10 @@
 {
   "ModbusDevices": [
     {
-      "Driver": "CerusVfd",
+      "Driver": "FranklinElectric.XDrive",
       "Address": 1,
-      "Description": "Pump1"
+      "Name": "Pump1_Motor",
+      "IsSimulated":  "True"
     }
   ],
   "FrequencyInputs": [
@@ -12,7 +13,7 @@
       "UnitType": "VolumetricFlow",
       "Scale": 1.0,
       "Offset": 0,
-      "Description": "Pump1 Output"
+      "Name": "Pump1 Output"
     }
   ],
   "Sensors": [
@@ -27,7 +28,7 @@
         "Scale": 3.4725,
         "Offset": -31.67,
         "UnitType": "Temperature",
-        "Description": "0-100F Temperature Sensor (4-20mA)"
+        "Name": "0-100F Temperature Sensor (4-20mA)"
       },
       {
         "ChannelNumber": 1,
@@ -35,7 +36,7 @@
         "Scale": 6.25,
         "Offset": -65.0,
         "UnitType": "Temperature",
-        "Description": "-40-140F Temperature Sensor (4-20mA)"
+        "Name": "-40-140F Temperature Sensor (4-20mA)"
       },
       {
         "ChannelNumber": 2,
@@ -43,7 +44,7 @@
         "Scale": 0.2068,
         "Offset": 0.0,
         "UnitType": "Pressure",
-        "Description": "0-30psi Pressure Sensor (0-10V)"
+        "Name": "0-30psi Pressure Sensor (0-10V)"
       }
     ]
   }

@@ -10,38 +10,37 @@ using Meadow.Units;
 using Thurston_Monitor.Core;
 using Thurston_Monitor.Core.Contracts;
 
-namespace Thurston_Monitor.DT
+namespace Thurston_Monitor.DT;
+
+internal class Thurston_MonitorHardware : IThurston_MonitorHardware
 {
-    internal class Thurston_MonitorHardware : IThurston_MonitorHardware
+    private readonly Desktop device;
+    private readonly Keyboard keyboard;
+
+    public RotationType DisplayRotation => RotationType.Default;
+    public IOutputController OutputController { get; }
+    public INetworkController? NetworkController { get; }
+    public IPixelDisplay? Display => device.Display;
+    public ITemperatureSensor? TemperatureSensor { get; }
+    public IButton? RightButton { get; }
+    public IButton? LeftButton { get; }
+    public Core.IInputController InputController { get; }
+
+    public Thurston_MonitorHardware(Desktop device)
     {
-        private readonly Desktop device;
-        private readonly Keyboard keyboard;
+        this.device = device;
 
-        public RotationType DisplayRotation => RotationType.Default;
-        public IOutputController OutputController { get; }
-        public INetworkController? NetworkController { get; }
-        public IPixelDisplay? Display => device.Display;
-        public ITemperatureSensor? TemperatureSensor { get; }
-        public IButton? RightButton { get; }
-        public IButton? LeftButton { get; }
-        public Core.IInputController InputController { get; }
+        keyboard = new Keyboard();
+        NetworkController = new NetworkController(keyboard);
 
-        public Thurston_MonitorHardware(Desktop device)
-        {
-            this.device = device;
+        TemperatureSensor = new SimulatedTemperatureSensor(
+            new Temperature(70, Temperature.UnitType.Fahrenheit),
+            keyboard.Pins.Up.CreateDigitalInterruptPort(InterruptMode.EdgeRising),
+            keyboard.Pins.Down.CreateDigitalInterruptPort(InterruptMode.EdgeRising));
 
-            keyboard = new Keyboard();
-            NetworkController = new NetworkController(keyboard);
+        LeftButton = new PushButton(keyboard.Pins.Left.CreateDigitalInterruptPort(InterruptMode.EdgeFalling));
+        RightButton = new PushButton(keyboard.Pins.Right.CreateDigitalInterruptPort(InterruptMode.EdgeFalling));
 
-            TemperatureSensor = new SimulatedTemperatureSensor(
-                new Temperature(70, Temperature.UnitType.Fahrenheit),
-                keyboard.Pins.Up.CreateDigitalInterruptPort(InterruptMode.EdgeRising),
-                keyboard.Pins.Down.CreateDigitalInterruptPort(InterruptMode.EdgeRising));
-
-            LeftButton = new PushButton(keyboard.Pins.Left.CreateDigitalInterruptPort(InterruptMode.EdgeFalling));
-            RightButton = new PushButton(keyboard.Pins.Right.CreateDigitalInterruptPort(InterruptMode.EdgeFalling));
-
-            OutputController = new OutputController();
-        }
+        OutputController = new OutputController();
     }
 }
