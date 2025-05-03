@@ -8,7 +8,20 @@ using System.Runtime.CompilerServices;
 
 namespace Thurston_Monitor.Core;
 
-public class ModbusDeviceConfig
+public interface IIntervalReadSensor
+{
+    int SenseIntervalSeconds { get; }
+}
+
+public class DigitalInputConfig : IIntervalReadSensor
+{
+    public int ChannelNumber { get; set; }
+    public string Name { get; set; }
+    public bool IsSimulated { get; set; }
+    public int SenseIntervalSeconds { get; set; }
+}
+
+public class ModbusDeviceConfig : IIntervalReadSensor
 {
     public string Driver { get; set; }
     public int Address { get; set; }
@@ -17,7 +30,7 @@ public class ModbusDeviceConfig
     public bool IsSimulated { get; set; }
 }
 
-public class FrequencyInput
+public class FrequencyInputConfig : IIntervalReadSensor
 {
     public int ChannelNumber { get; set; }
     public string UnitType { get; set; }
@@ -41,8 +54,9 @@ public class ExtendedChannelConfig : ChannelConfig
 
 public class SensorConfiguration
 {
+    public DigitalInputConfig[] DigitalInputs { get; set; } = Array.Empty<DigitalInputConfig>();
     public AnalogModuleConfig? ConfigurableAnalogs { get; set; }
-    public FrequencyInput[] FrequencyInputs { get; set; } = Array.Empty<FrequencyInput>();
+    public FrequencyInputConfig[] FrequencyInputs { get; set; } = Array.Empty<FrequencyInputConfig>();
     public ModbusDeviceConfig[] ModbusDevices { get; set; } = Array.Empty<ModbusDeviceConfig>();
 }
 

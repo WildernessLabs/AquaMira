@@ -1,4 +1,12 @@
 {
+  "DigitalInputs": [
+    {
+      "ChannelNumber": 0,
+      "Name": "Float",
+      "IsSimulated": true,
+      "SenseIntervalSeconds": 1
+    }
+  ],
   "ModbusDevices": [
     {
       "Driver": "FranklinElectric.XDrive",
@@ -16,8 +24,7 @@
       "Offset": 0,
       "Name": "Pump1 Output",
       "IsSimulated": true,
-      "SenseIntervalSeconds": 1,
-      "PublicationInterval": 60
+      "SenseIntervalSeconds": 1
     },
     {
       "ChannelNumber": 1,

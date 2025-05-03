@@ -18,13 +18,12 @@ internal class Thurston_MonitorHardware : IThurston_MonitorHardware
     private readonly Keyboard keyboard;
 
     public RotationType DisplayRotation => RotationType.Default;
-    public IOutputController OutputController { get; }
     public INetworkController? NetworkController { get; }
     public IPixelDisplay? Display => device.Display;
     public ITemperatureSensor? TemperatureSensor { get; }
     public IButton? RightButton { get; }
     public IButton? LeftButton { get; }
-    public Core.IInputController InputController { get; }
+    public IInputController InputController { get; }
 
     public Thurston_MonitorHardware(Desktop device)
     {
@@ -40,7 +39,6 @@ internal class Thurston_MonitorHardware : IThurston_MonitorHardware
 
         LeftButton = new PushButton(keyboard.Pins.Left.CreateDigitalInterruptPort(InterruptMode.EdgeFalling));
         RightButton = new PushButton(keyboard.Pins.Right.CreateDigitalInterruptPort(InterruptMode.EdgeFalling));
-
-        OutputController = new OutputController();
+        InputController = new InputController();
     }
 }

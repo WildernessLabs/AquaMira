@@ -65,6 +65,45 @@ public class SensorController
         ConfigureModbusDevices(configuration.ModbusDevices);
         ConfigureFrequencyInputs(configuration.FrequencyInputs);
         ConfigureConfigurableAnalogs(configuration.ConfigurableAnalogs);
+        ConfigureDigitalInputs(configuration.DigitalInputs);
+    }
+
+    private void ConfigureDigitalInputs(IEnumerable<DigitalInputConfig> inputConfigs)
+    {
+        foreach (var config in inputConfigs)
+        {
+            try
+            {
+                Resolver.Log.Info($"digital input: {config.Name} on channel {config.ChannelNumber}");
+                var id = GenerateSensorId(config, config.Name);
+
+                var input = config.IsSimulated
+                    ? new RandomizedSimulatedDigitalInputPort(config.Name)
+                    : hardware.InputController.GetInputForChannel(config.ChannelNumber);
+
+                // TODO: separate handling for interruptable inputs?
+                //if (input is IDigitalInterruptPort) { }
+
+                AddSensorToQueryList(config.SenseIntervalSeconds, new(id, input, () =>
+                {
+                    return new Scalar(input.State ? 1 : 0);
+                }));
+
+            }
+            catch (Exception ex)
+            {
+                // TODO: log this to the cloud (it's probably an unsupported device/bad config)
+            }
+        }
+    }
+
+    private void AddSensorToQueryList(int interval, (int id, object sensor, Func<object> queryDelegate) tuple)
+    {
+        if (!queryPeriodDictionary.ContainsKey(interval))
+        {
+            queryPeriodDictionary.Add(interval, new List<(int ID, object Sensor, Func<object>)>());
+        }
+        queryPeriodDictionary[interval].Add(tuple);
     }
 
     private void ConfigureModbusDevices(IEnumerable<ModbusDeviceConfig> modbusDevices)
@@ -76,22 +115,16 @@ public class SensorController
                 var sensor = ModbusDeviceFactory.CreateSensor(device);
                 var id = GenerateSensorId(sensor, device.Name);
                 ModbusSensors.Add(id, sensor);
-                if (!queryPeriodDictionary.ContainsKey(device.SenseIntervalSeconds))
+
+                AddSensorToQueryList(device.SenseIntervalSeconds, new(id, sensor, () =>
                 {
-                    queryPeriodDictionary.Add(device.SenseIntervalSeconds, new List<(int ID, object Sensor, Func<object>)>());
-                }
-                var capture = device;
-                queryPeriodDictionary[device.SenseIntervalSeconds].Add(new(id, sensor,
-                    () =>
-                    {
-                        return sensor.GetCurrentValues();
-                    }));
+                    return sensor.GetCurrentValues();
+                }));
             }
             catch (Exception ex)
             {
                 // TODO: log this to the cloud (it's probably an unsupported device/bad config)
             }
-
         }
     }
 
@@ -113,20 +146,15 @@ public class SensorController
         {
             ProgrammableAnalogInputModule.ConfigureChannel(analog);
             var id = GenerateSensorId(analog, analog.Name);
-            if (!queryPeriodDictionary.ContainsKey(analog.SenseIntervalSeconds))
-            {
-                queryPeriodDictionary.Add(analog.SenseIntervalSeconds, new List<(int ID, object Sensor, Func<object>)>());
-            }
             var capture = analog;
-            queryPeriodDictionary[analog.SenseIntervalSeconds].Add(new(id, ProgrammableAnalogInputModule,
-                () =>
-                {
-                    return ProgrammableAnalogInputModule.ReadChannelAsConfiguredUnit(capture.ChannelNumber);
-                }));
+            AddSensorToQueryList(analog.SenseIntervalSeconds, new(id, ProgrammableAnalogInputModule, () =>
+            {
+                return ProgrammableAnalogInputModule.ReadChannelAsConfiguredUnit(capture.ChannelNumber);
+            }));
         }
     }
 
-    private void ConfigureFrequencyInputs(IEnumerable<FrequencyInput> inputConfigs)
+    private void ConfigureFrequencyInputs(IEnumerable<FrequencyInputConfig> inputConfigs)
     {
         foreach (var input in inputConfigs)
         {

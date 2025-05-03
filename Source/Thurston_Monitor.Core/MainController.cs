@@ -16,12 +16,11 @@ namespace Thurston_Monitor.Core
         private SensorController sensorController;
         private StorageController storageController;
 
-        private IOutputController OutputController => hardware.OutputController;
         private INetworkController NetworkController => hardware.NetworkController;
         private IInputController InputController => hardware.InputController;
 
         private readonly Temperature.UnitType units;
-        private Temperature currentTemperature;
+        private readonly Temperature currentTemperature;
         private Temperature thresholdTemperature;
 
         public MainController()
@@ -58,8 +57,6 @@ namespace Thurston_Monitor.Core
 
             NetworkController.Connect();
 
-            InputController?.Configure(configurationController);
-
             sensorController.ApplySensorConfig(
                 configurationController.SensorConfiguration);
 
@@ -76,21 +73,6 @@ namespace Thurston_Monitor.Core
         {
             Resolver.Log.Info($"Network state changed to {NetworkController.IsConnected}");
             displayController.SetNetworkStatus(NetworkController.IsConnected);
-        }
-
-        private void CheckTemperaturesAndSetOutput()
-        {
-            OutputController?.SetState(currentTemperature < thresholdTemperature);
-        }
-
-        private void OnCurrentTemperatureChanged(object sender, Temperature temperature)
-        {
-            currentTemperature = temperature;
-
-            CheckTemperaturesAndSetOutput();
-
-            // update the UI
-            displayController.UpdateCurrentTemperature(currentTemperature);
         }
 
         public async Task Run()

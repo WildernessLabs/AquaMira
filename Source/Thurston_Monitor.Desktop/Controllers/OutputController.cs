@@ -1,35 +1,13 @@
+using Meadow.Hardware;
 using System;
-using System.Threading.Tasks;
-using Meadow;
-using Meadow.Foundation.Relays;
-using Meadow.Peripherals.Relays;
-using Thurston_Monitor.Core;
+using Thurston_Monitor.Core.Contracts;
 
-namespace Thurston_Monitor.DT
+namespace Thurston_Monitor.DT;
+
+internal class InputController : IInputController
 {
-    internal class OutputController : IOutputController
+    public IDigitalInputPort GetInputForChannel(int channelNumber)
     {
-        private IRelay Relay { get; }
-
-        public OutputController()
-        {
-            Relay = new SimulatedRelay("OUTPUT")
-            {
-                State = RelayState.Open
-            };
-        }
-
-        public Task SetState(bool state)
-        {
-            var requestedState = state ? RelayState.Closed : RelayState.Open;
-
-            if (Relay.State != requestedState)
-            {
-                Relay.State = requestedState;
-                Resolver.Log.Info($"RELAY IS NOW: {Relay.State}");
-            }
-
-            return Task.CompletedTask;
-        }
+        throw new NotImplementedException();
     }
 }
