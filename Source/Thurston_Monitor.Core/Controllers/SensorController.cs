@@ -81,6 +81,12 @@ public class SensorController
                     ? new RandomizedSimulatedDigitalInputPort(config.Name)
                     : hardware.InputController.GetInputForChannel(config.ChannelNumber);
 
+                if (input == null)
+                {
+                    // TODO: log this!
+                    continue;
+                }
+
                 // TODO: separate handling for interruptable inputs?
                 //if (input is IDigitalInterruptPort) { }
 
@@ -130,6 +136,12 @@ public class SensorController
 
     private void ConfigureConfigurableAnalogs(AnalogModuleConfig? moduleConfig)
     {
+        if (moduleConfig == null)
+        {
+            Resolver.Log.Warn($"No AnalogModuleConfig exists for this device");
+            return;
+        }
+
         if (moduleConfig.IsSimulated)
         {
             var m = new SimulatedProgrammableAnalogInputModule();
@@ -144,13 +156,21 @@ public class SensorController
 
         foreach (var analog in moduleConfig.Channels)
         {
-            ProgrammableAnalogInputModule.ConfigureChannel(analog);
-            var id = GenerateSensorId(analog, analog.Name);
-            var capture = analog;
-            AddSensorToQueryList(analog.SenseIntervalSeconds, new(id, ProgrammableAnalogInputModule, () =>
+            try
             {
-                return ProgrammableAnalogInputModule.ReadChannelAsConfiguredUnit(capture.ChannelNumber);
-            }));
+                ProgrammableAnalogInputModule.ConfigureChannel(analog);
+                var id = GenerateSensorId(analog, analog.Name);
+                var capture = analog;
+                AddSensorToQueryList(analog.SenseIntervalSeconds, new(id, ProgrammableAnalogInputModule, () =>
+                {
+                    return ProgrammableAnalogInputModule.ReadChannelAsConfiguredUnit(capture.ChannelNumber);
+                }));
+            }
+            catch (Exception ex)
+            {
+                // TODO: log this!
+                Resolver.Log.Error($"Failed to configure analog input channel {analog.ChannelNumber}");
+            }
         }
     }
 

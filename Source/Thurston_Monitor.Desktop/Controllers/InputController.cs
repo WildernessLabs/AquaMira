@@ -6,7 +6,7 @@ namespace Thurston_Monitor.DT;
 
 internal class InputController : IInputController
 {
-    public IDigitalInputPort GetInputForChannel(int channelNumber)
+    public IDigitalInputPort? GetInputForChannel(int channelNumber)
     {
         throw new NotImplementedException();
     }
