@@ -24,8 +24,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\Motors.FranklinElectric\Driver\Motors.FranklinElectric.csproj" />
       <ProjectReference Include="..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\Sensors.Flow.HallEffect\Simulation\Sensors.Flow.HallEffect.Simulation\Sensors.Flow.HallEffect.Simulation.csproj" />
+      <ProjectReference Include="..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\VFDs.CerusXDrive\Driver\Motors.CerusXDrive.csproj" />
       <ProjectReference Include="..\..\..\Meadow.Foundation\Source\Product\ProgrammableAnalogInput\Driver\ProgramableAnalogInput.csproj" />
     </ItemGroup>
 </Project>

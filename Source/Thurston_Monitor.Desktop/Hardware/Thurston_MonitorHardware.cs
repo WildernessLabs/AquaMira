@@ -3,6 +3,7 @@ using Meadow.Foundation.Sensors;
 using Meadow.Foundation.Sensors.Buttons;
 using Meadow.Foundation.Sensors.Hid;
 using Meadow.Hardware;
+using Meadow.Modbus;
 using Meadow.Peripherals.Displays;
 using Meadow.Peripherals.Sensors;
 using Meadow.Peripherals.Sensors.Buttons;
@@ -40,5 +41,14 @@ internal class Thurston_MonitorHardware : IThurston_MonitorHardware
         LeftButton = new PushButton(keyboard.Pins.Left.CreateDigitalInterruptPort(InterruptMode.EdgeFalling));
         RightButton = new PushButton(keyboard.Pins.Right.CreateDigitalInterruptPort(InterruptMode.EdgeFalling));
         InputController = new InputController();
+    }
+
+    public ModbusRtuClient GetModbusSerialClient()
+    {
+        var port = new WindowsSerialPort(
+            ConfigurationController.AppSettings.ModbusSerialPort,
+            ConfigurationController.AppSettings.ModbusBaudRate.Value);
+
+        return new ModbusRtuClient(port);
     }
 }

@@ -1,4 +1,5 @@
-﻿using Meadow.Foundation;
+﻿using Meadow;
+using Meadow.Foundation;
 using Meadow.Foundation.Serialization;
 using System;
 using System.IO;
@@ -93,4 +94,13 @@ public class ConfigurationController
             SensorConfiguration = MicroJson.Deserialize<SensorConfiguration>(json);
         }
     }
+
+    public static ThurstonAppSettings AppSettings { get; } = new();
+
+}
+
+public class ThurstonAppSettings
+{
+    public string? ModbusSerialPort => Resolver.App.Settings.TryGetValue("Thurston.Modbus.SerialPort", out string s) ? s : null;
+    public int? ModbusBaudRate => Resolver.App.Settings.TryGetValue("Thurston.Modbus.BaudRate", out string s) ? int.Parse(s) : null;
 }

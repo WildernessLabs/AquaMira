@@ -25,7 +25,7 @@ public class SensorController
     private readonly IThurston_MonitorHardware hardware;
     private readonly StorageController storageController;
 
-    private readonly Dictionary<int, List<(int ID, object Sensor, Func<object> ReadDelegate)>> queryPeriodDictionary = new();
+    private readonly Dictionary<int, List<(int ID, object Sensor, Func<object?> ReadDelegate)>> queryPeriodDictionary = new();
     private readonly Dictionary<int, Enum?> canonicalUnitsForSensorsMap = new();
     private readonly Dictionary<int, string> sensorIdToNameMap = new();
 
@@ -103,11 +103,11 @@ public class SensorController
         }
     }
 
-    private void AddSensorToQueryList(int interval, (int id, object sensor, Func<object> queryDelegate) tuple)
+    private void AddSensorToQueryList(int interval, (int id, object sensor, Func<object?> queryDelegate) tuple)
     {
         if (!queryPeriodDictionary.ContainsKey(interval))
         {
-            queryPeriodDictionary.Add(interval, new List<(int ID, object Sensor, Func<object>)>());
+            queryPeriodDictionary.Add(interval, new List<(int ID, object Sensor, Func<object?>)>());
         }
         queryPeriodDictionary[interval].Add(tuple);
     }
@@ -118,13 +118,22 @@ public class SensorController
         {
             try
             {
-                var sensor = ModbusDeviceFactory.CreateSensor(device);
+                var sensor = ModbusDeviceFactory.CreateSensor(device, hardware);
                 var id = GenerateSensorId(sensor, device.Name);
                 ModbusSensors.Add(id, sensor);
 
                 AddSensorToQueryList(device.SenseIntervalSeconds, new(id, sensor, () =>
                 {
-                    return sensor.GetCurrentValues();
+                    try
+                    {
+                        return sensor.GetCurrentValues();
+                    }
+                    catch (Exception mex)
+                    {
+                        // TODO: log this modbus error
+                        Resolver.Log.Error($"Error reading Modbus device {device.Name} values: {mex.Message}");
+                        return null;
+                    }
                 }));
             }
             catch (Exception ex)
@@ -186,7 +195,7 @@ public class SensorController
                 FlowSensors.Add(id, sensor);
                 if (!queryPeriodDictionary.ContainsKey(input.SenseIntervalSeconds))
                 {
-                    queryPeriodDictionary.Add(input.SenseIntervalSeconds, new List<(int ID, object Sensor, Func<object>)>());
+                    queryPeriodDictionary.Add(input.SenseIntervalSeconds, new List<(int ID, object Sensor, Func<object?>)>());
                 }
                 queryPeriodDictionary[input.SenseIntervalSeconds].Add(new(id, sensor, () => sensor.Read().GetAwaiter().GetResult()));
             }
@@ -214,6 +223,13 @@ public class SensorController
                     foreach (var sensor in queryPeriodDictionary[period])
                     {
                         var value = sensor.ReadDelegate();
+
+                        if (value == null)
+                        {
+                            // we had a problem.  should we log (or did that happen upstream?)
+                            Resolver.Log.Info($"Error reading from {sensor.Sensor.GetType().Name}");
+                            continue;
+                        }
 
                         if (value is Dictionary<string, object> valueDictionary)
                         {

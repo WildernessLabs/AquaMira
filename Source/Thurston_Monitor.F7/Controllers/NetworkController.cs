@@ -18,6 +18,8 @@ namespace Thurston_Monitor.F7
 
         public NetworkController(F7MicroBase device)
         {
+            // TODO: determine what adapter is in use (cell/wifi) and handle that properly
+
             wifi = device.NetworkAdapters.Primary<IWiFiNetworkAdapter>();
 
             wifi.NetworkConnected += OnNetworkConnected;

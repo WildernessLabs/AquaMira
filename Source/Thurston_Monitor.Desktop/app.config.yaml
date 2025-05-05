@@ -14,3 +14,8 @@ Logging:
 # Meadow.Cloud configuration.
 MeadowCloud:
     Enabled: true
+
+Thurston:
+    Modbus:
+        SerialPort: COM12
+        BaudRate: 9600

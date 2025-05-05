@@ -1,4 +1,5 @@
-﻿using Meadow.Peripherals.Displays;
+﻿using Meadow.Modbus;
+using Meadow.Peripherals.Displays;
 using Meadow.Peripherals.Sensors;
 using Meadow.Peripherals.Sensors.Buttons;
 
@@ -18,4 +19,6 @@ public interface IThurston_MonitorHardware
     // platform-dependent services
     IInputController InputController { get; }
     INetworkController NetworkController { get; }
+
+    ModbusRtuClient GetModbusSerialClient();
 }

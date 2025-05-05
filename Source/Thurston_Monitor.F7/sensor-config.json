@@ -9,10 +9,10 @@
   ],
   "ModbusDevices": [
     {
-      "Driver": "FranklinElectric.XDrive",
+      "Driver": "CerusXDrive",
       "Address": 1,
       "Name": "Pump1",
-      "IsSimulated": "True",
+      "IsSimulated": false,
       "SenseIntervalSeconds": 10
     }
   ],

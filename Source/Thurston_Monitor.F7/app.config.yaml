@@ -34,6 +34,9 @@ MeadowCloud:
     HealthMetricsIntervalMinutes: 60
 
 Thurston:
-    Network: wifi
-    SSID: interwebs
-    NetworkPasscode: 1234567890
+    Network: 
+        Type: wifi
+        SSID: interwebs
+        Passcode: 1234567890
+    Modbus:
+        BaudRate: 9600

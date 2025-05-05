@@ -1,7 +1,7 @@
-﻿using Meadow.Foundation.VFDs.FranklinElectric;
-using System;
+﻿using Meadow.Foundation.VFDs;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Thurston_Monitor.Core.Contracts;
 
 namespace Thurston_Monitor.Core;
 
@@ -10,10 +10,20 @@ public class XDriveModbusDevice : ICompositeSensor
     private readonly IXDrive drive;
     private readonly ModbusDeviceConfig config;
 
-    public XDriveModbusDevice(ModbusDeviceConfig config)
+    public XDriveModbusDevice(ModbusDeviceConfig config, IThurston_MonitorHardware hardware)
     {
         this.config = config;
-        drive = config.IsSimulated ? new SimulatedXDrive() : throw new NotImplementedException();
+
+        if (config.IsSimulated)
+        {
+            drive = new SimulatedXDrive();
+        }
+        else
+        {
+            var modbusClient = hardware.GetModbusSerialClient();
+            drive = new CerusXDrive(modbusClient, (byte)config.Address);
+        }
+
 
         drive.Connect();
     }

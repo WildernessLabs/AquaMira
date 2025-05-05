@@ -48,8 +48,9 @@
       <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
       <Deploy />
     </Project>
-    <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/Motors.FranklinElectric/Driver/Motors.FranklinElectric.csproj">
+    <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/ICs.IOExpanders.Tca95x5/Driver/ICs.IOExpanders.Tca95x5.csproj">
       <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
+      <Deploy />
     </Project>
     <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/Motors.StepperOnline/Driver/Motors.StepperOnline.csproj">
       <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
@@ -71,6 +72,9 @@
     <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/Sensors.Temperature.Thermistor/Driver/Sensors.Temperature.Thermistor.csproj">
       <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
       <Deploy />
+    </Project>
+    <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/VFDs.CerusXDrive/Driver/Motors.CerusXDrive.csproj">
+      <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
     </Project>
     <Project Path="../../Meadow.Foundation/Source/Product/ProgrammableAnalogInput/Driver/ProgramableAnalogInput.csproj">
       <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />

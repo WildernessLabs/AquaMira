@@ -1,4 +1,5 @@
 ﻿using Meadow.Devices;
+using Meadow.Modbus;
 using Meadow.Peripherals.Displays;
 using Meadow.Peripherals.Sensors;
 using Meadow.Peripherals.Sensors.Buttons;
@@ -27,6 +28,11 @@ namespace Thurston_Monitor.F7
             InputController = new InputController(projLab);
 
             NetworkController = new NetworkController(device);
+        }
+
+        public ModbusRtuClient GetModbusSerialClient()
+        {
+            return projLab.GetModbusRtuClient(ConfigurationController.AppSettings.ModbusBaudRate ?? 19200);
         }
     }
 }
