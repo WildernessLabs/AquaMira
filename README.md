@@ -5,7 +5,7 @@
 Configuration for Project Lab 3.d pins
 
 | terminal | purpose | processor pin | timer | connector |
-|-|-|
+|-|-|-|-|-|
 | 210 | high-speed digital input | PB8 | TIM4_CH3 | mikrobus 1 PWM |
 | 211 | high-speed digital input | PH10 | TIM5_CH1 | mikrobus 1 RST |
 | 212 | high-speed digital input | PB15 | TIM12_CH2 | mikrobus 1 RX |
@@ -36,7 +36,7 @@ __4-20mA inputs__
 __Modbus RTU inputs__
 
 | signal | vendor | units | address | register | scale | offset | Terminal | Meadow Signal |
-| - | - | - | - | - | - | - | - |
+| - | - | - | - | - | - | - | - | - |
 | Pump1 VFD | unkwown | rpm? | unknown | unknown | unknown | unknown | unknown | unknown |
 | Pump2 VFD | unkwown | rpm? | unknown | unknown | unknown | unknown | unknown | unknown |
 | Pump3 VFD | unkwown | rpm? | unknown | unknown | unknown | unknown | unknown | unknown |
