@@ -15,6 +15,9 @@
         <PackageReference Include="Meadow.Foundation" Version="2.*-*" />
         <PackageReference Include="Meadow.Foundation.Graphics.MicroLayout" Version="2.*-*" />
         <PackageReference Include="Meadow.Foundation.Serialization.MicroJson" Version="2.*-*" />
+
+        <PackageReference Include="Meadow.Foundation.Sensors.Flow.HallEffect" Version="2.*-*" />
+        <PackageReference Include="Meadow.Foundation.Motors.CerusXDrive" Version="2.*-*" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(UseProjectReference)' == 'true' AND '$(BuildingInVisualStudio)' == 'true'">
@@ -23,6 +26,10 @@
         <ProjectReference Include="..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Libraries_and_Frameworks\Serialization.MicroJson\Driver\Serialization.MicroJson.csproj" />
         <ProjectReference Include="..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\Sensors.Flow.HallEffect\Driver\Sensors.Flow.HallEffect.csproj" />
         <ProjectReference Include="..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\VFDs.CerusXDrive\Driver\Motors.CerusXDrive.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- not in the Condition groups above because we don't yet have a NuGet version -->
         <ProjectReference Include="..\..\..\Meadow.Foundation\Source\Product\ProgrammableAnalogInput\Driver\ProgramableAnalogInput.csproj" />
     </ItemGroup>
 </Project>
