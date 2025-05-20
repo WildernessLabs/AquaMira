@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\Sensors.Flow.HallEffect\Simulation\Sensors.Flow.HallEffect.Simulation\Sensors.Flow.HallEffect.Simulation.csproj" />
+    <ProjectReference Include="..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\Sensors.Flow.HallEffect\Driver\Sensors.Flow.HallEffect.csproj" />
     <ProjectReference Include="..\Thurston_Monitor.Core\Thurston_Monitor.Core.csproj" />
   </ItemGroup>
 
