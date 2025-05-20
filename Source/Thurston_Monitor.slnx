@@ -59,9 +59,6 @@
       <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
       <Deploy />
     </Project>
-    <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/Sensors.Flow.HallEffect/Simulation/Sensors.Flow.HallEffect.Simulation/Sensors.Flow.HallEffect.Simulation.csproj">
-      <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
-    </Project>
     <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/Sensors.Hid.Keyboard/Driver/Sensors.Hid.Keyboard.csproj">
       <BuildType Solution="Debug-ProjectRef|*" Project="Debug" />
     </Project>
