@@ -28,7 +28,7 @@ MeadowCloud:
     EnableUpdates: true
 
     # Enable Health Metrics
-    EnableHealthMetrics: false
+    EnableHealthMetrics: true
 
     # How often to send metrics to Meadow.Cloud
     HealthMetricsIntervalMinutes: 60
