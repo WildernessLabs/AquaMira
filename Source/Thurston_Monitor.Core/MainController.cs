@@ -55,8 +55,6 @@ namespace Thurston_Monitor.Core
             // connect events
             NetworkController.NetworkStatusChanged += OnNetworkStatusChanged;
 
-            NetworkController.Connect();
-
             sensorController.ApplySensorConfig(
                 configurationController.SensorConfiguration);
 

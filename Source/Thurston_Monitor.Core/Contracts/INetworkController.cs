@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 
 namespace Thurston_Monitor.Core
 {
@@ -7,7 +6,6 @@ namespace Thurston_Monitor.Core
     {
         event EventHandler NetworkStatusChanged;
 
-        Task Connect();
         bool IsConnected { get; }
     }
 }

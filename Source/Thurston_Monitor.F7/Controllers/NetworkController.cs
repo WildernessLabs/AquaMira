@@ -2,28 +2,37 @@
 using Meadow.Devices;
 using Meadow.Hardware;
 using System;
-using System.Threading.Tasks;
 using Thurston_Monitor.Core;
 
 namespace Thurston_Monitor.F7
 {
     internal class NetworkController : INetworkController
     {
-        private const string WIFI_NAME = "interwebs";
-        private const string WIFI_PASSWORD = "1234567890";
-
         public event EventHandler? NetworkStatusChanged;
 
         private readonly IWiFiNetworkAdapter? wifi;
+        private readonly ICellNetworkAdapter? cell;
 
         public NetworkController(F7MicroBase device)
         {
             // TODO: determine what adapter is in use (cell/wifi) and handle that properly
 
             wifi = device.NetworkAdapters.Primary<IWiFiNetworkAdapter>();
+            cell = device.NetworkAdapters.Primary<ICellNetworkAdapter>();
 
-            wifi.NetworkConnected += OnNetworkConnected;
-            wifi.NetworkDisconnected += OnNetworkDisconnected;
+            if (wifi != null)
+            {
+                wifi.NetworkConnected += OnNetworkConnected;
+                wifi.NetworkDisconnected += OnNetworkDisconnected;
+            }
+            else if (cell != null)
+            {
+                Resolver.Log.Info("Using Cell Network Adapter");
+            }
+            else
+            {
+                Resolver.Log.Error("No known Network Adapter");
+            }
 
             Resolver.Device.PlatformOS.NtpClient.TimeChanged += OnNtpTimeSync;
         }
@@ -36,6 +45,7 @@ namespace Thurston_Monitor.F7
         private void OnNetworkDisconnected(INetworkAdapter sender, NetworkDisconnectionEventArgs args)
         {
             // Handle logic when disconnected.
+            Resolver.Log.Info("Network disconnected");
         }
 
         private void OnNetworkConnected(INetworkAdapter sender, NetworkConnectionEventArgs args)
@@ -48,12 +58,7 @@ namespace Thurston_Monitor.F7
 
         public bool IsConnected
         {
-            get => wifi.IsConnected;
-        }
-
-        public async Task Connect()
-        {
-            await wifi.Connect(WIFI_NAME, WIFI_PASSWORD, TimeSpan.FromSeconds(45));
+            get => (wifi?.IsConnected ?? false) || (cell?.IsConnected ?? false);
         }
     }
 }
