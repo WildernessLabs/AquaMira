@@ -1,5 +1,9 @@
 # Customer_ThurstonPUD
 
+## Bench Testing
+
+See the [Bench Testing Guide](Documentation/BenchTesting.md) for setting up your device for bench testing.
+
 ## Project Lab Pin configuration
 
 Configuration for Project Lab 3.d pins
@@ -54,3 +58,4 @@ __Discrete inputs__
 | Reservoir hatch intrusion alarm | unknown | unknown | unknown | unknown |
 | ATS Generator on | unknown | unknown | unknown | unknown |
 | Generator fault | unknown | unknown | unknown | unknown |
+ 
