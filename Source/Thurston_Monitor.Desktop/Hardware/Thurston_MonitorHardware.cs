@@ -26,6 +26,8 @@ internal class Thurston_MonitorHardware : IThurston_MonitorHardware
     public IButton? LeftButton { get; }
     public IInputController InputController { get; }
 
+    private ModbusRtuClient? modbusClient;
+
     public Thurston_MonitorHardware(Desktop device)
     {
         this.device = device;
@@ -43,12 +45,18 @@ internal class Thurston_MonitorHardware : IThurston_MonitorHardware
         InputController = new InputController();
     }
 
+
     public ModbusRtuClient GetModbusSerialClient()
     {
-        var port = new WindowsSerialPort(
-            ConfigurationController.AppSettings.ModbusSerialPort,
-            ConfigurationController.AppSettings.ModbusBaudRate.Value);
+        if (modbusClient == null)
+        {
+            var port = new WindowsSerialPort(
+                ConfigurationController.AppSettings.ModbusSerialPort,
+                ConfigurationController.AppSettings.ModbusBaudRate.Value);
 
-        return new ModbusRtuClient(port);
+            modbusClient = new ModbusRtuClient(port);
+        }
+
+        return modbusClient;
     }
 }

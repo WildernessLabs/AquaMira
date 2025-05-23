@@ -27,7 +27,7 @@ namespace Thurston_Monitor.Core
         {
         }
 
-        public Task Initialize(IThurston_MonitorHardware hardware)
+        public async Task Initialize(IThurston_MonitorHardware hardware)
         {
             this.hardware = hardware;
 
@@ -55,12 +55,10 @@ namespace Thurston_Monitor.Core
             // connect events
             NetworkController.NetworkStatusChanged += OnNetworkStatusChanged;
 
-            sensorController.ApplySensorConfig(
+            await sensorController.ApplySensorConfig(
                 configurationController.SensorConfiguration);
 
             _ = cloudController.ReportDeviceStartup();
-
-            return Task.CompletedTask;
         }
 
         private void ConfigureAnalyzers(ConfigurationController configuration)

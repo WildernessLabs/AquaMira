@@ -26,6 +26,8 @@ public class DisplayController
         RotationType displayRotation,
         Temperature.UnitType unit)
     {
+        display = null;
+
         if (display != null)
         {
             var theme = new DisplayTheme
@@ -89,6 +91,7 @@ public class DisplayController
 
     private void UpdateDisplay()
     {
+        if (screen == null) { return; }
         var unitLabel = displayUnits switch
         {
             Temperature.UnitType.Celsius => "C",

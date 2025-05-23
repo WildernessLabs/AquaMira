@@ -59,6 +59,14 @@ public class SensorConfiguration
     public AnalogModuleConfig? ConfigurableAnalogs { get; set; }
     public FrequencyInputConfig[] FrequencyInputs { get; set; } = Array.Empty<FrequencyInputConfig>();
     public ModbusDeviceConfig[] ModbusDevices { get; set; } = Array.Empty<ModbusDeviceConfig>();
+    public T322iConfiguration? T322iInputs { get; set; }
+}
+
+public class T322iConfiguration
+{
+    public int ModbusAddress { get; set; }
+    public bool IsSimulated { get; set; }
+    public ExtendedChannelConfig[] Channels { get; set; }
 }
 
 public class ConfigurationController

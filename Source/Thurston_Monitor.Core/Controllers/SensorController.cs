@@ -1,5 +1,6 @@
 ﻿using Meadow;
 using Meadow.Foundation;
+using Meadow.Foundation.IOExpanders;
 using Meadow.Peripherals.Sensors;
 using Meadow.Units;
 using Sensors.Flow.HallEffect.Simulation;
@@ -32,6 +33,7 @@ public class SensorController
     public Dictionary<int, IVolumetricFlowSensor> FlowSensors { get; } = new();
     public IProgrammableAnalogInputModule? ProgrammableAnalogInputModule { get; private set; }
     public Dictionary<int, ICompositeSensor> ModbusSensors { get; } = new();
+    public T322ai? T3Module { get; private set; }
 
     public SensorController(IThurston_MonitorHardware hardware, StorageController storageController)
     {
@@ -60,12 +62,13 @@ public class SensorController
         return null;
     }
 
-    public void ApplySensorConfig(SensorConfiguration configuration)
+    public async Task ApplySensorConfig(SensorConfiguration configuration)
     {
         ConfigureModbusDevices(configuration.ModbusDevices);
         ConfigureFrequencyInputs(configuration.FrequencyInputs);
         ConfigureConfigurableAnalogs(configuration.ConfigurableAnalogs);
         ConfigureDigitalInputs(configuration.DigitalInputs);
+        await ConfigureT322iInputs(configuration.T322iInputs);
     }
 
     private void ConfigureDigitalInputs(IEnumerable<DigitalInputConfig> inputConfigs)
@@ -143,6 +146,85 @@ public class SensorController
         }
     }
 
+    private async Task ConfigureT322iInputs(T322iConfiguration? moduleConfig)
+    {
+        if (moduleConfig == null)
+        {
+            Resolver.Log.Warn($"No T322i exists for this device");
+            return;
+        }
+
+        if (moduleConfig.IsSimulated)
+        {
+            throw new NotSupportedException("Simulated T3 not supported");
+        }
+        else
+        {
+            try
+            {
+                var client = hardware.GetModbusSerialClient();
+                if (!client.IsConnected)
+                {
+                    await client.Connect();
+                }
+                T3Module = new T322ai(client, (byte)moduleConfig.ModbusAddress);
+
+                // read the serial number to verify comms
+                Resolver.Log.Info($"Connecting to a T3-22i at {moduleConfig.ModbusAddress}...");
+                var sn = await T3Module.ReadSerialNumber();
+                Resolver.Log.Info($"T3-22i SN: {sn}");
+            }
+            catch (Exception ex)
+            {
+                Resolver.Log.Error($"Unable to connecto to T3-22i: {ex.Message}");
+            }
+        }
+
+        foreach (var analog in moduleConfig.Channels)
+        {
+            try
+            {
+                var capture = analog;
+                var id = GenerateSensorId(analog, analog.Name);
+
+                switch (analog.ChannelType)
+                {
+                    case ConfigurableAnalogInputChannelType.Current_4_20:
+                    case ConfigurableAnalogInputChannelType.Current_0_20:
+                        // verify the pin is valid
+                        var pin = T3Module.Pins.FirstOrDefault(p => (int)p.Key == analog.ChannelNumber);
+                        if (pin == null)
+                        {
+                            Resolver.Log.Error($"No T3 Pin for requested channel {analog.ChannelNumber}");
+                            break;
+                        }
+                        // create an input
+                        var cinput = T3Module.CreateCurrentInputPort(pin);
+                        // register the input for reading
+                        AddSensorToQueryList(analog.SenseIntervalSeconds, new(id, cinput, () =>
+                        {
+                            // TODO: we need to try/catch this
+                            var rawCurrent = cinput.Read().GetAwaiter().GetResult();
+                            return InputToUnitConverter.ConvertCurrentToUnit(
+                                rawCurrent,
+                                analog.UnitType,
+                                analog.Scale,
+                                analog.Offset);
+                        }));
+                        break;
+                    case ConfigurableAnalogInputChannelType.Voltage_0_10:
+                        break;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                // TODO: log this!
+                Resolver.Log.Error($"Failed to configure analog input channel {analog.ChannelNumber}");
+            }
+        }
+    }
+
     private void ConfigureConfigurableAnalogs(AnalogModuleConfig? moduleConfig)
     {
         if (moduleConfig == null)
@@ -159,7 +241,7 @@ public class SensorController
         }
         else
         {
-            throw new NotSupportedException();
+            throw new NotSupportedException("Configurable Analog Inputs not supported");
             //module = new ProgrammableAnalogInputModule();
         }
 

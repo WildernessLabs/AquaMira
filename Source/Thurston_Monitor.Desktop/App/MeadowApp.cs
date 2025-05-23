@@ -34,7 +34,7 @@ namespace Thurston_Monitor.DT
         {
             if (Device.Display is SilkDisplay silkDisplay)
             {
-                silkDisplay.Run();
+                Program.InvokeOnMainThread(silkDisplay.Run);
             }
         }
     }
