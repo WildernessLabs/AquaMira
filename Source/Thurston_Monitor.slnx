@@ -1,8 +1,4 @@
 <Solution>
-  <Configurations>
-    <BuildType Name="Debug" />
-    <BuildType Name="Release" />
-  </Configurations>
   <Folder Name="/docs/">
     <File Path="../README.md" />
   </Folder>
@@ -10,13 +6,11 @@
     <Project Path="../../Meadow.Contracts/Source/Meadow.Contracts/Meadow.Contracts.csproj">
       <Deploy />
     </Project>
-    <Project Path="../../Meadow.Core/Source/implementations/desktop/Meadow.Desktop/Meadow.Desktop.csproj">
-    </Project>
+    <Project Path="../../Meadow.Core/Source/implementations/desktop/Meadow.Desktop/Meadow.Desktop.csproj" />
     <Project Path="../../Meadow.Core/Source/implementations/f7/Meadow.F7/Meadow.F7.csproj">
       <Deploy />
     </Project>
-    <Project Path="../../Meadow.Core/Source/implementations/windows/Meadow.Windows/Meadow.Windows.csproj">
-    </Project>
+    <Project Path="../../Meadow.Core/Source/implementations/windows/Meadow.Windows/Meadow.Windows.csproj" />
     <Project Path="../../Meadow.Core/Source/Meadow.Core/Meadow.Core.csproj">
       <Deploy />
     </Project>
@@ -26,10 +20,8 @@
     <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Libraries_and_Frameworks/Graphics.MicroGraphics/Driver/Graphics.MicroGraphics.csproj">
       <Deploy />
     </Project>
-    <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Libraries_and_Frameworks/Graphics.MicroLayout/Driver/Graphics.MicroLayout.csproj">
-    </Project>
-    <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Libraries_and_Frameworks/Serialization.MicroJson/Driver/Serialization.MicroJson.csproj">
-    </Project>
+    <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Libraries_and_Frameworks/Graphics.MicroLayout/Driver/Graphics.MicroLayout.csproj" />
+    <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Libraries_and_Frameworks/Serialization.MicroJson/Driver/Serialization.MicroJson.csproj" />
     <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/ICs.ADC.Ads7128/Driver/ICs.ADC.Ads7128.csproj">
       <Deploy />
     </Project>
@@ -39,33 +31,30 @@
     <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/ICs.IOExpanders.Tca95x5/Driver/ICs.IOExpanders.Tca95x5.csproj">
       <Deploy />
     </Project>
-    <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/Motors.StepperOnline/Driver/Motors.StepperOnline.csproj">
+    <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/IOExpanders.T3xxx/Driver/IOExpanders.T3xxx.csproj">
+      <Deploy />
     </Project>
+    <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/Motors.StepperOnline/Driver/Motors.StepperOnline.csproj" />
     <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/Sensors.Flow.HallEffect/Driver/Sensors.Flow.HallEffect.csproj">
       <Deploy />
     </Project>
-    <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/Sensors.Hid.Keyboard/Driver/Sensors.Hid.Keyboard.csproj">
-    </Project>
+    <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/Sensors.Hid.Keyboard/Driver/Sensors.Hid.Keyboard.csproj" />
     <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/Sensors.Power.CurrentTransducer/Driver/Sensors.Power.CurrentTransducer.csproj">
       <Deploy />
     </Project>
     <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/Sensors.Temperature.Thermistor/Driver/Sensors.Temperature.Thermistor.csproj">
       <Deploy />
     </Project>
-    <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/VFDs.CerusXDrive/Driver/Motors.CerusXDrive.csproj">
-    </Project>
+    <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/VFDs.CerusXDrive/Driver/Motors.CerusXDrive.csproj" />
     <Project Path="../../Meadow.Foundation/Source/Product/ProgrammableAnalogInput/Driver/ProgramableAnalogInput.csproj">
       <Deploy />
     </Project>
-    <Project Path="../../Meadow.Logging/Source/Meadow.Logging/lib/Meadow.Logging.csproj">
-    </Project>
-    <Project Path="../../Meadow.Modbus/src/Meadow.Modbus/Meadow.Modbus.csproj">
-    </Project>
+    <Project Path="../../Meadow.Logging/Source/Meadow.Logging/lib/Meadow.Logging.csproj" />
+    <Project Path="../../Meadow.Modbus/src/Meadow.Modbus/Meadow.Modbus.csproj" />
     <Project Path="../../Meadow.ProjectLab/Source/Meadow.ProjectLab/Meadow.ProjectLab.csproj">
       <Deploy />
     </Project>
-    <Project Path="../../Meadow.Units/Source/Meadow.Units.Serialization.MicroJson/Meadow.Units.Serialization.MicroJson.csproj">
-    </Project>
+    <Project Path="../../Meadow.Units/Source/Meadow.Units.Serialization.MicroJson/Meadow.Units.Serialization.MicroJson.csproj" />
     <Project Path="../../Meadow.Units/Source/Meadow.Units/Meadow.Units.csproj">
       <Deploy />
     </Project>
@@ -74,14 +63,13 @@
     </Project>
   </Folder>
   <Folder Name="/_tests/" Id="02ea681e-c7d8-13c7-8484-4ac65e1b71e8">
-    <Project Path="../../Meadow.Foundation/Source/Product/ProgrammableAnalogInput/Tests/ProgrammableAnalogInputTests.csproj">
-    </Project>
+    <Project Path="../../Meadow.Foundation/Source/Product/ProgrammableAnalogInput/Tests/ProgrammableAnalogInputTests.csproj" />
   </Folder>
   <Project Path="Thurston_Monitor.Core/Thurston_Monitor.Core.csproj">
-      <Deploy />
+    <Deploy />
   </Project>
   <Project Path="Thurston_Monitor.Desktop/Thurston_Monitor.Desktop.csproj">
-      <Deploy />
+    <Deploy />
   </Project>
   <Project Path="Thurston_Monitor.F7/Thurston_Monitor.ProjLab.csproj">
     <Deploy />

@@ -17,5 +17,5 @@ MeadowCloud:
 
 Thurston:
     Modbus:
-        SerialPort: COM12
+        SerialPort: COM8
         BaudRate: 9600

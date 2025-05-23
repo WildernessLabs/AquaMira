@@ -36,6 +36,21 @@
       "SenseIntervalSeconds": 5
     }
   ],
+  "T322iInputs": {
+    "ModbusAddress": 254,
+    "IsSimulated": false,
+    "Channels": [
+      {
+        "ChannelNumber": 10,
+        "ChannelType": "Current_4_20",
+        "Scale": 1,
+        "Offset": 0,
+        "UnitType": "Temperature",
+        "Name": "Housing Temp",
+        "SenseIntervalSeconds": 4
+      }
+    ]
+  },
   "ConfigurableAnalogs": {
     "IsSimulated": true,
     "Channels": [
