@@ -33,6 +33,7 @@ public class SensorController
     public Dictionary<int, IVolumetricFlowSensor> FlowSensors { get; } = new();
     public IProgrammableAnalogInputModule? ProgrammableAnalogInputModule { get; private set; }
     public Dictionary<int, ICompositeSensor> ModbusSensors { get; } = new();
+    public T322ai? T3Module { get; private set; }
 
     public SensorController(IThurston_MonitorHardware hardware, StorageController storageController)
     {
@@ -166,11 +167,11 @@ public class SensorController
                 {
                     await client.Connect();
                 }
-                _t3Module = new T322ai(client, (byte)moduleConfig.ModbusAddress);
+                T3Module = new T322ai(client, (byte)moduleConfig.ModbusAddress);
 
                 // read the serial number to verify comms
                 Resolver.Log.Info($"Connecting to a T3-22i at {moduleConfig.ModbusAddress}...");
-                var sn = await _t3Module.ReadSerialNumber();
+                var sn = await T3Module.ReadSerialNumber();
                 Resolver.Log.Info($"T3-22i SN: {sn}");
             }
             catch (Exception ex)
@@ -191,14 +192,14 @@ public class SensorController
                     case ConfigurableAnalogInputChannelType.Current_4_20:
                     case ConfigurableAnalogInputChannelType.Current_0_20:
                         // verify the pin is valid
-                        var pin = _t3Module.Pins.FirstOrDefault(p => (int)p.Key == analog.ChannelNumber);
+                        var pin = T3Module.Pins.FirstOrDefault(p => (int)p.Key == analog.ChannelNumber);
                         if (pin == null)
                         {
                             Resolver.Log.Error($"No T3 Pin for requested channel {analog.ChannelNumber}");
                             break;
                         }
                         // create an input
-                        var cinput = _t3Module.CreateCurrentInputPort(pin);
+                        var cinput = T3Module.CreateCurrentInputPort(pin);
                         // register the input for reading
                         AddSensorToQueryList(analog.SenseIntervalSeconds, new(id, cinput, () =>
                         {
@@ -223,8 +224,6 @@ public class SensorController
             }
         }
     }
-
-    private T322ai? _t3Module;
 
     private void ConfigureConfigurableAnalogs(AnalogModuleConfig? moduleConfig)
     {

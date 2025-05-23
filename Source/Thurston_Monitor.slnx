@@ -22,6 +22,7 @@
     </Project>
     <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Libraries_and_Frameworks/Graphics.MicroLayout/Driver/Graphics.MicroLayout.csproj" />
     <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Libraries_and_Frameworks/Serialization.MicroJson/Driver/Serialization.MicroJson.csproj" />
+    <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/Displays.Silk/Driver/Displays.Silk.csproj" />
     <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/ICs.ADC.Ads7128/Driver/ICs.ADC.Ads7128.csproj">
       <Deploy />
     </Project>
