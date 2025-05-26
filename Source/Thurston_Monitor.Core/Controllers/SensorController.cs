@@ -33,7 +33,7 @@ public class SensorController
     public Dictionary<int, IVolumetricFlowSensor> FlowSensors { get; } = new();
     public IProgrammableAnalogInputModule? ProgrammableAnalogInputModule { get; private set; }
     public Dictionary<int, ICompositeSensor> ModbusSensors { get; } = new();
-    public T322ai? T3Module { get; private set; }
+    public IT322ai? T3Module { get; private set; }
 
     public SensorController(IThurston_MonitorHardware hardware, StorageController storageController)
     {
@@ -156,7 +156,7 @@ public class SensorController
 
         if (moduleConfig.IsSimulated)
         {
-            throw new NotSupportedException("Simulated T3 not supported");
+            T3Module = new SimulatedT322ai();
         }
         else
         {

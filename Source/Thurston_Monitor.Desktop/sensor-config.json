@@ -38,7 +38,7 @@
   ],
   "T322iInputs": {
     "ModbusAddress": 254,
-    "IsSimulated": false,
+    "IsSimulated": true,
     "Channels": [
       {
         "ChannelNumber": 10,
