@@ -13,14 +13,6 @@ using Thurston_Monitor.Core.Contracts;
 
 namespace Thurston_Monitor.Core;
 
-public class Simulated4_40mAPressureSensor : Simulated4_40mASensor
-{
-}
-
-public abstract class Simulated4_40mASensor
-{
-}
-
 public class SensorController
 {
     private readonly IThurston_MonitorHardware hardware;

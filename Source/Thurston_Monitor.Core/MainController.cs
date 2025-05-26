@@ -58,11 +58,11 @@ namespace Thurston_Monitor.Core
             await sensorController.ApplySensorConfig(
                 configurationController.SensorConfiguration);
 
-            _ = cloudController.ReportDeviceStartup();
-        }
-
-        private void ConfigureAnalyzers(ConfigurationController configuration)
-        {
+            _ = Task.Run(async () =>
+            {
+                await cloudController.ReportDeviceStartup();
+                await cloudController.ReportSensorConfiguration(configurationController.SensorConfiguration);
+            });
         }
 
         private void OnNetworkStatusChanged(object sender, EventArgs e)
