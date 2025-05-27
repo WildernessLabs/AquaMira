@@ -47,6 +47,8 @@ namespace Thurston_Monitor.Core
 
             sensorController = new SensorController(hardware, storageController);
 
+            Resolver.Log.Info("Creating DisplayController...");
+
             displayController = new DisplayController(
                 this.hardware.Display,
                 this.hardware.DisplayRotation,

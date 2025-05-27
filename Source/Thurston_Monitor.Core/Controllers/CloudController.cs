@@ -76,7 +76,7 @@ public class CloudController
         return cloudService.SendLog(log);
     }
 
-    public Task ReportDeviceStartup()
+    public async Task ReportDeviceStartup()
     {
         var deviceInfo = new Dictionary<string, object>
         {
@@ -92,10 +92,18 @@ public class CloudController
             Timestamp = DateTime.UtcNow
         };
 
-        return cloudService.SendEvent(evt);
+        try
+        {
+            await cloudService.SendEvent(evt);
+        }
+        catch (Exception ex)
+        {
+            // we'll end up here if cloud features aren't enabled
+            Resolver.Log.Info($"Failed to send to cloud: {ex.Message}");
+        }
     }
 
-    public Task ReportSensorConfiguration(SensorConfiguration configuration)
+    public async Task ReportSensorConfiguration(SensorConfiguration configuration)
     {
         var configDictionary = new Dictionary<string, object>();
 
@@ -194,6 +202,14 @@ public class CloudController
             Timestamp = DateTime.UtcNow
         };
 
-        return cloudService.SendEvent(evt);
+        try
+        {
+            await cloudService.SendEvent(evt);
+        }
+        catch (Exception ex)
+        {
+            // we'll end up here if cloud features aren't enabled
+            Resolver.Log.Info($"Failed to send to cloud: {ex.Message}");
+        }
     }
 }
