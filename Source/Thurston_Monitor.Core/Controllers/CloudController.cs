@@ -1,12 +1,13 @@
 ﻿using Meadow;
 using Meadow.Cloud;
+using Meadow.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Thurston_Monitor.Core;
 
-public class CloudController
+public class CloudController : ILogProvider
 {
     public enum EventIds
     {
@@ -32,6 +33,8 @@ public class CloudController
         this.networkController = networkController;
 
         storageController.Records.ItemAdded += Records_ItemAdded;
+
+        Resolver.Log.AddProvider(this);
     }
 
     private void Records_ItemAdded(object sender, EventArgs e)
@@ -67,11 +70,35 @@ public class CloudController
 
     }
 
-    public Task LogError()
+    public Task LogError(Exception exception, string? message = null)
     {
         var log = new CloudLog
         {
+            Timestamp = DateTime.UtcNow,
+            Message = message ?? exception.Message,
+            Exception = exception.ToString()
+        };
+        return cloudService.SendLog(log);
+    }
 
+    public Task LogError(string message)
+    {
+        var log = new CloudLog
+        {
+            Timestamp = DateTime.UtcNow,
+            Message = message,
+            Severity = "error"
+        };
+        return cloudService.SendLog(log);
+    }
+
+    public Task LogWarning(string message)
+    {
+        var log = new CloudLog
+        {
+            Timestamp = DateTime.UtcNow,
+            Message = message,
+            Severity = "warning"
         };
         return cloudService.SendLog(log);
     }
@@ -210,6 +237,19 @@ public class CloudController
         {
             // we'll end up here if cloud features aren't enabled
             Resolver.Log.Info($"Failed to send to cloud: {ex.Message}");
+        }
+    }
+
+    public void Log(LogLevel level, string message, string? messageGroup)
+    {
+        switch (level)
+        {
+            case LogLevel.Error:
+                LogError(message);
+                break;
+            case LogLevel.Warning:
+                LogWarning(message);
+                break;
         }
     }
 }

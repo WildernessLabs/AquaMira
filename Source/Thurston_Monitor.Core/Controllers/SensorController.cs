@@ -125,7 +125,6 @@ public class SensorController
                     }
                     catch (Exception mex)
                     {
-                        // TODO: log this modbus error
                         Resolver.Log.Error($"Error reading Modbus device {device.Name} values: {mex.Message}");
                         return null;
                     }
@@ -168,7 +167,7 @@ public class SensorController
             }
             catch (Exception ex)
             {
-                Resolver.Log.Error($"Unable to connecto to T3-22i: {ex.Message}");
+                Resolver.Log.Error($"Unable to connect to T3-22i: {ex.Message}");
             }
         }
 
@@ -300,7 +299,6 @@ public class SensorController
 
                         if (value == null)
                         {
-                            // we had a problem.  should we log (or did that happen upstream?)
                             Resolver.Log.Info($"Error reading from {sensor.Sensor.GetType().Name}");
                             continue;
                         }

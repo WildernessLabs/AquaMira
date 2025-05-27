@@ -35,7 +35,10 @@ namespace Thurston_Monitor.F7
 
         public ModbusRtuClient GetModbusSerialClient()
         {
-            return projLab.GetModbusRtuClient(ConfigurationController.AppSettings.ModbusBaudRate ?? 19200);
+            var baud = ConfigurationController.AppSettings.ModbusBaudRate ?? 9600;
+            Resolver.Log.Info($"Modbus RTU is running at {baud} baud");
+
+            return projLab.GetModbusRtuClient(baud);
         }
     }
 }

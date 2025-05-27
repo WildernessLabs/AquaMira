@@ -18,6 +18,9 @@
         <None Update="app.config.yaml">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
+        <None Update="sensor-config-simulation.json">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
         <None Update="sensor-config.json">
           <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>

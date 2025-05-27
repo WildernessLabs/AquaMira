@@ -45,9 +45,10 @@ namespace Thurston_Monitor.Core
                 storageController,
                 NetworkController);
 
-            sensorController = new SensorController(hardware, storageController);
+            // Register the CloudController so we can avoid passing it around to everyone that needs to log errors
+            Resolver.Services.Add(cloudController);
 
-            Resolver.Log.Info("Creating DisplayController...");
+            sensorController = new SensorController(hardware, storageController);
 
             displayController = new DisplayController(
                 this.hardware.Display,
