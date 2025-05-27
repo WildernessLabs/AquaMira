@@ -1,4 +1,5 @@
-﻿using Meadow.Devices;
+﻿using Meadow;
+using Meadow.Devices;
 using Meadow.Modbus;
 using Meadow.Peripherals.Displays;
 using Meadow.Peripherals.Sensors;
@@ -23,6 +24,8 @@ namespace Thurston_Monitor.F7
 
         public Thurston_MonitorProjectLabHardware(F7CoreComputeV2 device)
         {
+            Resolver.Log.Info("Creating ProjectLab...");
+
             projLab = ProjectLab.Create();
 
             InputController = new InputController(projLab);

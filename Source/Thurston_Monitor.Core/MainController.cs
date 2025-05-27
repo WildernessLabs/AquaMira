@@ -47,6 +47,8 @@ namespace Thurston_Monitor.Core
 
             sensorController = new SensorController(hardware, storageController);
 
+            Resolver.Log.Info("Creating DisplayController...");
+
             displayController = new DisplayController(
                 this.hardware.Display,
                 this.hardware.DisplayRotation,
@@ -58,11 +60,11 @@ namespace Thurston_Monitor.Core
             await sensorController.ApplySensorConfig(
                 configurationController.SensorConfiguration);
 
-            _ = cloudController.ReportDeviceStartup();
-        }
-
-        private void ConfigureAnalyzers(ConfigurationController configuration)
-        {
+            _ = Task.Run(async () =>
+            {
+                await cloudController.ReportDeviceStartup();
+                await cloudController.ReportSensorConfiguration(configurationController.SensorConfiguration);
+            });
         }
 
         private void OnNetworkStatusChanged(object sender, EventArgs e)

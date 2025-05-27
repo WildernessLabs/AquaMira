@@ -11,6 +11,7 @@ public class CloudController
     public enum EventIds
     {
         DeviceStarted = 101,
+        SensorConfig = 102,
         DeviceData = 201,
     }
 
@@ -75,7 +76,7 @@ public class CloudController
         return cloudService.SendLog(log);
     }
 
-    public Task ReportDeviceStartup()
+    public async Task ReportDeviceStartup()
     {
         var deviceInfo = new Dictionary<string, object>
         {
@@ -91,6 +92,124 @@ public class CloudController
             Timestamp = DateTime.UtcNow
         };
 
-        return cloudService.SendEvent(evt);
+        try
+        {
+            await cloudService.SendEvent(evt);
+        }
+        catch (Exception ex)
+        {
+            // we'll end up here if cloud features aren't enabled
+            Resolver.Log.Info($"Failed to send to cloud: {ex.Message}");
+        }
+    }
+
+    public async Task ReportSensorConfiguration(SensorConfiguration configuration)
+    {
+        var configDictionary = new Dictionary<string, object>();
+
+        if (configuration.ConfigurableAnalogs == null)
+        {
+            configDictionary.Add("ConfigurableAnalogs", "null");
+        }
+        else if (configuration.ConfigurableAnalogs.Channels.Length == 0)
+        {
+            configDictionary.Add("ConfigurableAnalogs.Channels", "Zero channels");
+        }
+        else
+        {
+            configDictionary.Add("ConfigurableAnalogs.IsSimulated",
+                configuration.ConfigurableAnalogs.IsSimulated);
+
+            for (var i = 0; i < configuration.ConfigurableAnalogs.Channels.Length; i++)
+            {
+                configDictionary.Add(
+                    $"ConfigurableAnalogs.Channel{i}.Name",
+                    configuration.ConfigurableAnalogs.Channels[i].Name);
+                configDictionary.Add(
+                    $"ConfigurableAnalogs.Channel{i}.Type",
+                    configuration.ConfigurableAnalogs.Channels[i].ChannelType);
+                configDictionary.Add(
+                    $"ConfigurableAnalogs.Channel{i}.Unit",
+                    configuration.ConfigurableAnalogs.Channels[i].UnitType);
+            }
+        }
+
+        if (configuration.T322iInputs == null)
+        {
+            configDictionary.Add("T322iInputs", "null");
+        }
+        else if (configuration.T322iInputs.Channels.Length == 0)
+        {
+            configDictionary.Add("T322iInputs.Channels", "Zero channels");
+        }
+        else
+        {
+            configDictionary.Add("T322iInputs.IsSimulated",
+                configuration.T322iInputs.IsSimulated);
+
+            for (var i = 0; i < configuration.T322iInputs.Channels.Length; i++)
+            {
+                configDictionary.Add(
+                    $"T322iInputs.Channel{i}.Name",
+                    configuration.T322iInputs.Channels[i].Name);
+                configDictionary.Add(
+                    $"T322iInputs.Channel{i}.Type",
+                    configuration.T322iInputs.Channels[i].ChannelType);
+                configDictionary.Add(
+                    $"T322iInputs.Channel{i}.Unit",
+                    configuration.T322iInputs.Channels[i].UnitType);
+            }
+        }
+
+        foreach (var device in configuration.ModbusDevices)
+        {
+            configDictionary.Add(
+                $"Modbus.{device.Driver}.IsSimulated",
+                device.IsSimulated);
+            configDictionary.Add(
+                $"Modbus.{device.Driver}.Address",
+                device.Address);
+        }
+
+        foreach (var input in configuration.DigitalInputs)
+        {
+            configDictionary.Add(
+                $"DigitalInputs.Channel{input.ChannelNumber}.IsSimulated",
+                input.IsSimulated);
+            configDictionary.Add(
+                $"DigitalInputs.Channel{input.ChannelNumber}.Name",
+                input.Name);
+        }
+
+        foreach (var input in configuration.FrequencyInputs)
+        {
+            configDictionary.Add(
+                $"FrequencyInputs.Channel{input.ChannelNumber}.IsSimulated",
+                input.IsSimulated);
+            configDictionary.Add(
+                $"FrequencyInputs.Channel{input.ChannelNumber}.Name",
+                input.Name);
+            configDictionary.Add(
+                $"FrequencyInputs.Channel{input.ChannelNumber}.Unit",
+                input.UnitType);
+        }
+
+        var evt = new CloudEvent
+        {
+            EventId = (int)EventIds.DeviceStarted,
+            Description = "Sensor Configuration",
+            Measurements = configDictionary,
+            Timestamp = DateTime.UtcNow
+        };
+
+        try
+        {
+            await cloudService.SendEvent(evt);
+        }
+        catch (Exception ex)
+        {
+            // we'll end up here if cloud features aren't enabled
+            Resolver.Log.Info($"Failed to send to cloud: {ex.Message}");
+        }
     }
 }
