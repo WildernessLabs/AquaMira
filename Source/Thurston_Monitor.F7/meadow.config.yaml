@@ -7,6 +7,13 @@ Device:
     # Name of the device on the network.
     Name: BryanThurstonPL
 
+    # Corresponding MCU pin names for the reserved pins
+    # (COMX_RX pin, COM_TX pin, ENABLE pin)
+    # Examples:
+    # Using mikroBUS 1 on Project Lab v3 with Quectel EG21-GL (Meadow AN pin as enable pin),
+    #  reserve the following:
+    ReservedPins: B15;B14;H10
+
     # Uncomment if SD card hardware present on this hardware 
     # (e.g., Core-Compute module with SD add-on)? Optional; default value is `false`.
 #    SdStorageSupported: true
