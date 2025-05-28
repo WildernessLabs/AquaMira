@@ -23,7 +23,7 @@ The Thurston application can be run on a Project Lab for bench testing and valid
 
 ## Cellular Setup
 
-1. Activate and assign Teal SIM Card.  
+1. Activate and assign Teal SIM Card.
   a. Go to [aurora.teal.global](https://aurora.teal.global/onechips).
   b. Search for the last few SIM card ID numbers to pull up the detail page, and click the **Activate** button.
   c. Make sure that it's in the `internal_AquaMira` sub account. Email [Teal Support](mailto:support@tealcom.freshdesk.com) with the SIM card ID with a request to move to that group.
