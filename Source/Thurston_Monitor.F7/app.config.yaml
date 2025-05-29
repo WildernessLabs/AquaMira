@@ -31,7 +31,7 @@ MeadowCloud:
     EnableHealthMetrics: true
 
     # How often to send metrics to Meadow.Cloud
-    HealthMetricsIntervalMinutes: 60
+    HealthMetricsIntervalMinutes: 10
 
 Thurston:
     Modbus:
