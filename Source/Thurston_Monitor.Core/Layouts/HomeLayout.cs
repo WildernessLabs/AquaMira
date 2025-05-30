@@ -18,7 +18,7 @@ internal class HomeLayout : StackLayout
         this.BackgroundColor = Color.FromRgb(50, 50, 50);
 
         this.Add(new Picture(Resources.Logo.Width, Resources.Logo.Height, Resources.Logo));
-        this.Add(new Label(screen.Width, screen.Height, "Hello!")
+        this.Add(new Label(screen.Width, 30, "Hello!")
         {
             TextColor = Color.White,
         });

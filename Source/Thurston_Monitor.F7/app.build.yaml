@@ -1,2 +1,2 @@
 Deploy:
-  NoLink: [ Thurston_Monitor.Core, ProgrammableAnalogInput ]
+  NoLink: [ Thurston_Monitor.Core, ProgrammableAnalogInput, Temco.T3xxx ]

@@ -9,6 +9,7 @@ public static class Resources
     private static readonly Dictionary<string, Image> _images = new();
     private static readonly string _assemblyName;
 
+    public static Image Heart => GetImageResource("heart.bmp");
     public static Image Logo => GetImageResource("logo.bmp");
     public static Image NetConnected => GetImageResource("net-connected.bmp");
     public static Image NetDisconnected => GetImageResource("net-disconnected.bmp");

@@ -1,20 +1,53 @@
-﻿using System;
-using System.Threading.Tasks;
-using Meadow;
+﻿using Meadow;
 using Meadow.Devices;
+using System;
+using System.Threading.Tasks;
 using Thurston_Monitor.Core;
 
 namespace Thurston_Monitor.F7
 {
     public class MeadowProjectLabApp : App<F7CoreComputeV2>
     {
-        private MainController mainController;
+        private bool shutdownHappened = false;
+        private const int WatchdogIntervalSeconds = 30;
+        private MainController? mainController;
 
         public override Task Initialize()
         {
+            new Task(async () =>
+            {
+                Device.WatchdogEnable(TimeSpan.FromSeconds(WatchdogIntervalSeconds));
+
+                Resolver.Log.Info("Watchdog timer enabled");
+                while (!shutdownHappened)
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(3));
+                    Device.WatchdogReset();
+                    mainController?.WatchdogNotify();
+                }
+                Resolver.Log.Warn("Watchdog timer will trigger shortly");
+            }, TaskCreationOptions.LongRunning)
+                .Start();
+
             var hardware = new Thurston_MonitorProjectLabHardware(Device);
             mainController = new MainController();
             return mainController.Initialize(hardware);
+        }
+
+        public override Task OnError(Exception e)
+        {
+            Resolver.Log.Info($"System error: {e.Message}");
+            shutdownHappened = true;
+
+            return base.OnError(e);
+        }
+
+        public override Task OnShutdown()
+        {
+            Resolver.Log.Info($"Device is shutting down...");
+            shutdownHappened = true;
+
+            return base.OnShutdown();
         }
 
         public override Task Run()

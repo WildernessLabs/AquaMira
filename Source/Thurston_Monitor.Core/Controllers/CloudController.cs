@@ -7,6 +7,13 @@ using System.Threading.Tasks;
 
 namespace Thurston_Monitor.Core;
 
+public class StateController
+{
+    public bool IsError { get; private set; }
+    public bool IsWarn { get; private set; }
+
+}
+
 public class CloudController : ILogProvider
 {
     public enum EventIds

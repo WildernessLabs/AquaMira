@@ -10,7 +10,8 @@ public class DisplayController
 {
     private readonly DisplayScreen? screen;
 
-    private MicroLayout _homelayout;
+    private MicroLayout homelayout;
+    private Picture heartbeatPicture;
 
     public DisplayController(
         IPixelDisplay? display,
@@ -41,11 +42,23 @@ public class DisplayController
         }
     }
 
+    internal void WatchdogNotify()
+    {
+        heartbeatPicture.IsVisible = !heartbeatPicture.IsVisible;
+    }
+
     private void GenerateLayout(DisplayScreen screen)
     {
-        _homelayout = new HomeLayout(screen);
+        homelayout = new HomeLayout(screen);
 
-        screen.Controls.Add(_homelayout);
+        heartbeatPicture = new Picture(
+            screen.Width - Resources.Heart.Width - 5,
+            screen.Height - Resources.Heart.Height - 5,
+            Resources.Heart.Width,
+            Resources.Heart.Height,
+            Resources.Heart);
+
+        screen.Controls.Add(homelayout, heartbeatPicture);
     }
 
     public void SetNetworkStatus(bool isConnected)

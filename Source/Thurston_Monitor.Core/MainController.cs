@@ -12,7 +12,7 @@ namespace Thurston_Monitor.Core
 
         private CloudController cloudController;
         private ConfigurationController configurationController;
-        private DisplayController displayController;
+        private DisplayController? displayController;
         private SensorController sensorController;
         private StorageController storageController;
 
@@ -68,10 +68,15 @@ namespace Thurston_Monitor.Core
             });
         }
 
+        public void WatchdogNotify()
+        {
+            displayController?.WatchdogNotify();
+        }
+
         private void OnNetworkStatusChanged(object sender, EventArgs e)
         {
             Resolver.Log.Info($"Network state changed to {NetworkController.IsConnected}");
-            displayController.SetNetworkStatus(NetworkController.IsConnected);
+            displayController?.SetNetworkStatus(NetworkController.IsConnected);
         }
 
         public async Task Run()

@@ -183,7 +183,7 @@ public class SensorController
                     case ConfigurableAnalogInputChannelType.Current_4_20:
                     case ConfigurableAnalogInputChannelType.Current_0_20:
                         // verify the pin is valid
-                        var pin = T3Module.Pins.FirstOrDefault(p => (int)p.Key == analog.ChannelNumber);
+                        var pin = T3Module?.Pins.FirstOrDefault(p => (int)p.Key == analog.ChannelNumber);
                         if (pin == null)
                         {
                             Resolver.Log.Error($"No T3 Pin for requested channel {analog.ChannelNumber}");
