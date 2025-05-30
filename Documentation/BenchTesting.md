@@ -23,9 +23,11 @@ The Thurston application can be run on a Project Lab for bench testing and valid
 
 ## Cellular Setup
 
-1. Activate and assign Teal SIM Card.
+1. Connect the EG2x cell module in mikroBUS 1 on your project lab.
+2. Install the Teal SIM card into the EG2x.
+3. Activate and assign Teal SIM card.
   * Go to [aurora.teal.global](https://aurora.teal.global/onechips).
   * Search for the last few SIM card ID numbers to pull up the detail page, and click the **Activate** button.
   * Make sure that it's in the `internal_AquaMira` sub account. Email [Teal Support](mailto:support@tealcom.freshdesk.com) with the SIM card ID with a request to move to that group.
-2. In `meadow.config.yaml`, change the default network interface to cell:
+4. In `meadow.config.yaml`, change the default network interface to cell:
     `DefaultInterface: Cell`
