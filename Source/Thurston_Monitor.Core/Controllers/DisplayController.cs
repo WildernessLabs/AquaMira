@@ -9,7 +9,7 @@ public class DisplayController
 {
     private readonly DisplayScreen? screen;
 
-    private MicroLayout homelayout;
+    private HomeLayout homelayout;
     private Picture heartbeatPicture;
 
     public DisplayController(
@@ -61,6 +61,8 @@ public class DisplayController
 
     public void SetNetworkStatus(bool isConnected)
     {
+        homelayout.SetConnectedState(isConnected);
+
         UpdateDisplay();
     }
 
