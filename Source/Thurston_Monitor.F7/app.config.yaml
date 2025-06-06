@@ -33,6 +33,8 @@ MeadowCloud:
     # How often to send metrics to Meadow.Cloud
     HealthMetricsIntervalMinutes: 10
 
+    # MaxQueueDepth: 200
+
 Thurston:
     Modbus:
         BaudRate: 9600

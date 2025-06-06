@@ -5,7 +5,7 @@
 Device:
 
     # Name of the device on the network.
-    Name: BryanThurstonPL
+    Name: TackeThurstonPL
 
     # Corresponding MCU pin names for the reserved pins
     # (COMX_RX pin, COM_TX pin, ENABLE pin)

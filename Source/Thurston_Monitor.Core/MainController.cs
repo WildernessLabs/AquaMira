@@ -1,5 +1,4 @@
 ﻿using Meadow;
-using Meadow.Units;
 using System;
 using System.Threading.Tasks;
 using Thurston_Monitor.Core.Contracts;
@@ -19,10 +18,6 @@ namespace Thurston_Monitor.Core
         private INetworkController NetworkController => hardware.NetworkController;
         private IInputController InputController => hardware.InputController;
 
-        private readonly Temperature.UnitType units;
-        private readonly Temperature currentTemperature;
-        private Temperature thresholdTemperature;
-
         public MainController()
         {
         }
@@ -30,8 +25,6 @@ namespace Thurston_Monitor.Core
         public async Task Initialize(IThurston_MonitorHardware hardware)
         {
             this.hardware = hardware;
-
-            this.thresholdTemperature = 68.Fahrenheit();
 
             var a = Resolver.Device.NetworkAdapters;
 
@@ -52,8 +45,7 @@ namespace Thurston_Monitor.Core
 
             displayController = new DisplayController(
                 this.hardware.Display,
-                this.hardware.DisplayRotation,
-                units);
+                this.hardware.DisplayRotation);
 
             // connect events
             NetworkController.NetworkStatusChanged += OnNetworkStatusChanged;

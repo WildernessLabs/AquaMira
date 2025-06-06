@@ -9,6 +9,9 @@ internal class HomeLayout : StackLayout
     protected IFont MediumFont { get; }
     protected IFont LargeFont { get; }
 
+    private readonly Picture disconnected;
+    private readonly Picture connected;
+
     public HomeLayout(DisplayScreen screen)
         : base(0, 0, screen.Width, screen.Height)
     {
@@ -22,5 +25,19 @@ internal class HomeLayout : StackLayout
         {
             TextColor = Color.White,
         });
+
+        connected = new Picture(Resources.NetConnected.Width, Resources.NetConnected.Height, Resources.NetConnected);
+        disconnected = new Picture(Resources.NetDisconnected.Width, Resources.NetDisconnected.Height, Resources.NetDisconnected);
+
+        this.Add(disconnected);
+        this.Add(connected);
+
+        connected.IsVisible = false;
+    }
+
+    public void SetConnectedState(bool isConnected)
+    {
+        connected.IsVisible = isConnected;
+        disconnected.IsVisible = !isConnected;
     }
 }

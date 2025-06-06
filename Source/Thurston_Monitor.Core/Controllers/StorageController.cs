@@ -25,6 +25,12 @@ public class StorageController
 
     public StorageController(ConfigurationController configurationController)
     {
+        Records.Overrun += OnRecordBufferOverrun;
+    }
+
+    private void OnRecordBufferOverrun(object sender, EventArgs e)
+    {
+        Resolver.Log.Info("Telemetry storage overrrun");
     }
 
     public void RecordSensorValues(Dictionary<string, object> values)

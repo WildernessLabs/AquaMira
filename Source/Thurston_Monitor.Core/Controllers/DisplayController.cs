@@ -2,7 +2,6 @@
 using Meadow.Foundation.Graphics;
 using Meadow.Foundation.Graphics.MicroLayout;
 using Meadow.Peripherals.Displays;
-using Meadow.Units;
 
 namespace Thurston_Monitor.Core;
 
@@ -10,13 +9,12 @@ public class DisplayController
 {
     private readonly DisplayScreen? screen;
 
-    private MicroLayout homelayout;
+    private HomeLayout homelayout;
     private Picture heartbeatPicture;
 
     public DisplayController(
         IPixelDisplay? display,
-        RotationType displayRotation,
-        Temperature.UnitType unit)
+        RotationType displayRotation)
     {
         if (display != null)
         {
@@ -63,6 +61,8 @@ public class DisplayController
 
     public void SetNetworkStatus(bool isConnected)
     {
+        homelayout.SetConnectedState(isConnected);
+
         UpdateDisplay();
     }
 
