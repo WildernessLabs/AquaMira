@@ -2,7 +2,6 @@
 using Meadow.Foundation.Graphics;
 using Meadow.Foundation.Graphics.MicroLayout;
 using Meadow.Peripherals.Displays;
-using Meadow.Units;
 
 namespace Thurston_Monitor.Core;
 
@@ -15,8 +14,7 @@ public class DisplayController
 
     public DisplayController(
         IPixelDisplay? display,
-        RotationType displayRotation,
-        Temperature.UnitType unit)
+        RotationType displayRotation)
     {
         if (display != null)
         {

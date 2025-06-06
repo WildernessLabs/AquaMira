@@ -14,6 +14,11 @@ Logging:
 # Meadow.Cloud configuration.
 MeadowCloud:
     Enabled: true
+    EnableUpdates: true
+    EnableHealthMetrics: true
+    HealthMetricsIntervalMinutes: 10
+
+    MaxQueueDepth: 200
 
 Thurston:
     Modbus:
