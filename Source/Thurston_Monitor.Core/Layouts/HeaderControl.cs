@@ -39,7 +39,8 @@ internal class HeaderControl : AbsoluteLayout
             connected.Left - 40, 0, 40, logo.Height)
         {
             VerticalAlignment = VerticalAlignment.Center,
-            Text = "--"
+            Text = "--",
+            Font = new Font8x12()
         };
 
         this.Controls.Add(logo, disconnected, connected, heart, signal);

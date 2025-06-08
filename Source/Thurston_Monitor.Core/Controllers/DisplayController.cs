@@ -32,6 +32,10 @@ public class DisplayController
 
             GenerateLayout(screen);
 
+            diagnosticProvider = new DiagnosticLogProvider();
+            diagnosticProvider.DiagnosticMessageReceived += (s, e) => diagnosticLayout?.AddLogText(e);
+            Resolver.Log.AddProvider(diagnosticProvider);
+
             UpdateDisplay();
         }
         else
@@ -45,10 +49,11 @@ public class DisplayController
     }
 
     private readonly List<MicroLayout> navigationStack = new();
-    private int _currentPage = 0;
+    private readonly DiagnosticLogProvider diagnosticProvider;
+    private int currentPage = 0;
     private DisplayTheme? theme;
     private AbsoluteLayout mainLayout;
-    private StackLayout diagnosticLayout;
+    private DiagnosticLayout diagnosticLayout;
     private HomeLayout homeLayout;
     private HeaderControl headerControl;
 
@@ -81,13 +86,13 @@ public class DisplayController
     {
         if (screen == null) return;
 
-        if (_currentPage >= navigationStack.Count - 1) return;
+        if (currentPage >= navigationStack.Count - 1) return;
 
         screen.BeginUpdate();
 
-        navigationStack[_currentPage].IsVisible = false;
-        _currentPage++;
-        navigationStack[_currentPage].IsVisible = true;
+        navigationStack[currentPage].IsVisible = false;
+        currentPage++;
+        navigationStack[currentPage].IsVisible = true;
         screen.EndUpdate();
     }
 
@@ -95,13 +100,13 @@ public class DisplayController
     {
         if (screen == null) return;
 
-        if (_currentPage <= 0) return;
+        if (currentPage <= 0) return;
 
         screen.BeginUpdate();
 
-        navigationStack[_currentPage].IsVisible = false;
-        _currentPage--;
-        navigationStack[_currentPage].IsVisible = true;
+        navigationStack[currentPage].IsVisible = false;
+        currentPage--;
+        navigationStack[currentPage].IsVisible = true;
         screen.EndUpdate();
     }
 
@@ -111,12 +116,12 @@ public class DisplayController
 
         screen.BeginUpdate();
 
-        if (_currentPage > 0)
+        if (currentPage > 0)
         {
-            navigationStack[_currentPage].IsVisible = false;
+            navigationStack[currentPage].IsVisible = false;
         }
-        _currentPage = 0;
-        navigationStack[_currentPage].IsVisible = true;
+        currentPage = 0;
+        navigationStack[currentPage].IsVisible = true;
         screen.EndUpdate();
     }
 
@@ -130,6 +135,11 @@ public class DisplayController
         headerControl.SetConnectedState(isConnected);
 
         UpdateDisplay();
+    }
+
+    public void SetNetworkSignal(int? signal)
+    {
+        headerControl.SetSignal(signal);
     }
 
     private void UpdateDisplay()
