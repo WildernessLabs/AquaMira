@@ -11,6 +11,7 @@ public static class Resources
 
     public static Image Heart => GetImageResource("heart.bmp");
     public static Image Logo => GetImageResource("logo.bmp");
+    public static Image LogoSmall => GetImageResource("logo-small.bmp");
     public static Image NetConnected => GetImageResource("net-connected.bmp");
     public static Image NetDisconnected => GetImageResource("net-disconnected.bmp");
 

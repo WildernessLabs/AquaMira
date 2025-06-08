@@ -22,6 +22,7 @@ internal class Thurston_MonitorHardware : IThurston_MonitorHardware
     public INetworkController? NetworkController { get; }
     public IPixelDisplay? Display => device.Display;
     public ITemperatureSensor? TemperatureSensor { get; }
+    public IButton? UpButton { get; }
     public IButton? RightButton { get; }
     public IButton? LeftButton { get; }
     public IInputController InputController { get; }
@@ -37,11 +38,12 @@ internal class Thurston_MonitorHardware : IThurston_MonitorHardware
 
         TemperatureSensor = new SimulatedTemperatureSensor(
             new Temperature(70, Temperature.UnitType.Fahrenheit),
-            keyboard.Pins.Up.CreateDigitalInterruptPort(InterruptMode.EdgeRising),
-            keyboard.Pins.Down.CreateDigitalInterruptPort(InterruptMode.EdgeRising));
+            keyboard.Pins.Q.CreateDigitalInterruptPort(InterruptMode.EdgeRising),
+            keyboard.Pins.W.CreateDigitalInterruptPort(InterruptMode.EdgeRising));
 
-        LeftButton = new PushButton(keyboard.Pins.Left.CreateDigitalInterruptPort(InterruptMode.EdgeFalling));
-        RightButton = new PushButton(keyboard.Pins.Right.CreateDigitalInterruptPort(InterruptMode.EdgeFalling));
+        UpButton = new PushButton(keyboard.Pins.Up);
+        LeftButton = new PushButton(keyboard.Pins.Left);
+        RightButton = new PushButton(keyboard.Pins.Right);
         InputController = new InputController();
     }
 

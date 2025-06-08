@@ -45,7 +45,8 @@ namespace Thurston_Monitor.Core
 
             displayController = new DisplayController(
                 this.hardware.Display,
-                this.hardware.DisplayRotation);
+                this.hardware.DisplayRotation,
+                this.hardware);
 
             // connect events
             NetworkController.NetworkStatusChanged += OnNetworkStatusChanged;
