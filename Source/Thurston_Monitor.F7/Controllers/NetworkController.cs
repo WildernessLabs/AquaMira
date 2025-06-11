@@ -14,10 +14,11 @@ namespace Thurston_Monitor.F7
 
         private readonly IWiFiNetworkAdapter? wifi;
         private readonly ICellNetworkAdapter? cell;
+        private readonly ThurstonAppSettings settings;
 
         public NetworkController(F7MicroBase device)
         {
-            // TODO: determine what adapter is in use (cell/wifi) and handle that properly
+            this.settings = ConfigurationController.AppSettings;
 
             wifi = device.NetworkAdapters.Primary<IWiFiNetworkAdapter>();
             cell = device.NetworkAdapters.Primary<ICellNetworkAdapter>();
@@ -62,7 +63,7 @@ namespace Thurston_Monitor.F7
                     // TBD
                 }
 
-                await Task.Delay(60000);
+                await Task.Delay(settings.NetworkSignalRefreshSeconds);
             }
         }
 

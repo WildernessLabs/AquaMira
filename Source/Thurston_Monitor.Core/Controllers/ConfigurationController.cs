@@ -62,4 +62,5 @@ public class ThurstonAppSettings
 {
     public string? ModbusSerialPort => Resolver.App.Settings.TryGetValue("Thurston.Modbus.SerialPort", out string s) ? s : null;
     public int? ModbusBaudRate => Resolver.App.Settings.TryGetValue("Thurston.Modbus.BaudRate", out string s) ? int.Parse(s) : null;
+    public int NetworkSignalRefreshSeconds => Resolver.App.Settings.TryGetValue("Thurston.Network.SignalRefreshSeconds", out string s) ? int.Parse(s) : 60;
 }
