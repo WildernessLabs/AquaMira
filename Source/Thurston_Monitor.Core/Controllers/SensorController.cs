@@ -26,13 +26,14 @@ public class SensorController
     public IProgrammableAnalogInputModule? ProgrammableAnalogInputModule { get; private set; }
     public Dictionary<int, ICompositeSensor> ModbusSensors { get; } = new();
     public IT322ai? T3Module { get; private set; }
+    public Task SensorProc { get; private set; }
 
     public SensorController(IThurston_MonitorHardware hardware, StorageController storageController)
     {
         this.hardware = hardware;
         this.storageController = storageController;
 
-        _ = Task.Run(SensorReadProc);
+        SensorProc = Task.Run(SensorReadProc);
     }
 
     private int GenerateSensorId(object sensor, string sensorName)
