@@ -81,8 +81,15 @@ public class MainController
         while (true)
         {
             // add any app logic here
-
-            await Task.Delay(5000);
+            try
+            {
+                sensorController.SensorProc.Wait(5000);
+            }
+            catch (AggregateException e)
+            {
+                Resolver.Log.Error(e.InnerException.ToString());
+                throw e;
+            }
         }
     }
 }
