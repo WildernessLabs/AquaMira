@@ -1,4 +1,5 @@
 ﻿using Meadow;
+using System;
 using System.Threading.Tasks;
 using Thurston_Monitor.Core.Contracts;
 
@@ -78,12 +79,15 @@ public class MainController
 
     public async Task Run()
     {
+        // this delay is required for the desktop to be able to start the UI thread.  Do not remove.
+        await Task.Delay(100);
+
         while (true)
         {
             // add any app logic here
             try
             {
-                sensorController.SensorProc.Wait(5000);
+                sensorController.SensorProc.Wait(1000);
             }
             catch (AggregateException e)
             {

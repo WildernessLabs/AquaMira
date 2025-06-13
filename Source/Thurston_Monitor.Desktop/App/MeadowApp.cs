@@ -15,6 +15,8 @@ internal class MeadowApp : App<Desktop>
 
     public override Task Initialize()
     {
+        Device.Display?.Resize(320, 240, 2);
+
         new Task(async () =>
         {
             while (!shutdownHappened)

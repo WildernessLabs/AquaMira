@@ -10,6 +10,14 @@ namespace Thurston_Monitor.Core;
 public class DisplayController
 {
     private readonly DisplayScreen? screen;
+    private readonly List<MicroLayout> navigationStack = new();
+    private readonly DiagnosticLogProvider diagnosticProvider;
+    private int currentPage = 0;
+    private DisplayTheme? theme;
+    private AbsoluteLayout mainLayout;
+    private DiagnosticLayout diagnosticLayout;
+    private HomeLayout homeLayout;
+    private HeaderControl headerControl;
 
     public DisplayController(
         IPixelDisplay? display,
@@ -47,15 +55,6 @@ public class DisplayController
         hardware.LeftButton.Clicked += OnPreviousRequested;
         hardware.RightButton.Clicked += OnNextRequested;
     }
-
-    private readonly List<MicroLayout> navigationStack = new();
-    private readonly DiagnosticLogProvider diagnosticProvider;
-    private int currentPage = 0;
-    private DisplayTheme? theme;
-    private AbsoluteLayout mainLayout;
-    private DiagnosticLayout diagnosticLayout;
-    private HomeLayout homeLayout;
-    private HeaderControl headerControl;
 
     private void GenerateLayout(DisplayScreen screen)
     {

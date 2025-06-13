@@ -26,7 +26,7 @@ public class SensorController
     public IProgrammableAnalogInputModule? ProgrammableAnalogInputModule { get; private set; }
     public Dictionary<int, ICompositeSensor> ModbusSensors { get; } = new();
     public IT322ai? T3Module { get; private set; }
-    public Task SensorProc { get; private set; }
+    public Task SensorProc { get; set; }
 
     public SensorController(IThurston_MonitorHardware hardware, StorageController storageController)
     {
@@ -191,7 +191,7 @@ public class SensorController
                             break;
                         }
                         // create an input
-                        var cinput = T3Module.CreateCurrentInputPort(pin);
+                        var cinput = await T3Module.CreateCurrentInputPort(pin);
                         // register the input for reading
                         AddSensorToQueryList(analog.SenseIntervalSeconds, new(id, cinput, () =>
                         {
