@@ -18,9 +18,9 @@ public class InputController : IInputController
     {
         switch (channelNumber)
         {
-            case 0:
-                // TODO: for testing this is I3
-                return projLab.IOTerminal.Pins.D3.CreateDigitalInputPort(ResistorMode.ExternalPullDown);
+            //case 0:
+            //    // TODO: for testing this is I3
+            //    return projLab.IOTerminal.Pins.D3.CreateDigitalInputPort(ResistorMode.ExternalPullDown);
             default:
                 // TODO: log the attempt to configure an invalid channel
                 Resolver.Log.Info($"Invalid digital input channel requested {channelNumber}");

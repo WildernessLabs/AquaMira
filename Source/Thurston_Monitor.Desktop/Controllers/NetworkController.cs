@@ -11,7 +11,8 @@ internal class NetworkController : INetworkController
 {
     private bool isConnected;
 
-    public event EventHandler? NetworkStatusChanged;
+    public event EventHandler<bool>? NetworkConnectedChanged;
+    public event EventHandler<int>? SignalStrengthChanged;
 
     public NetworkController(Keyboard? keyboard)
     {
@@ -30,7 +31,7 @@ internal class NetworkController : INetworkController
         {
             if (value == IsConnected) { return; }
             isConnected = value;
-            NetworkStatusChanged?.Invoke(this, EventArgs.Empty);
+            NetworkConnectedChanged?.Invoke(this, value);
         }
     }
 
@@ -39,6 +40,7 @@ internal class NetworkController : INetworkController
         // simulate connection delay
         await Task.Delay(1000);
 
+        SignalStrengthChanged?.Invoke(this, -99);
         IsConnected = true;
     }
 }

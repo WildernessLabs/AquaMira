@@ -38,3 +38,5 @@ MeadowCloud:
 Thurston:
     Modbus:
         BaudRate: 9600
+    Network:
+        SignalRefreshSeconds: 600

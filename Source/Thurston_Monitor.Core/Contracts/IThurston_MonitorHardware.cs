@@ -8,6 +8,7 @@ namespace Thurston_Monitor.Core.Contracts;
 public interface IThurston_MonitorHardware
 {
     // basic hardware
+    IButton? UpButton { get; }
     IButton? LeftButton { get; }
     IButton? RightButton { get; }
 

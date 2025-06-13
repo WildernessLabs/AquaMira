@@ -4,7 +4,8 @@ namespace Thurston_Monitor.Core
 {
     public interface INetworkController
     {
-        event EventHandler NetworkStatusChanged;
+        event EventHandler<bool>? NetworkConnectedChanged;
+        event EventHandler<int>? SignalStrengthChanged;
 
         bool IsConnected { get; }
     }

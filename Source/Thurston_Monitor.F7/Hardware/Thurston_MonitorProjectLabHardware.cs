@@ -7,38 +7,38 @@ using Meadow.Peripherals.Sensors.Buttons;
 using Thurston_Monitor.Core;
 using Thurston_Monitor.Core.Contracts;
 
-namespace Thurston_Monitor.F7
+namespace Thurston_Monitor.F7;
+
+internal class Thurston_MonitorProjectLabHardware : IThurston_MonitorHardware
 {
-    internal class Thurston_MonitorProjectLabHardware : IThurston_MonitorHardware
+    private readonly IProjectLabHardware projLab;
+
+    public RotationType DisplayRotation => RotationType._270Degrees;
+    public IButton? LeftButton => projLab.LeftButton;
+    public IButton? RightButton => projLab.RightButton;
+    public IButton? UpButton => projLab.UpButton;
+    public ITemperatureSensor? TemperatureSensor => projLab.TemperatureSensor;
+    public IPixelDisplay? Display => projLab.Display;
+    public INetworkController NetworkController { get; }
+
+    public IInputController InputController { get; }
+
+    public Thurston_MonitorProjectLabHardware(F7CoreComputeV2 device)
     {
-        private readonly IProjectLabHardware projLab;
+        Resolver.Log.Info("Creating ProjectLab...");
 
-        public RotationType DisplayRotation => RotationType._270Degrees;
-        public IButton? LeftButton => projLab.LeftButton;
-        public IButton? RightButton => projLab.RightButton;
-        public ITemperatureSensor? TemperatureSensor => projLab.TemperatureSensor;
-        public IPixelDisplay? Display => projLab.Display;
-        public INetworkController NetworkController { get; }
+        projLab = ProjectLab.Create();
 
-        public IInputController InputController { get; }
+        InputController = new InputController(projLab);
 
-        public Thurston_MonitorProjectLabHardware(F7CoreComputeV2 device)
-        {
-            Resolver.Log.Info("Creating ProjectLab...");
+        NetworkController = new NetworkController(device);
+    }
 
-            projLab = ProjectLab.Create();
+    public ModbusRtuClient GetModbusSerialClient()
+    {
+        var baud = ConfigurationController.AppSettings.ModbusBaudRate ?? 9600;
+        Resolver.Log.Info($"Modbus RTU is running at {baud} baud");
 
-            InputController = new InputController(projLab);
-
-            NetworkController = new NetworkController(device);
-        }
-
-        public ModbusRtuClient GetModbusSerialClient()
-        {
-            var baud = ConfigurationController.AppSettings.ModbusBaudRate ?? 9600;
-            Resolver.Log.Info($"Modbus RTU is running at {baud} baud");
-
-            return projLab.GetModbusRtuClient(baud);
-        }
+        return projLab.GetModbusRtuClient(baud);
     }
 }
