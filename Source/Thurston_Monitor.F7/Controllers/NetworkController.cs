@@ -43,7 +43,7 @@ namespace Thurston_Monitor.F7
                 Resolver.Log.Error("No known Network Adapter");
             }
 
-            _ = Task.Run(SignalMonitor);
+            //_ = Task.Run(SignalMonitor);
 
             Resolver.Device.PlatformOS.NtpClient.TimeChanged += OnNtpTimeSync;
         }
