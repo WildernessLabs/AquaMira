@@ -17,7 +17,6 @@ MeadowCloud:
     EnableUpdates: true
     EnableHealthMetrics: true
     HealthMetricsIntervalMinutes: 10
-
     MaxQueueDepth: 200
 
 Thurston:

@@ -44,6 +44,9 @@
     <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/Sensors.Power.CurrentTransducer/Driver/Sensors.Power.CurrentTransducer.csproj">
       <Deploy />
     </Project>
+    <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/Sensors.Power.Spm1x/Driver/Sensors.Power.Spm1x.csproj">
+      <Deploy />
+    </Project>
     <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/Sensors.Temperature.Thermistor/Driver/Sensors.Temperature.Thermistor.csproj">
       <Deploy />
     </Project>

@@ -11,6 +11,8 @@ public static class ModbusDeviceFactory
         {
             case "cerusxdrive":
                 return new XDriveModbusDevice(config, hardware);
+            case "spm1x":
+                return new Spm1xModbusDevice(config, hardware);
             default:
                 throw new NotSupportedException($"Modbus device {config.Driver} not supported");
         }

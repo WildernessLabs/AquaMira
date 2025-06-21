@@ -38,7 +38,11 @@ internal class MeadowApp : App<Desktop>
     public override Task Run()
     {
         // this must be spawned in a worker because the UI needs the main thread
-        _ = mainController.Run();
+        Task.Run(async () =>
+        {
+            await Task.Delay(1000);
+            mainController.Run();
+        });
 
         ExecutePlatformDisplayRunner();
 
