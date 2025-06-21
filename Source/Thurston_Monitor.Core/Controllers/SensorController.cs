@@ -169,50 +169,61 @@ public class SensorController
             catch (Exception ex)
             {
                 Resolver.Log.Error($"Unable to connect to T3-22i: {ex.Message}");
+                T3Module = null;
             }
         }
 
-        foreach (var analog in moduleConfig.Channels)
+        if (T3Module != null)
         {
-            try
+            foreach (var analog in moduleConfig.Channels)
             {
-                var capture = analog;
-                var id = GenerateSensorId(analog, analog.Name);
-
-                switch (analog.ChannelType)
+                try
                 {
-                    case ConfigurableAnalogInputChannelType.Current_4_20:
-                    case ConfigurableAnalogInputChannelType.Current_0_20:
-                        // verify the pin is valid
-                        var pin = T3Module?.Pins.FirstOrDefault(p => (int)p.Key == analog.ChannelNumber);
-                        if (pin == null)
-                        {
-                            Resolver.Log.Error($"No T3 Pin for requested channel {analog.ChannelNumber}");
-                            break;
-                        }
-                        // create an input
-                        var cinput = await T3Module.CreateCurrentInputPort(pin);
-                        // register the input for reading
-                        AddSensorToQueryList(analog.SenseIntervalSeconds, new(id, cinput, () =>
-                        {
-                            // TODO: we need to try/catch this
-                            var rawCurrent = cinput.Read().GetAwaiter().GetResult();
-                            return InputToUnitConverter.ConvertCurrentToUnit(
-                                rawCurrent,
-                                analog.UnitType,
-                                analog.Scale,
-                                analog.Offset);
-                        }));
-                        break;
-                    case ConfigurableAnalogInputChannelType.Voltage_0_10:
-                        break;
-                }
+                    var capture = analog;
+                    var id = GenerateSensorId(analog, analog.Name);
 
-            }
-            catch (Exception ex)
-            {
-                // TODO: log this!
-                Resolver.Log.Error($"Failed to configure analog input channel {analog.ChannelNumber}");
+                    switch (analog.ChannelType)
+                    {
+                        case ConfigurableAnalogInputChannelType.Current_4_20:
+                        case ConfigurableAnalogInputChannelType.Current_0_20:
+                            // verify the pin is valid
+                            var pin = T3Module.Pins.FirstOrDefault(p => (int)p.Key == analog.ChannelNumber);
+                            if (pin == null)
+                            {
+                                Resolver.Log.Error($"No T3 Pin for requested channel {analog.ChannelNumber}");
+                                break;
+                            }
+                            // create an input
+                            var cinput = await T3Module.CreateCurrentInputPort(pin);
+                            // register the input for reading
+                            AddSensorToQueryList(analog.SenseIntervalSeconds, new(id, cinput, () =>
+                            {
+                                try
+                                {
+                                    var rawCurrent = cinput.Read().GetAwaiter().GetResult();
+                                    return InputToUnitConverter.ConvertCurrentToUnit(
+                                        rawCurrent,
+                                        analog.UnitType,
+                                        analog.Scale,
+                                        analog.Offset);
+                                }
+                                catch (Exception rex)
+                                {
+                                    Resolver.Log.Error($"Failed to read analog input channel {cinput.Pin.Name}: {rex.Message}");
+                                    return null;
+                                }
+                            }));
+                            break;
+                        case ConfigurableAnalogInputChannelType.Voltage_0_10:
+                            break;
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    // TODO: log this!
+                    Resolver.Log.Error($"Failed to configure analog input channel {analog.ChannelNumber}");
+                }
             }
         }
     }
