@@ -1,7 +1,7 @@
 <Solution>
   <Folder Name="/docs/">
-    <File Path="../Docs/bom-v1.md" />
     <File Path="../Documentation/BenchTesting.md" />
+    <File Path="../Documentation/bom-v1.md" />
     <File Path="../README.md" />
   </Folder>
   <Folder Name="/_meadow_refs/">
