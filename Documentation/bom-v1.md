@@ -8,7 +8,7 @@
 | 1 | Project Lab | ProjectLab v3.e | Wilderness Labs | | |
 | 1 | Project Lab Enclosure | n/a | Wilderness Labs | | |
 | 1 | EG21 Mikrobus | ED2x v1.c | Wilderness Labs | | |
-| 1 | Enclosure with Backplane | | Amazon | https://a.co/d/4AIpzhK | 11.4x7.5x5.5" |
+| 1 | Enclosure with Backplane | | Amazon | https://amzn.to/40jyGSg | 20"×16.1"×7.9" |
 | 2 | DIN rail | | Automation direct | | 8" |
 | 1 | DIN rail | | Automation direct | | 10" |
 | 1 | wire tray | T1E-1015G-1 | Automation direct | https://www.automationdirect.com/adc/shopping/catalog/wiring_solutions/wire_duct/narrow_finger_wall/t1e-1015g-1 | 1" wide, 1.5" high, 12" long |
