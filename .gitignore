@@ -402,3 +402,7 @@ FodyWeavers.xsd
 
 # VSCODE
 **/.vscode*
+meadow.config.yaml
+wifi.config.yaml
+sensor-config.json
+app.config.yaml
