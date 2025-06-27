@@ -278,11 +278,14 @@ public class SensorController
                 sensor.StartSimulation(SimulationBehavior.Sawtooth);
                 var id = GenerateSensorId(sensor, input.Name);
                 FlowSensors.Add(id, sensor);
-                if (!queryPeriodDictionary.ContainsKey(input.SenseIntervalSeconds))
+                lock (queryPeriodDictionary)
                 {
-                    queryPeriodDictionary.Add(input.SenseIntervalSeconds, new List<(int ID, object Sensor, Func<object?>)>());
+                    if (!queryPeriodDictionary.ContainsKey(input.SenseIntervalSeconds))
+                    {
+                        queryPeriodDictionary.Add(input.SenseIntervalSeconds, new List<(int ID, object Sensor, Func<object?>)>());
+                    }
+                    queryPeriodDictionary[input.SenseIntervalSeconds].Add(new(id, sensor, () => sensor.Read().GetAwaiter().GetResult()));
                 }
-                queryPeriodDictionary[input.SenseIntervalSeconds].Add(new(id, sensor, () => sensor.Read().GetAwaiter().GetResult()));
             }
             else
             {
@@ -301,43 +304,72 @@ public class SensorController
         {
             telemetryList.Clear();
 
-            foreach (var period in queryPeriodDictionary.Keys)
+            lock (queryPeriodDictionary)
             {
-                if (tick % period == 0)
+                foreach (var period in queryPeriodDictionary.Keys)
                 {
-                    foreach (var sensor in queryPeriodDictionary[period])
+                    if (tick % period == 0)
                     {
-                        var value = sensor.ReadDelegate();
-
-                        if (value == null)
+                        foreach (var sensor in queryPeriodDictionary[period])
                         {
-                            Resolver.Log.Info($"Error reading from {sensor.Sensor.GetType().Name}");
-                            continue;
-                        }
+                            var value = sensor.ReadDelegate();
 
-                        if (value is Dictionary<string, object> valueDictionary)
-                        {
-                            Resolver.Log.Info($"[{tick:D4}]Composite sensor returned {valueDictionary.Count} values");
-
-                            foreach (var sensorItem in valueDictionary)
+                            if (value == null)
                             {
-                                // we have to create a separate ID for each value because the units can vary between items
-                                var valueId = GenerateSensorId(sensorItem, sensorItem.Key);
-                                if (!canonicalUnitsForSensorsMap.ContainsKey(valueId))
+                                Resolver.Log.Info($"Error reading from {sensor.Sensor.GetType().Name}");
+                                continue;
+                            }
+
+                            if (value is Dictionary<string, object> valueDictionary)
+                            {
+                                Resolver.Log.Info($"[{tick:D4}]Composite sensor returned {valueDictionary.Count} values");
+
+                                foreach (var sensorItem in valueDictionary)
                                 {
-                                    var canonicalUnit = GetCanonicalUnitTypeValue(sensorItem.Value);
-                                    canonicalUnitsForSensorsMap.Add(valueId, canonicalUnit);
+                                    // we have to create a separate ID for each value because the units can vary between items
+                                    var valueId = GenerateSensorId(sensorItem, sensorItem.Key);
+                                    if (!canonicalUnitsForSensorsMap.ContainsKey(valueId))
+                                    {
+                                        var canonicalUnit = GetCanonicalUnitTypeValue(sensorItem.Value);
+                                        canonicalUnitsForSensorsMap.Add(valueId, canonicalUnit);
+                                    }
+
+                                    try
+                                    {
+                                        if (sensorItem.Value is IUnit unit)
+                                        {
+                                            telemetryList.Add(sensorIdToNameMap[valueId], unit.ToCanonical());
+                                        }
+                                        else
+                                        {
+                                            telemetryList.Add(sensorIdToNameMap[valueId], value);
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        // TODO: log this
+                                    }
                                 }
+                            }
+                            else
+                            {
+                                if (!canonicalUnitsForSensorsMap.ContainsKey(sensor.ID))
+                                {
+                                    var canonicalUnit = GetCanonicalUnitTypeValue(value);
+                                    canonicalUnitsForSensorsMap.Add(sensor.ID, canonicalUnit);
+                                }
+
+                                Resolver.Log.Info($"[{tick:D4}]Read sensor: {sensor.ID}:{sensor.GetType().Name}:{value}:{canonicalUnitsForSensorsMap[sensor.ID]}");
 
                                 try
                                 {
-                                    if (sensorItem.Value is IUnit unit)
+                                    if (value is IUnit unit)
                                     {
-                                        telemetryList.Add(sensorIdToNameMap[valueId], unit.ToCanonical());
+                                        telemetryList.Add(sensorIdToNameMap[sensor.ID], unit.ToCanonical());
                                     }
                                     else
                                     {
-                                        telemetryList.Add(sensorIdToNameMap[valueId], value);
+                                        telemetryList.Add(sensorIdToNameMap[sensor.ID], value);
                                     }
                                 }
                                 catch (Exception ex)
@@ -346,36 +378,9 @@ public class SensorController
                                 }
                             }
                         }
-                        else
-                        {
-                            if (!canonicalUnitsForSensorsMap.ContainsKey(sensor.ID))
-                            {
-                                var canonicalUnit = GetCanonicalUnitTypeValue(value);
-                                canonicalUnitsForSensorsMap.Add(sensor.ID, canonicalUnit);
-                            }
-
-                            Resolver.Log.Info($"[{tick:D4}]Read sensor: {sensor.ID}:{sensor.GetType().Name}:{value}:{canonicalUnitsForSensorsMap[sensor.ID]}");
-
-                            try
-                            {
-                                if (value is IUnit unit)
-                                {
-                                    telemetryList.Add(sensorIdToNameMap[sensor.ID], unit.ToCanonical());
-                                }
-                                else
-                                {
-                                    telemetryList.Add(sensorIdToNameMap[sensor.ID], value);
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                // TODO: log this
-                            }
-                        }
                     }
                 }
             }
-
             storageController.RecordSensorValues(telemetryList);
 
             tick++;

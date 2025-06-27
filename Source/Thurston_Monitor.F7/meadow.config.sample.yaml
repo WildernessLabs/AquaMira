@@ -48,7 +48,7 @@ Network:
 #          Gateway:
 
     # Default Interface
-    DefaultInterface: Cell
+    DefaultInterface: WiFi
 
     # Automatically attempt to get the time at startup?
     GetNetworkTimeAtStartup: true
