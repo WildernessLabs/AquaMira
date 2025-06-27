@@ -120,4 +120,9 @@ public class DisplayController
     {
         homeLayout.SetPowerMeterInfo(text);
     }
+
+    public void SetIOExpanderInfo(string text)
+    {
+        homeLayout.SetIOExpanderInfo(text);
+    }
 }

@@ -1,5 +1,6 @@
 ﻿using Meadow;
 using Meadow.Devices;
+using Meadow.Foundation.IOExpanders;
 using Meadow.Foundation.Sensors.Power;
 using Meadow.Peripherals.Displays;
 using System;
@@ -11,7 +12,9 @@ public class MainController
 {
     private IProjectLabHardware hardware;
     private DisplayController displayController;
+
     private Spm1x? powerMeter;
+    private T322ai? t3;
 
     public Task Initialize(IProjectLabHardware hardware)
     {
@@ -22,9 +25,11 @@ public class MainController
             RotationType._270Degrees,
             this.hardware);
 
+        var modbus = hardware.GetModbusRtuClient(9600);
+
         try
         {
-            powerMeter = new Spm1x(hardware.GetModbusRtuClient(), 2);
+            powerMeter = new Spm1x(modbus, 2);
             var sn = powerMeter.SerialNumber;
 
             displayController.SetPowerMeterInfo("Power Meter Found");
@@ -34,6 +39,20 @@ public class MainController
         {
             displayController.SetPowerMeterInfo("POWER METER FAULT!");
             Resolver.Log.Error($"Unable to create power meter: {ex.Message}");
+        }
+
+        try
+        {
+            t3 = new T322ai(modbus, 254);
+            var sn = t3.ReadSerialNumber().GetAwaiter().GetResult();
+
+            displayController.SetIOExpanderInfo("T3-22i Found");
+            Resolver.Log.Info($"found T3 SN {sn}");
+        }
+        catch (Exception ex)
+        {
+            displayController.SetPowerMeterInfo("T3-22i FAULT!");
+            Resolver.Log.Error($"Unable to create T3: {ex.Message}");
         }
 
         return Task.CompletedTask;
@@ -49,6 +68,22 @@ public class MainController
             // add any app logic here
             try
             {
+                if (powerMeter != null)
+                {
+                    try
+                    {
+                        var volts = await powerMeter.ReadVoltage();
+                        var amps = await powerMeter.ReadCurrent();
+
+                        displayController.SetPowerMeterInfo($"Power: {amps.Amps:N2}A @ {volts.Volts:N1}V");
+                    }
+                    catch (Exception ex)
+                    {
+                        displayController.SetPowerMeterInfo("POWER METER FAULT!");
+                        Resolver.Log.Error($"Unable to read power meter: {ex.Message}");
+                    }
+                }
+
                 await Task.Delay(1000);
             }
             catch (AggregateException e)

@@ -6,6 +6,7 @@ namespace HardwareValidation;
 internal class HomeLayout : StackLayout
 {
     private readonly Label powerMeterLabel;
+    private readonly Label ioExpanderLabel;
 
     public HomeLayout(int left, int top, int width, int height)
         : base(left, top, width, height)
@@ -17,16 +18,26 @@ internal class HomeLayout : StackLayout
             TextColor = Color.White,
         });
 
-        powerMeterLabel = new Label(width, 30, "PowerMeter")
+        powerMeterLabel = new Label(width, 30, "Testing Power Meter...")
         {
             TextColor = Color.White,
         };
 
-        this.Add(powerMeterLabel);
+        ioExpanderLabel = new Label(width, 30, "Testing T3-22i...")
+        {
+            TextColor = Color.White,
+        };
+
+        this.Add(powerMeterLabel, ioExpanderLabel);
     }
 
     public void SetPowerMeterInfo(string text)
     {
         powerMeterLabel.Text = text;
+    }
+
+    public void SetIOExpanderInfo(string text)
+    {
+        ioExpanderLabel.Text = text;
     }
 }
