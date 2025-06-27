@@ -69,6 +69,9 @@
   </Folder>
   <Folder Name="/_tests/" Id="02ea681e-c7d8-13c7-8484-4ac65e1b71e8">
     <Project Path="../../Meadow.Foundation/Source/Product/ProgrammableAnalogInput/Tests/ProgrammableAnalogInputTests.csproj" />
+    <Project Path="HardwareValidation/HardwareValidation.csproj" Id="edfce0dc-f1bc-4b22-a946-6586bdffc61e">
+      <Deploy />
+    </Project>
   </Folder>
   <Project Path="Thurston_Monitor.Core/Thurston_Monitor.Core.csproj">
     <Deploy />
