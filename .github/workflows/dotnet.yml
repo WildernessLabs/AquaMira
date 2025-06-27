@@ -64,7 +64,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         path: Meadow.ProjectLab
-        repository: WildernessLabs/Meadow.Meadow.ProjectLab
+        repository: WildernessLabs/Meadow.ProjectLab
         ref: develop
 
     - name: Checkout Customer_ThurstonPUD
