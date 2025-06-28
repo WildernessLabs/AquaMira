@@ -9,6 +9,8 @@ internal class HomeLayout : StackLayout
     protected IFont MediumFont { get; }
     protected IFont LargeFont { get; }
 
+    private readonly GridLayout t3Grid;
+
     public HomeLayout(int left, int top, int width, int height)
         : base(left, top, width, height)
     {

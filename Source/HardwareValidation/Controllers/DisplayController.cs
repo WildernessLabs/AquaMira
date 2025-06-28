@@ -125,4 +125,16 @@ public class DisplayController
     {
         homeLayout.SetIOExpanderInfo(text);
     }
+
+    public void ShowT3Inputs()
+    {
+        homeLayout.ShowT3Inputs(true);
+    }
+
+    internal void SetDiscreteInputStates(Dictionary<string, bool> discreteStates)
+    {
+        screen?.BeginUpdate();
+        homeLayout.SetDiscreteInputStates(discreteStates);
+        screen?.EndUpdate();
+    }
 }

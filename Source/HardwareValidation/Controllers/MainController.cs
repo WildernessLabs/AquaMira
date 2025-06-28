@@ -2,8 +2,10 @@
 using Meadow.Devices;
 using Meadow.Foundation.IOExpanders;
 using Meadow.Foundation.Sensors.Power;
+using Meadow.Hardware;
 using Meadow.Peripherals.Displays;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace HardwareValidation;
@@ -15,6 +17,8 @@ public class MainController
 
     private Spm1x? powerMeter;
     private T322ai? t3;
+
+    private readonly List<IDigitalInputPort> t3DigitalInputs = new();
 
     public Task Initialize(IProjectLabHardware hardware)
     {
@@ -44,14 +48,36 @@ public class MainController
         try
         {
             t3 = new T322ai(modbus, 254);
-            var sn = t3.ReadSerialNumber().GetAwaiter().GetResult();
+            var retries = 3;
 
-            displayController.SetIOExpanderInfo("T3-22i Found");
-            Resolver.Log.Info($"found T3 SN {sn}");
+            while (true)
+            {
+                try
+                {
+                    Resolver.Log.Info($"Checking fot the T3...");
+
+                    var sn = t3.ReadSerialNumber().GetAwaiter().GetResult();
+
+                    displayController.SetIOExpanderInfo("T3-22i Found");
+                    displayController.ShowT3Inputs();
+                    Resolver.Log.Info($"found T3 SN {sn}");
+
+                    t3DigitalInputs.Add(t3.Pins.AI7.CreateDigitalInputPort());
+                    t3DigitalInputs.Add(t3.Pins.AI8.CreateDigitalInputPort());
+                    t3DigitalInputs.Add(t3.Pins.AI9.CreateDigitalInputPort());
+                    t3DigitalInputs.Add(t3.Pins.AI10.CreateDigitalInputPort());
+                    break;
+                }
+                catch (TimeoutException)
+                {
+                    retries--;
+                    if (retries <= 0) throw;
+                }
+            }
         }
         catch (Exception ex)
         {
-            displayController.SetPowerMeterInfo("T3-22i FAULT!");
+            displayController.SetIOExpanderInfo("T3-22i FAULT!");
             Resolver.Log.Error($"Unable to create T3: {ex.Message}");
         }
 
@@ -81,6 +107,26 @@ public class MainController
                     {
                         displayController.SetPowerMeterInfo("POWER METER FAULT!");
                         Resolver.Log.Error($"Unable to read power meter: {ex.Message}");
+                    }
+                }
+
+                if (t3 != null && t3DigitalInputs.Count > 0)
+                {
+                    try
+                    {
+                        var discreteStates = new Dictionary<string, bool>();
+                        foreach (var input in t3DigitalInputs)
+                        {
+                            Resolver.Log.Info($"T3 check {input.Pin.Name}");
+                            discreteStates.Add(input.Pin.Name, input.State);
+                        }
+
+                        displayController.SetDiscreteInputStates(discreteStates);
+                    }
+                    catch (Exception ex)
+                    {
+                        displayController.SetIOExpanderInfo("T3-22i FAULT!");
+                        Resolver.Log.Error($"Unable to read T3 discretes: {ex.Message}");
                     }
                 }
 
