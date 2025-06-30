@@ -1,5 +1,6 @@
 ﻿using Meadow;
 using Meadow.Foundation.Graphics.MicroLayout;
+using Meadow.Units;
 using System.Collections.Generic;
 
 namespace HardwareValidation;
@@ -55,5 +56,10 @@ internal class HomeLayout : StackLayout
     internal void SetDiscreteInputStates(Dictionary<string, bool> discreteStates)
     {
         t3InputGrid.SetDiscreteInputStates(discreteStates);
+    }
+
+    internal void ShowCurrentInputs(Dictionary<string, Current> currentInputs)
+    {
+        t3InputGrid.ShowCurrentInputs(currentInputs);
     }
 }

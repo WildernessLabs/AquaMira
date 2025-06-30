@@ -4,6 +4,7 @@ using Meadow.Foundation.IOExpanders;
 using Meadow.Foundation.Sensors.Power;
 using Meadow.Hardware;
 using Meadow.Peripherals.Displays;
+using Meadow.Units;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -19,6 +20,7 @@ public class MainController
     private T322ai? t3;
 
     private readonly List<IDigitalInputPort> t3DigitalInputs = new();
+    private readonly List<ICurrentInputPort> t3CurrentInputs = new();
 
     public Task Initialize(IProjectLabHardware hardware)
     {
@@ -62,10 +64,18 @@ public class MainController
                     displayController.ShowT3Inputs();
                     Resolver.Log.Info($"found T3 SN {sn}");
 
+                    t3CurrentInputs.Add(t3.Pins.AI1.CreateCurrentInputPort());
+                    t3CurrentInputs.Add(t3.Pins.AI2.CreateCurrentInputPort());
+                    t3CurrentInputs.Add(t3.Pins.AI3.CreateCurrentInputPort());
+                    t3CurrentInputs.Add(t3.Pins.AI4.CreateCurrentInputPort());
+                    t3CurrentInputs.Add(t3.Pins.AI5.CreateCurrentInputPort());
+                    t3CurrentInputs.Add(t3.Pins.AI6.CreateCurrentInputPort());
+
                     t3DigitalInputs.Add(t3.Pins.AI7.CreateDigitalInputPort());
                     t3DigitalInputs.Add(t3.Pins.AI8.CreateDigitalInputPort());
                     t3DigitalInputs.Add(t3.Pins.AI9.CreateDigitalInputPort());
                     t3DigitalInputs.Add(t3.Pins.AI10.CreateDigitalInputPort());
+
                     break;
                 }
                 catch (TimeoutException)
@@ -114,14 +124,23 @@ public class MainController
                 {
                     try
                     {
+                        var currentInputs = new Dictionary<string, Current>();
+
+                        Resolver.Log.Info($"T3 check");
+                        foreach (var input in t3CurrentInputs)
+                        {
+                            var current = await input.Read();
+                            currentInputs.Add(input.Pin.Name, current);
+                        }
+
                         var discreteStates = new Dictionary<string, bool>();
                         foreach (var input in t3DigitalInputs)
                         {
-                            Resolver.Log.Info($"T3 check {input.Pin.Name}");
                             discreteStates.Add(input.Pin.Name, input.State);
                         }
 
                         displayController.SetDiscreteInputStates(discreteStates);
+                        displayController.ShowCurrentInputs(currentInputs);
                     }
                     catch (Exception ex)
                     {

@@ -3,6 +3,7 @@ using Meadow.Devices;
 using Meadow.Foundation.Graphics;
 using Meadow.Foundation.Graphics.MicroLayout;
 using Meadow.Peripherals.Displays;
+using Meadow.Units;
 using System.Collections.Generic;
 
 namespace HardwareValidation;
@@ -135,6 +136,13 @@ public class DisplayController
     {
         screen?.BeginUpdate();
         homeLayout.SetDiscreteInputStates(discreteStates);
+        screen?.EndUpdate();
+    }
+
+    internal void ShowCurrentInputs(Dictionary<string, Current> currentInputs)
+    {
+        screen?.BeginUpdate();
+        homeLayout.ShowCurrentInputs(currentInputs);
         screen?.EndUpdate();
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Meadow;
 using Meadow.Foundation.Graphics.MicroLayout;
+using Meadow.Units;
 using System.Collections.Generic;
 
 namespace HardwareValidation;
@@ -71,6 +72,28 @@ internal class T3InputGrid : GridLayout
         this.Add(in10Label, 3, 2, alignment: Alignment.Center);
         in10ValueLabel = new Label(20, 20, "OPEN");
         this.Add(in10ValueLabel, 3, 3, alignment: Alignment.Left);
+    }
+
+    internal void ShowCurrentInputs(Dictionary<string, Current> currentInputs)
+    {
+        foreach (var input in currentInputs)
+        {
+            Resolver.Log.Info($"{input.Key}: {input.Value.Amps:N2}A");
+            var label = input.Key switch
+            {
+                "AI1" => in1ValueLabel,
+                "AI2" => in2ValueLabel,
+                "AI3" => in3ValueLabel,
+                "AI4" => in4ValueLabel,
+                "AI5" => in5ValueLabel,
+                "AI6" => in6ValueLabel,
+                _ => null
+            };
+            if (label != null)
+            {
+                label.Text = $"{input.Value.Milliamps:N1}mA";
+            }
+        }
     }
 
     internal void SetDiscreteInputStates(Dictionary<string, bool> discreteStates)
