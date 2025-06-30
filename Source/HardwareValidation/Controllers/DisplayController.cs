@@ -127,6 +127,11 @@ public class DisplayController
         homeLayout.SetIOExpanderInfo(text);
     }
 
+    public void SetVFDInfo(string text)
+    {
+        homeLayout.SetVFDInfo(text);
+    }
+
     public void ShowT3Inputs()
     {
         homeLayout.ShowT3Inputs(true);

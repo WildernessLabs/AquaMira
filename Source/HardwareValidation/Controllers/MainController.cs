@@ -2,6 +2,7 @@
 using Meadow.Devices;
 using Meadow.Foundation.IOExpanders;
 using Meadow.Foundation.Sensors.Power;
+using Meadow.Foundation.VFDs;
 using Meadow.Hardware;
 using Meadow.Peripherals.Displays;
 using Meadow.Units;
@@ -18,11 +19,12 @@ public class MainController
 
     private Spm1x? powerMeter;
     private T322ai? t3;
+    private CerusXDrive? vfd;
 
     private readonly List<IDigitalInputPort> t3DigitalInputs = new();
     private readonly List<ICurrentInputPort> t3CurrentInputs = new();
 
-    public Task Initialize(IProjectLabHardware hardware)
+    public async Task Initialize(IProjectLabHardware hardware)
     {
         this.hardware = hardware;
 
@@ -49,6 +51,20 @@ public class MainController
 
         try
         {
+            vfd = new CerusXDrive(modbus, 1);
+            await vfd.Connect();
+            await vfd.ReadDriveStatus();
+            displayController.SetVFDInfo($"VFD Found");
+            Resolver.Log.Info($"Found VFD");
+        }
+        catch (Exception ex)
+        {
+            displayController.SetVFDInfo("VFD FAULT!");
+            Resolver.Log.Error($"Unable to create VFD: {ex.Message}");
+        }
+
+        try
+        {
             t3 = new T322ai(modbus, 254);
             var retries = 3;
 
@@ -56,7 +72,7 @@ public class MainController
             {
                 try
                 {
-                    Resolver.Log.Info($"Checking fot the T3...");
+                    Resolver.Log.Info($"Checking for the T3...");
 
                     var sn = t3.ReadSerialNumber().GetAwaiter().GetResult();
 
@@ -90,8 +106,6 @@ public class MainController
             displayController.SetIOExpanderInfo("T3-22i FAULT!");
             Resolver.Log.Error($"Unable to create T3: {ex.Message}");
         }
-
-        return Task.CompletedTask;
     }
 
     public async Task Run()
@@ -130,13 +144,13 @@ public class MainController
                         foreach (var input in t3CurrentInputs)
                         {
                             var current = await input.Read();
-                            currentInputs.Add(input.Pin.Name, current);
+                            currentInputs.TryAdd(input.Pin.Name, current);
                         }
 
                         var discreteStates = new Dictionary<string, bool>();
                         foreach (var input in t3DigitalInputs)
                         {
-                            discreteStates.Add(input.Pin.Name, input.State);
+                            discreteStates.TryAdd(input.Pin.Name, input.State);
                         }
 
                         displayController.SetDiscreteInputStates(discreteStates);
