@@ -1,7 +1,7 @@
 #!/bin/bash
-# Usage: ./make_mpak.sh path/to/sensor-config.json path/to/info.json
+# Usage: ./make_mpak.sh
 
-SENSOR_CONFIG="sensor-config.json"
+SENSOR_CONFIG="./sensor-config.json"
 INFO_JSON="./info.json"
 OUTPUT_ZIP="sensor-config.mpak"
 
