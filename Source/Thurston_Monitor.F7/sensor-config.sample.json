@@ -4,7 +4,7 @@
       "ChannelNumber": 0,
       "Name": "Float",
       "IsSimulated": true,
-      "SenseIntervalSeconds": 1
+      "SenseIntervalSeconds": 60
     }
   ],
   "ModbusDevices": [
@@ -13,7 +13,7 @@
       "Address": 1,
       "Name": "Pump1",
       "IsSimulated": true,
-      "SenseIntervalSeconds": 10
+      "SenseIntervalSeconds": 60
     }
   ],
   "FrequencyInputs": [
@@ -24,7 +24,7 @@
       "Offset": 0,
       "Name": "Pump1 Output",
       "IsSimulated": true,
-      "SenseIntervalSeconds": 1
+      "SenseIntervalSeconds": 60
     },
     {
       "ChannelNumber": 1,
@@ -33,7 +33,7 @@
       "Offset": 0,
       "Name": "Pump2 Output",
       "IsSimulated": true,
-      "SenseIntervalSeconds": 5
+      "SenseIntervalSeconds": 60
     }
   ],
   "T322iInputs": {
@@ -47,7 +47,7 @@
         "Offset": 0,
         "UnitType": "Temperature",
         "Name": "Housing Temp",
-        "SenseIntervalSeconds": 4
+        "SenseIntervalSeconds": 60
       }
     ]
   }
