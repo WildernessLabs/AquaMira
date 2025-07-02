@@ -3,6 +3,7 @@ using Meadow.Devices;
 using Meadow.Foundation.Graphics;
 using Meadow.Foundation.Graphics.MicroLayout;
 using Meadow.Peripherals.Displays;
+using Meadow.Units;
 using System.Collections.Generic;
 
 namespace HardwareValidation;
@@ -124,5 +125,29 @@ public class DisplayController
     public void SetIOExpanderInfo(string text)
     {
         homeLayout.SetIOExpanderInfo(text);
+    }
+
+    public void SetVFDInfo(string text)
+    {
+        homeLayout.SetVFDInfo(text);
+    }
+
+    public void ShowT3Inputs()
+    {
+        homeLayout.ShowT3Inputs(true);
+    }
+
+    internal void SetDiscreteInputStates(Dictionary<string, bool> discreteStates)
+    {
+        screen?.BeginUpdate();
+        homeLayout.SetDiscreteInputStates(discreteStates);
+        screen?.EndUpdate();
+    }
+
+    internal void ShowCurrentInputs(Dictionary<string, Current> currentInputs)
+    {
+        screen?.BeginUpdate();
+        homeLayout.ShowCurrentInputs(currentInputs);
+        screen?.EndUpdate();
     }
 }
