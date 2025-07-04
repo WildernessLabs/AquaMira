@@ -163,6 +163,22 @@ public class MainController
                     }
                 }
 
+                if (vfd != null)
+                {
+                    Resolver.Log.Info($"VFD check");
+                    try
+                    {
+                        var current = await vfd.ReadOutputCurrent();
+                        var voltage = await vfd.ReadOutputVoltage();
+                        displayController.SetVFDInfo($"VFD: {current.Amps:N1}A @ {voltage.Volts:N1}V");
+                    }
+                    catch (Exception ex)
+                    {
+                        displayController.SetVFDInfo("VFD FAULT!");
+                        Resolver.Log.Error($"Unable to read VFD info: {ex.Message}");
+                    }
+                }
+
                 await Task.Delay(1000);
             }
             catch (AggregateException e)
