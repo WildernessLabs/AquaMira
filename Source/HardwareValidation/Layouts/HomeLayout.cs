@@ -17,7 +17,7 @@ internal class HomeLayout : StackLayout
     {
         this.BackgroundColor = Color.FromRgb(50, 50, 50);
 
-        this.Add(new Label(width, 30, "Thurston Hardware Validator")
+        this.Controls.Add(new Label(width, 30, "Thurston Hardware Validator")
         {
             TextColor = Color.White,
         });
@@ -39,7 +39,7 @@ internal class HomeLayout : StackLayout
             TextColor = Color.White,
         };
 
-        this.Add(powerMeterLabel, ioExpanderLabel, t3InputGrid, vfdLabel);
+        this.Controls.Add(powerMeterLabel, ioExpanderLabel, t3InputGrid, vfdLabel);
 
         ShowT3Inputs(false);
     }
