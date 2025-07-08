@@ -20,7 +20,7 @@ internal class DiagnosticLayout : StackLayout
             2, 2, this.Width - 4, this.Height - 34,
             new Font8x8());
 
-        this.Add(label, textConsole);
+        this.Controls.Add(label, textConsole);
     }
 
     public void AddLogText(string item)

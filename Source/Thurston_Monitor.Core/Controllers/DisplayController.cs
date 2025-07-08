@@ -10,7 +10,7 @@ namespace Thurston_Monitor.Core;
 public class DisplayController
 {
     private readonly DisplayScreen? screen;
-    private readonly List<MicroLayout> navigationStack = new();
+    private readonly List<LayoutBase> navigationStack = new();
     private readonly DiagnosticLogProvider diagnosticProvider;
     private int currentPage = 0;
     private DisplayTheme? theme;
