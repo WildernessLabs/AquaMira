@@ -72,7 +72,7 @@ public class MainController
         catch (Exception ex)
         {
             displayController.SetPowerMeterInfo("POWER METER FAULT!");
-            Resolver.Log.Error($"Unable to create power meter: {ex.Message}");
+            Resolver.Log.Error($"Unable to create power meter: {ex.Message}\n{ex.StackTrace}");
         }
     }
 
@@ -115,7 +115,7 @@ public class MainController
         catch (Exception ex)
         {
             displayController.SetIOExpanderInfo("T3-22i FAULT!");
-            Resolver.Log.Error($"Unable to create T3: {ex.Message}");
+            Resolver.Log.Error($"Unable to create T3: {ex.Message}\n{ex.StackTrace}");
         }
     }
 
@@ -146,7 +146,7 @@ public class MainController
                     catch (Exception ex)
                     {
                         displayController.SetPowerMeterInfo("POWER METER FAULT!");
-                        Resolver.Log.Error($"Unable to read power meter: {ex.Message}");
+                        Resolver.Log.Error($"Unable to read power meter: {ex.Message}\n{ex.StackTrace}");
                     }
                 }
 
@@ -181,7 +181,7 @@ public class MainController
                     catch (Exception ex)
                     {
                         displayController.SetIOExpanderInfo("T3-22i FAULT!");
-                        Resolver.Log.Error($"Unable to read T3 discretes: {ex.Message}");
+                        Resolver.Log.Error($"Unable to read T3 discretes: {ex.Message}\n{ex.StackTrace}");
                     }
                 }
 
