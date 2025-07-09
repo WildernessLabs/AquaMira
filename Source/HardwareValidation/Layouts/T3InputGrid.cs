@@ -1,5 +1,4 @@
-﻿using Meadow;
-using Meadow.Foundation.Graphics;
+﻿using Meadow.Foundation.Graphics;
 using Meadow.Foundation.Graphics.MicroLayout;
 using Meadow.Units;
 using System.Collections.Generic;
@@ -82,7 +81,6 @@ internal class T3InputGrid : GridLayout
     {
         foreach (var input in currentInputs)
         {
-            Resolver.Log.Info($"{input.Key}: {input.Value.Amps:N2}A");
             var label = input.Key switch
             {
                 "AI1" => in1ValueLabel,
@@ -104,7 +102,6 @@ internal class T3InputGrid : GridLayout
     {
         foreach (var state in discreteStates)
         {
-            Resolver.Log.Info($"{state.Key}: {state.Value}");
             var label = state.Key switch
             {
                 "AI7" => in7ValueLabel,

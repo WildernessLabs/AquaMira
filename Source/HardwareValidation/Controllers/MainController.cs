@@ -4,6 +4,7 @@ using Meadow.Foundation.IOExpanders;
 using Meadow.Foundation.Sensors.Power;
 using Meadow.Foundation.VFDs;
 using Meadow.Hardware;
+using Meadow.Modbus;
 using Meadow.Peripherals.Displays;
 using Meadow.Units;
 using System;
@@ -16,6 +17,11 @@ public class MainController
 {
     private IProjectLabHardware hardware;
     private DisplayController displayController;
+    private ModbusRtuClient modbus;
+    private readonly int baudRate = 9600;
+    private readonly byte powerMeterAddress = 2;
+    private readonly byte vfdAddress = 1;
+    private readonly byte t3Address = 254;
 
     private Spm1x? powerMeter;
     private T322ai? t3;
@@ -33,25 +39,12 @@ public class MainController
             RotationType._270Degrees,
             this.hardware);
 
-        var modbus = hardware.GetModbusRtuClient(9600);
+        modbus = hardware.GetModbusRtuClient(baudRate);
 
         try
         {
-            powerMeter = new Spm1x(modbus, 2);
-            var sn = powerMeter.SerialNumber;
-
-            displayController.SetPowerMeterInfo("Power Meter Found");
-            Resolver.Log.Info($"found power meter SN {sn}");
-        }
-        catch (Exception ex)
-        {
-            displayController.SetPowerMeterInfo("POWER METER FAULT!");
-            Resolver.Log.Error($"Unable to create power meter: {ex.Message}");
-        }
-
-        try
-        {
-            vfd = new CerusXDrive(modbus, 1);
+            Resolver.Log.Info($"Connecting to vfd at address {vfdAddress} at {baudRate}bps");
+            vfd = new CerusXDrive(modbus, vfdAddress);
             await vfd.Connect();
             await vfd.ReadDriveStatus();
             displayController.SetVFDInfo($"VFD Found");
@@ -63,42 +56,60 @@ public class MainController
             Resolver.Log.Error($"Unable to create VFD: {ex.Message}");
         }
 
+    }
+
+    private void InitializePowerMeter()
+    {
         try
         {
-            t3 = new T322ai(modbus, 254);
+            Resolver.Log.Info($"Connecting to power meter at address {powerMeterAddress} at {baudRate}bps");
+            powerMeter = new Spm1x(modbus, powerMeterAddress);
+            var sn = powerMeter.SerialNumber;
+
+            displayController.SetPowerMeterInfo("Power Meter Found");
+            Resolver.Log.Info($"found power meter SN {sn}");
+        }
+        catch (Exception ex)
+        {
+            displayController.SetPowerMeterInfo("POWER METER FAULT!");
+            Resolver.Log.Error($"Unable to create power meter: {ex.Message}");
+        }
+    }
+
+    private void InitializeT3()
+    {
+        try
+        {
+            Resolver.Log.Info($"Connecting to T3-22i at address {t3Address} at {baudRate}bps");
+            t3 = new T322ai(modbus, t3Address);
             var retries = 3;
 
-            while (true)
+            try
             {
-                try
-                {
-                    Resolver.Log.Info($"Checking for the T3...");
+                Resolver.Log.Info($"Checking for the T3...");
 
-                    var sn = t3.ReadSerialNumber().GetAwaiter().GetResult();
+                var sn = t3.ReadSerialNumber().GetAwaiter().GetResult();
 
-                    displayController.SetIOExpanderInfo("T3-22i Found");
-                    displayController.ShowT3Inputs();
-                    Resolver.Log.Info($"found T3 SN {sn}");
+                displayController.SetIOExpanderInfo("T3-22i Found");
+                displayController.ShowT3Inputs();
+                Resolver.Log.Info($"found T3 SN {sn}");
 
-                    t3CurrentInputs.Add(t3.Pins.AI1.CreateCurrentInputPort());
-                    t3CurrentInputs.Add(t3.Pins.AI2.CreateCurrentInputPort());
-                    t3CurrentInputs.Add(t3.Pins.AI3.CreateCurrentInputPort());
-                    t3CurrentInputs.Add(t3.Pins.AI4.CreateCurrentInputPort());
-                    t3CurrentInputs.Add(t3.Pins.AI5.CreateCurrentInputPort());
-                    t3CurrentInputs.Add(t3.Pins.AI6.CreateCurrentInputPort());
+                t3CurrentInputs.Add(t3.Pins.AI1.CreateCurrentInputPort());
+                t3CurrentInputs.Add(t3.Pins.AI2.CreateCurrentInputPort());
+                t3CurrentInputs.Add(t3.Pins.AI3.CreateCurrentInputPort());
+                t3CurrentInputs.Add(t3.Pins.AI4.CreateCurrentInputPort());
+                t3CurrentInputs.Add(t3.Pins.AI5.CreateCurrentInputPort());
+                t3CurrentInputs.Add(t3.Pins.AI6.CreateCurrentInputPort());
 
-                    t3DigitalInputs.Add(t3.Pins.AI7.CreateDigitalInputPort());
-                    t3DigitalInputs.Add(t3.Pins.AI8.CreateDigitalInputPort());
-                    t3DigitalInputs.Add(t3.Pins.AI9.CreateDigitalInputPort());
-                    t3DigitalInputs.Add(t3.Pins.AI10.CreateDigitalInputPort());
-
-                    break;
-                }
-                catch (TimeoutException)
-                {
-                    retries--;
-                    if (retries <= 0) throw;
-                }
+                t3DigitalInputs.Add(t3.Pins.AI7.CreateDigitalInputPort());
+                t3DigitalInputs.Add(t3.Pins.AI8.CreateDigitalInputPort());
+                t3DigitalInputs.Add(t3.Pins.AI9.CreateDigitalInputPort());
+                t3DigitalInputs.Add(t3.Pins.AI10.CreateDigitalInputPort());
+            }
+            catch (TimeoutException)
+            {
+                retries--;
+                if (retries <= 0) throw;
             }
         }
         catch (Exception ex)
@@ -118,10 +129,15 @@ public class MainController
             // add any app logic here
             try
             {
-                if (powerMeter != null)
+                if (powerMeter == null)
+                {
+                    InitializePowerMeter();
+                }
+                else
                 {
                     try
                     {
+                        Resolver.Log.Info($"Power check");
                         var volts = await powerMeter.ReadVoltage();
                         var amps = await powerMeter.ReadCurrent();
 
@@ -132,6 +148,11 @@ public class MainController
                         displayController.SetPowerMeterInfo("POWER METER FAULT!");
                         Resolver.Log.Error($"Unable to read power meter: {ex.Message}");
                     }
+                }
+
+                if (t3 == null)
+                {
+                    InitializeT3();
                 }
 
                 if (t3 != null && t3DigitalInputs.Count > 0)
@@ -153,6 +174,7 @@ public class MainController
                             discreteStates.TryAdd(input.Pin.Name, input.State);
                         }
 
+                        displayController.SetIOExpanderInfo("T3-22i Connected");
                         displayController.SetDiscreteInputStates(discreteStates);
                         displayController.ShowCurrentInputs(currentInputs);
                     }
