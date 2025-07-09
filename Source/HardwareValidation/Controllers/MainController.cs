@@ -40,7 +40,10 @@ public class MainController
             this.hardware);
 
         modbus = hardware.GetModbusRtuClient(baudRate);
+    }
 
+    private async Task InitializeVfd()
+    {
         try
         {
             Resolver.Log.Info($"Connecting to vfd at address {vfdAddress} at {baudRate}bps");
@@ -55,7 +58,6 @@ public class MainController
             displayController.SetVFDInfo("VFD FAULT!");
             Resolver.Log.Error($"Unable to create VFD: {ex.Message}");
         }
-
     }
 
     private void InitializePowerMeter()
@@ -142,6 +144,8 @@ public class MainController
                         var amps = await powerMeter.ReadCurrent();
 
                         displayController.SetPowerMeterInfo($"Power: {amps.Amps:N2}A @ {volts.Volts:N1}V");
+
+                        Resolver.Log.Info($"Power: {amps.Amps:N2}A @ {volts.Volts:N1}V");
                     }
                     catch (Exception ex)
                     {
@@ -185,6 +189,11 @@ public class MainController
                     }
                 }
 
+                if (vfd is null)
+                {
+                    await InitializeVfd();
+                }                
+
                 if (vfd != null)
                 {
                     Resolver.Log.Info($"VFD check");
@@ -200,7 +209,6 @@ public class MainController
                         Resolver.Log.Error($"Unable to read VFD info: {ex.Message}");
                     }
                 }
-
                 await Task.Delay(1000);
             }
             catch (AggregateException e)
