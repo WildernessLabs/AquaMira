@@ -1,6 +1,6 @@
 # Bench Testing
 
-The Thurston application can be run on a Project Lab for bench testing and validation. 
+The AquaMira application can be run on a Project Lab for bench testing and validation. 
 
 ## Setup
 
@@ -13,7 +13,7 @@ The Thurston application can be run on a Project Lab for bench testing and valid
 1. [Provision your Project Lab](https://developer.wildernesslabs.co/Meadow/Meadow.Cloud/Device_Provisioning/) to the `Wilderness Labs` org. This sets it up up for Meadow.Cloud communications:
     `meadow device provision -o 37fa1d46bd38433e80bd7c19f55bebe5 -n [device name]`
 2. Set your device name in `meadow.config.yaml`
-     `Name: BryanThurstonPL`
+     `Name: BryanAquaMiraPL`
 3. Test the app over WiFi. See [WiFi Setup](#wifi-setup).
 4. Once project has been verified connecting, change over to the [cell config](#cellular-setup).
 

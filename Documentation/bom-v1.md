@@ -1,4 +1,4 @@
-# Thurston Monitor Enclosure BOM
+# AquaMira Monitor Enclosure BOM
 
 (Rev 1.0 - 25 June, 2025)
 

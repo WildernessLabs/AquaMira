@@ -1,0 +1,2 @@
+Deploy:
+  NoLink: [ AquaMira.Core, ProgrammableAnalogInput, Temco.T3xxx ]
