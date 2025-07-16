@@ -214,6 +214,32 @@ public class SensorController
                                 }
                             }));
                             break;
+                        case ConfigurableAnalogInputChannelType.Counter:
+                            // verify the pin is valid
+                            var countpin = T3Module.Pins.FirstOrDefault(p => (int)p.Key == analog.ChannelNumber);
+                            if (countpin == null)
+                            {
+                                Resolver.Log.Error($"No T3 Pin for requested channel {analog.ChannelNumber}");
+                                break;
+                            }
+                            // create an input
+                            var countinput = T3Module.CreateCounter(countpin, Meadow.Hardware.InterruptMode.EdgeRising);
+                            // register the input for reading
+                            AddSensorToQueryList(analog.SenseIntervalSeconds, new(id, countinput, () =>
+                            {
+                                try
+                                {
+                                    var count = countinput.Count;
+                                    // TODO: need to figure out how to convert that to flow/quantity
+                                    return VolumetricFlow.Zero;
+                                }
+                                catch (Exception rex)
+                                {
+                                    Resolver.Log.Error($"Failed to read counter input channel: {rex.Message}");
+                                    return null;
+                                }
+                            }));
+                            break;
                         case ConfigurableAnalogInputChannelType.Voltage_0_10:
                             break;
                     }
