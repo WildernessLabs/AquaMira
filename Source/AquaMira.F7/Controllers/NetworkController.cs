@@ -1,6 +1,5 @@
 ﻿using AquaMira.Core;
 using Meadow;
-using Meadow.Devices;
 using Meadow.Hardware;
 using System;
 using System.Threading.Tasks;
@@ -16,7 +15,7 @@ namespace AquaMira.F7
         private readonly ICellNetworkAdapter? cell;
         private readonly AquaMiraAppSettings settings;
 
-        public NetworkController(F7MicroBase device)
+        public NetworkController(IMeadowDevice device)
         {
             this.settings = ConfigurationController.AppSettings;
 

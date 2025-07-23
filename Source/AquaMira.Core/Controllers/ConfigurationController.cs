@@ -20,14 +20,6 @@ public class ConfigurationController
     {
         SettingsFileName = configPath ?? DefaultSettingsFileName;
 
-        Resolver.Log.Info($"Loading sensor config from {SettingsFileName}");
-
-        if (!File.Exists(SettingsFileName))
-        {
-            // TODO: this needs to get logged and sent to the cloud
-            throw new FileNotFoundException($"Config file {SettingsFileName} not found");
-        }
-
         Load();
     }
 
@@ -40,6 +32,8 @@ public class ConfigurationController
     {
         if (File.Exists(SettingsFileName))
         {
+            Resolver.Log.Info($"Loading sensor config from {SettingsFileName}");
+
             try
             {
                 var json = File.ReadAllText(SettingsFileName);
@@ -49,8 +43,14 @@ public class ConfigurationController
             {
                 Resolver.Log.Error($"Unable to load configuration: {ex.Message}");
 
-                // TODO: this needs to get logged and sent to the cloud if possible
+                SensorConfiguration = SensorConfiguration.Default;
             }
+        }
+        else
+        {
+            Resolver.Log.Error($"Config file {SettingsFileName} not found. Using default configuration.");
+
+            SensorConfiguration = SensorConfiguration.Default;
         }
     }
 

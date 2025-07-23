@@ -1,58 +1,78 @@
 ﻿using AquaMira.Core;
+using AquaMira.Core.Contracts;
 using Meadow;
 using Meadow.Devices;
 using System;
 using System.Threading.Tasks;
 
-namespace AquaMira.F7
+namespace AquaMira.F7;
+
+public class MeadowProjectLabApp : ProjectLabCoreComputeApp
 {
-    public class MeadowProjectLabApp : App<F7CoreComputeV2>
+    private bool shutdownHappened = false;
+    private const int WatchdogIntervalSeconds = 30;
+    private MainController? mainController;
+
+    public override Task Initialize()
     {
-        private bool shutdownHappened = false;
-        private const int WatchdogIntervalSeconds = 30;
-        private MainController? mainController;
-
-        public override Task Initialize()
+        new Task(async () =>
         {
-            new Task(async () =>
+            Hardware.ComputeModule.WatchdogEnable(TimeSpan.FromSeconds(WatchdogIntervalSeconds));
+
+            Resolver.Log.Info("Watchdog timer enabled");
+            while (!shutdownHappened)
             {
-                Device.WatchdogEnable(TimeSpan.FromSeconds(WatchdogIntervalSeconds));
+                await Task.Delay(TimeSpan.FromSeconds(3));
+                Hardware.ComputeModule.WatchdogReset();
+                mainController?.WatchdogNotify();
+            }
+            Resolver.Log.Warn("Watchdog timer will trigger shortly");
+        }, TaskCreationOptions.LongRunning)
+            .Start();
 
-                Resolver.Log.Info("Watchdog timer enabled");
-                while (!shutdownHappened)
-                {
-                    await Task.Delay(TimeSpan.FromSeconds(3));
-                    Device.WatchdogReset();
-                    mainController?.WatchdogNotify();
-                }
-                Resolver.Log.Warn("Watchdog timer will trigger shortly");
-            }, TaskCreationOptions.LongRunning)
-                .Start();
+        IAquaMiraHardware hardware;
+        try
+        {
+            Resolver.Log.Info("Creating hardware");
+            hardware = new AquaMiraProjectLabHardware(Hardware);
+        }
+        catch (Exception ex)
+        {
+            Resolver.Log.Error($"Error Creating hardware: {ex.Message}");
+            throw;
+        }
 
-            var hardware = new AquaMiraProjectLabHardware(Device);
+        try
+        {
             mainController = new MainController();
             return mainController.Initialize(hardware);
         }
-
-        public override Task OnError(Exception e)
+        catch (Exception ex)
         {
-            Resolver.Log.Info($"System error: {e.Message}");
-            shutdownHappened = true;
-
-            return base.OnError(e);
+            Resolver.Log.Error($"Error Initializing MainController: {ex.Message}");
+            throw;
         }
+    }
 
-        public override Task OnShutdown()
-        {
-            Resolver.Log.Info($"Device is shutting down...");
-            shutdownHappened = true;
+    public override Task OnError(Exception e)
+    {
+        Resolver.Log.Info($"System error: {e.Message}");
+        Resolver.Log.Info($" at {e.StackTrace}");
+        shutdownHappened = true;
 
-            return base.OnShutdown();
-        }
+        return base.OnError(e);
+    }
 
-        public override Task Run()
-        {
-            return mainController.Run();
-        }
+    public override Task OnShutdown()
+    {
+        Resolver.Log.Info($"Device is shutting down...");
+        shutdownHappened = true;
+
+        return base.OnShutdown();
+    }
+
+    public override Task Run()
+    {
+        return mainController!.Run();
     }
 }

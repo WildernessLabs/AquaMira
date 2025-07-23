@@ -23,15 +23,18 @@ internal class AquaMiraProjectLabHardware : IAquaMiraHardware
 
     public IInputController InputController { get; }
 
-    public AquaMiraProjectLabHardware(F7CoreComputeV2 device)
+    public AquaMiraProjectLabHardware(IMeadowDevice device)
+        : this(ProjectLab.Create())
     {
-        Resolver.Log.Info("Creating ProjectLab...");
+    }
 
-        projLab = ProjectLab.Create();
+    public AquaMiraProjectLabHardware(IProjectLabHardware projLab)
+    {
+        this.projLab = projLab;
 
         InputController = new InputController(projLab);
 
-        NetworkController = new NetworkController(device);
+        NetworkController = new NetworkController(projLab.ComputeModule);
     }
 
     public ModbusRtuClient GetModbusSerialClient()
