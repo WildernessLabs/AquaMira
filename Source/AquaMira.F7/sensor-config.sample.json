@@ -14,6 +14,13 @@
       "Name": "Pump1",
       "IsSimulated": true,
       "SenseIntervalSeconds": 60
+    },
+    {
+      "Driver": "Spm1x",
+      "Address": 2,
+      "Name": "InputPower",
+      "IsSimulated": false,
+      "SenseIntervalSeconds": 60
     }
   ],
   "FrequencyInputs": [
