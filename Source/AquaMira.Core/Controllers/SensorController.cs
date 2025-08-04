@@ -99,6 +99,11 @@ public class SensorController
         }
     }
 
+    /// <summary>
+    /// Adds a sensor to the list of sensors that are going to get polled.
+    /// </summary>
+    /// <param name="interval">Time, in seconds, of which to poll sensor.</param>
+    /// <param name="tuple">Id, Sensor, and Function that actually does the sensor reading.</param>
     private void AddSensorToQueryList(int interval, (int id, object sensor, Func<object?> queryDelegate) tuple)
     {
         if (!queryPeriodDictionary.ContainsKey(interval))
@@ -294,6 +299,13 @@ public class SensorController
         }
     }
 
+    /// <summary>
+    /// This menthod walks through list of sensors in the to read list
+    /// calls the function that does the reading, and then saves the results
+    /// to the telemetry list. Finally, it passes the telemetry data to the 
+    /// storage controller.
+    /// </summary>
+    /// <returns></returns>
     private async Task SensorReadProc()
     {
         int tick = 0;
