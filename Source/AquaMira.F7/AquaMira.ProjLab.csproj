@@ -9,7 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Update="app.config.sample.yaml">
+        <None Update="app.config.yaml">
           <CopyToOutputDirectory>Never</CopyToOutputDirectory>
         </None>
         <None Update="app.build.yaml">

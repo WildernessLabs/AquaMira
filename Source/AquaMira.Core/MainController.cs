@@ -40,7 +40,8 @@ public class MainController
         // Register the CloudController so we can avoid passing it around to everyone that needs to log errors
         Resolver.Services.Add(cloudController);
 
-        sensorController = new SensorController(hardware, storageController);
+        sensorController = new SensorController(hardware);
+        sensorController.SensorValuesUpdated += OnSensorValuesUpdated;
 
         displayController = new DisplayController(
             this.hardware.Display,
@@ -59,6 +60,12 @@ public class MainController
             await cloudController.ReportDeviceStartup();
             await cloudController.ReportSensorConfiguration(configurationController.SensorConfiguration);
         });
+    }
+
+    private void OnSensorValuesUpdated(object sender, System.Collections.Generic.Dictionary<string, object> e)
+    {
+        storageController.RecordSensorValues(e);
+        displayController?.UpdateSensorValues(e);
     }
 
     private void OnNetworkSignalStrengthChanged(object sender, int e)

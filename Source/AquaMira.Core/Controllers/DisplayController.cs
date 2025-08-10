@@ -147,4 +147,9 @@ public class DisplayController
 
         // TODO: do things
     }
+
+    internal void UpdateSensorValues(Dictionary<string, object> e)
+    {
+        homeLayout.UpdateSensorValues(e);
+    }
 }

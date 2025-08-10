@@ -29,6 +29,5 @@
         <ProjectReference Include="..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\Sensors.Flow.HallEffect\Driver\Sensors.Flow.HallEffect.csproj" />
         <ProjectReference Include="..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\Sensors.Power.Spm1x\Driver\Sensors.Power.Spm1x.csproj" />
         <ProjectReference Include="..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\VFDs.CerusXDrive\Driver\Motors.CerusXDrive.csproj" />
-        <ProjectReference Include="..\..\..\Meadow.Foundation\Source\Product\ProgrammableAnalogInput\Driver\ProgramableAnalogInput.csproj" />
     </ItemGroup>
 </Project>

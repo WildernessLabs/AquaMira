@@ -1,14 +1,10 @@
 ﻿using AquaMira.Core.Contracts;
 using Meadow;
-using Meadow.Foundation;
 using Meadow.Foundation.IOExpanders;
 using Meadow.Peripherals.Sensors;
 using Meadow.Units;
-using Sensors.Flow.HallEffect.Simulation;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace AquaMira.Core;
@@ -16,52 +12,63 @@ namespace AquaMira.Core;
 public class SensorController
 {
     private readonly IAquaMiraHardware hardware;
-    private readonly StorageController storageController;
 
-    private readonly Dictionary<int, List<(int ID, object Sensor, Func<object?> ReadDelegate)>> queryPeriodDictionary = new();
-    private readonly Dictionary<int, Enum?> canonicalUnitsForSensorsMap = new();
-    private readonly Dictionary<int, string> sensorIdToNameMap = new();
+    private readonly Dictionary<int, List<ISensingNode>> sensingNodes = new();
+
+    public event EventHandler<Dictionary<string, object>>? SensorValuesUpdated;
+
+    private ISensingNodeController? t3Controller;
 
     public Dictionary<int, IVolumetricFlowSensor> FlowSensors { get; } = new();
-    public IProgrammableAnalogInputModule? ProgrammableAnalogInputModule { get; private set; }
     public Dictionary<int, ICompositeSensor> ModbusSensors { get; } = new();
-    public IT322ai? T3Module { get; private set; }
     public Task SensorProc { get; set; }
 
-    public SensorController(IAquaMiraHardware hardware, StorageController storageController)
+    public SensorController(IAquaMiraHardware hardware)
     {
         this.hardware = hardware;
-        this.storageController = storageController;
 
         SensorProc = Task.Run(SensorReadProc);
-    }
-
-    private int GenerateSensorId(object sensor, string sensorName)
-    {
-        var id = sensor.GetType().GetHashCode() | sensorName.GetHashCode();
-        if (!sensorIdToNameMap.ContainsKey(id))
-        {
-            sensorIdToNameMap.Add(id, sensorName);
-        }
-        return id;
-    }
-
-    public string? GetSensorName(int sensorId)
-    {
-        if (sensorIdToNameMap.ContainsKey(sensorId))
-        {
-            return sensorIdToNameMap[sensorId];
-        }
-        return null;
     }
 
     public async Task ApplySensorConfig(SensorConfiguration configuration)
     {
         ConfigureModbusDevices(configuration.ModbusDevices);
-        ConfigureFrequencyInputs(configuration.FrequencyInputs);
-        ConfigureConfigurableAnalogs(configuration.ConfigurableAnalogs);
         ConfigureDigitalInputs(configuration.DigitalInputs);
-        await ConfigureT322iInputs(configuration.T322iInputs);
+
+        if (configuration.T322iInputs != null)
+        {
+            try
+            {
+                IT322ai t3Module;
+                if (configuration.T322iInputs.IsSimulated)
+                {
+                    Resolver.Log.Info("Using simulated T3-22i module");
+                    t3Module = new SimulatedT322ai();
+                }
+                else
+                {
+                    Resolver.Log.Info($"Using T3-22i module at address {configuration.T322iInputs.ModbusAddress}");
+                    var client = hardware.GetModbusSerialClient();
+                    if (!client.IsConnected)
+                    {
+                        await client.Connect();
+                    }
+                    t3Module = new T322ai(client, (byte)configuration.T322iInputs.ModbusAddress);
+                }
+
+                t3Controller = new T322InputController(t3Module);
+                await t3Controller.ConfigureInputs(configuration.T322iInputs.Channels);
+            }
+            catch (Exception ex)
+            {
+                Resolver.Log.Error($"Error configuring T3-22i inputs: {ex.Message}");
+                t3Controller = null;
+            }
+        }
+        else
+        {
+            Resolver.Log.Warn($"No T322i configured for this device");
+        }
     }
 
     private void ConfigureDigitalInputs(IEnumerable<DigitalInputConfig> inputConfigs)
@@ -71,7 +78,6 @@ public class SensorController
             try
             {
                 Resolver.Log.Info($"digital input: {config.Name} on channel {config.ChannelNumber}");
-                var id = GenerateSensorId(config, config.Name);
 
                 var input = config.IsSimulated
                     ? new RandomizedSimulatedDigitalInputPort(config.Name)
@@ -85,12 +91,15 @@ public class SensorController
 
                 // TODO: separate handling for interruptable inputs?
                 //if (input is IDigitalInterruptPort) { }
+                var node = new UnitizedSensingNode<Scalar>(
+                    config.Name,
+                    input, () =>
+                    {
+                        return new Scalar(input.State ? 1 : 0);
+                    },
+                    TimeSpan.FromSeconds(config.SenseIntervalSeconds));
 
-                AddSensorToQueryList(config.SenseIntervalSeconds, new(id, input, () =>
-                {
-                    return new Scalar(input.State ? 1 : 0);
-                }));
-
+                AddSensingNode(node);
             }
             catch (Exception ex)
             {
@@ -99,13 +108,20 @@ public class SensorController
         }
     }
 
-    private void AddSensorToQueryList(int interval, (int id, object sensor, Func<object?> queryDelegate) tuple)
+    public void AddSensingNode(ISensingNode node)
     {
-        if (!queryPeriodDictionary.ContainsKey(interval))
+        lock (sensingNodes)
         {
-            queryPeriodDictionary.Add(interval, new List<(int ID, object Sensor, Func<object?>)>());
+            Resolver.Log.Info($"Adding sensing node {node.Name} with period {node.QueryPeriod.TotalSeconds} seconds");
+
+            var interval = (int)node.QueryPeriod.TotalSeconds;
+
+            if (!sensingNodes.ContainsKey(interval))
+            {
+                sensingNodes.Add(interval, new List<ISensingNode>());
+            }
+            sensingNodes[interval].Add(node);
         }
-        queryPeriodDictionary[interval].Add(tuple);
     }
 
     private void ConfigureModbusDevices(IEnumerable<ModbusDeviceConfig> modbusDevices)
@@ -115,10 +131,7 @@ public class SensorController
             try
             {
                 var sensor = ModbusDeviceFactory.CreateSensor(device, hardware);
-                var id = GenerateSensorId(sensor, device.Name);
-                ModbusSensors.Add(id, sensor);
-
-                AddSensorToQueryList(device.SenseIntervalSeconds, new(id, sensor, () =>
+                var node = new SensingNode(device.Name, sensor, () =>
                 {
                     try
                     {
@@ -129,167 +142,15 @@ public class SensorController
                         Resolver.Log.Error($"Error reading Modbus device {device.Name} values: {mex.Message}");
                         return null;
                     }
-                }));
+                }, TimeSpan.FromSeconds(device.SenseIntervalSeconds));
+
+                ModbusSensors.Add(node.NodeId, sensor);
+
+                AddSensingNode(node);
             }
             catch (Exception ex)
             {
                 // TODO: log this to the cloud (it's probably an unsupported device/bad config)
-            }
-        }
-    }
-
-    private async Task ConfigureT322iInputs(T322iConfiguration? moduleConfig)
-    {
-        if (moduleConfig == null)
-        {
-            Resolver.Log.Warn($"No T322i exists for this device");
-            return;
-        }
-
-        if (moduleConfig.IsSimulated)
-        {
-            T3Module = new SimulatedT322ai();
-        }
-        else
-        {
-            try
-            {
-                var client = hardware.GetModbusSerialClient();
-                if (!client.IsConnected)
-                {
-                    await client.Connect();
-                }
-                T3Module = new T322ai(client, (byte)moduleConfig.ModbusAddress);
-
-                // read the serial number to verify comms
-                Resolver.Log.Info($"Connecting to a T3-22i at {moduleConfig.ModbusAddress}...");
-                var sn = await T3Module.ReadSerialNumber();
-                Resolver.Log.Info($"T3-22i SN: {sn}");
-            }
-            catch (Exception ex)
-            {
-                Resolver.Log.Error($"Unable to connect to T3-22i: {ex.Message}");
-                T3Module = null;
-            }
-        }
-
-        if (T3Module != null)
-        {
-            foreach (var analog in moduleConfig.Channels)
-            {
-                try
-                {
-                    var capture = analog;
-                    var id = GenerateSensorId(analog, analog.Name);
-
-                    switch (analog.ChannelType)
-                    {
-                        case ConfigurableAnalogInputChannelType.Current_4_20:
-                        case ConfigurableAnalogInputChannelType.Current_0_20:
-                            // verify the pin is valid
-                            var pin = T3Module.Pins.FirstOrDefault(p => (int)p.Key == analog.ChannelNumber);
-                            if (pin == null)
-                            {
-                                Resolver.Log.Error($"No T3 Pin for requested channel {analog.ChannelNumber}");
-                                break;
-                            }
-                            // create an input
-                            var cinput = await T3Module.CreateCurrentInputPort(pin);
-                            // register the input for reading
-                            AddSensorToQueryList(analog.SenseIntervalSeconds, new(id, cinput, () =>
-                            {
-                                try
-                                {
-                                    var rawCurrent = cinput.Read().GetAwaiter().GetResult();
-                                    return InputToUnitConverter.ConvertCurrentToUnit(
-                                        rawCurrent,
-                                        analog.UnitType,
-                                        analog.Scale,
-                                        analog.Offset);
-                                }
-                                catch (Exception rex)
-                                {
-                                    Resolver.Log.Error($"Failed to read analog input channel {cinput.Pin.Name}: {rex.Message}");
-                                    return null;
-                                }
-                            }));
-                            break;
-                        case ConfigurableAnalogInputChannelType.Voltage_0_10:
-                            break;
-                    }
-
-                }
-                catch (Exception ex)
-                {
-                    // TODO: log this!
-                    Resolver.Log.Error($"Failed to configure analog input channel {analog.ChannelNumber}");
-                }
-            }
-        }
-    }
-
-    private void ConfigureConfigurableAnalogs(AnalogModuleConfig? moduleConfig)
-    {
-        if (moduleConfig == null)
-        {
-            Resolver.Log.Warn($"No AnalogModuleConfig exists for this device");
-            return;
-        }
-
-        if (moduleConfig.IsSimulated)
-        {
-            var m = new SimulatedProgrammableAnalogInputModule();
-            m.StartSimulation();
-            ProgrammableAnalogInputModule = m;
-        }
-        else
-        {
-            throw new NotSupportedException("Configurable Analog Inputs not supported");
-            //module = new ProgrammableAnalogInputModule();
-        }
-
-        foreach (var analog in moduleConfig.Channels)
-        {
-            try
-            {
-                ProgrammableAnalogInputModule.ConfigureChannel(analog);
-                var id = GenerateSensorId(analog, analog.Name);
-                var capture = analog;
-                AddSensorToQueryList(analog.SenseIntervalSeconds, new(id, ProgrammableAnalogInputModule, () =>
-                {
-                    return ProgrammableAnalogInputModule.ReadChannelAsConfiguredUnit(capture.ChannelNumber);
-                }));
-            }
-            catch (Exception ex)
-            {
-                // TODO: log this!
-                Resolver.Log.Error($"Failed to configure analog input channel {analog.ChannelNumber}");
-            }
-        }
-    }
-
-    private void ConfigureFrequencyInputs(IEnumerable<FrequencyInputConfig> inputConfigs)
-    {
-        foreach (var input in inputConfigs)
-        {
-            if (input.IsSimulated)
-            {
-                var sensor = new SimulatedHallEffectFlowSensor();
-                sensor.StartSimulation(SimulationBehavior.Sawtooth);
-                var id = GenerateSensorId(sensor, input.Name);
-                FlowSensors.Add(id, sensor);
-                lock (queryPeriodDictionary)
-                {
-                    if (!queryPeriodDictionary.ContainsKey(input.SenseIntervalSeconds))
-                    {
-                        queryPeriodDictionary.Add(input.SenseIntervalSeconds, new List<(int ID, object Sensor, Func<object?>)>());
-                    }
-                    queryPeriodDictionary[input.SenseIntervalSeconds].Add(new(id, sensor, () => sensor.Read().GetAwaiter().GetResult()));
-                }
-            }
-            else
-            {
-                throw new NotSupportedException("Non-simulated frequency inputs are not supported on this platform");
             }
         }
     }
@@ -304,133 +165,134 @@ public class SensorController
         {
             telemetryList.Clear();
 
-            lock (queryPeriodDictionary)
+            lock (sensingNodes)
             {
-                foreach (var period in queryPeriodDictionary.Keys)
+                foreach (var period in sensingNodes.Keys)
                 {
                     if (tick % period == 0)
                     {
-                        foreach (var sensor in queryPeriodDictionary[period])
+                        foreach (var node in sensingNodes[period])
                         {
-                            var value = sensor.ReadDelegate();
+                            Resolver.Log.Debug($"Reading sensor {node.Name}...");
 
-                            if (value == null)
+                            if (node is IUnitizedSensingNode usn)
                             {
-                                Resolver.Log.Info($"Error reading from {sensor.Sensor.GetType().Name}");
-                                continue;
-                            }
-
-                            if (value is Dictionary<string, object> valueDictionary)
-                            {
-                                Resolver.Log.Info($"[{tick:D4}]Composite sensor returned {valueDictionary.Count} values");
-
-                                foreach (var sensorItem in valueDictionary)
+                                try
                                 {
-                                    // we have to create a separate ID for each value because the units can vary between items
-                                    var valueId = GenerateSensorId(sensorItem, sensorItem.Key);
-                                    if (!canonicalUnitsForSensorsMap.ContainsKey(valueId))
-                                    {
-                                        var canonicalUnit = GetCanonicalUnitTypeValue(sensorItem.Value);
-                                        canonicalUnitsForSensorsMap.Add(valueId, canonicalUnit);
-                                    }
+                                    var value = usn.ReadAsCanonicalUnit();
 
-                                    try
+                                    if (value == null)
                                     {
-                                        if (sensorItem.Value is IUnit unit)
-                                        {
-                                            telemetryList.Add(sensorIdToNameMap[valueId], unit.ToCanonical());
-                                        }
-                                        else
-                                        {
-                                            telemetryList.Add(sensorIdToNameMap[valueId], value);
-                                        }
+                                        Resolver.Log.Info($"Error reading from {node.Sensor.GetType().Name}");
+                                        continue;
                                     }
-                                    catch (Exception ex)
-                                    {
-                                        // TODO: log this
-                                    }
+                                    telemetryList.Add(usn.Name, value);
+                                }
+                                catch (Exception ex)
+                                {
+                                    Resolver.Log.Error($"Error reading from node: {node.Name}: {ex.Message}");
+                                    continue;
                                 }
                             }
-                            else
+                            else if (node is ISensingNode sensingNode)
                             {
-                                if (!canonicalUnitsForSensorsMap.ContainsKey(sensor.ID))
-                                {
-                                    var canonicalUnit = GetCanonicalUnitTypeValue(value);
-                                    canonicalUnitsForSensorsMap.Add(sensor.ID, canonicalUnit);
-                                }
-
-                                Resolver.Log.Info($"[{tick:D4}]Read sensor: {sensor.ID}:{sensor.GetType().Name}:{value}:{canonicalUnitsForSensorsMap[sensor.ID]}");
+                                object? value;
 
                                 try
                                 {
-                                    if (value is IUnit unit)
+                                    value = node.ReadDelegate();
+                                    if (value == null)
                                     {
-                                        telemetryList.Add(sensorIdToNameMap[sensor.ID], unit.ToCanonical());
-                                    }
-                                    else
-                                    {
-                                        telemetryList.Add(sensorIdToNameMap[sensor.ID], value);
+                                        Resolver.Log.Info($"Error reading from {node.Sensor.GetType().Name}");
+                                        continue;
                                     }
                                 }
                                 catch (Exception ex)
                                 {
-                                    // TODO: log this
+                                    Resolver.Log.Error($"Error reading from node: {node.Name}: {ex.Message}");
+                                    continue;
                                 }
+
+                                if (value is Dictionary<string, object> valueDictionary)
+                                {
+                                    foreach (var sensorItem in valueDictionary)
+                                    {
+                                        if (sensorItem.Value is IUnit unit)
+                                        {
+                                            telemetryList.Add(sensorItem.Key, unit.ToCanonical());
+                                        }
+                                        else
+                                        {
+                                            telemetryList.Add(sensorItem.Key, sensorItem.Value);
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                }
+                            }
+                            else
+                            {
+
                             }
                         }
                     }
                 }
             }
-            storageController.RecordSensorValues(telemetryList);
+
+            if (telemetryList.Count > 0)
+            {
+                SensorValuesUpdated?.Invoke(this, telemetryList);
+            }
 
             tick++;
             await Task.Delay(1000);
         }
     }
 
-    private static Enum? GetCanonicalUnitTypeValue(object unitObject)
-    {
-        // Get the type of the object
-        Type objectType = unitObject.GetType();
+    //private static Enum? GetCanonicalUnitTypeValue(object unitObject)
+    //{
+    //    // Get the type of the object
+    //    Type objectType = unitObject.GetType();
 
-        // Find the IUnit interface implementation
-        Type iunitInterface = objectType.GetInterfaces()
-            .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IUnit<,>));
+    //    // Find the IUnit interface implementation
+    //    Type iunitInterface = objectType.GetInterfaces()
+    //        .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IUnit<,>));
 
-        if (iunitInterface != null)
-        {
-            // Use reflection to invoke the method
-            MethodInfo method = iunitInterface.GetMethod("GetCanonicalUnitType");
-            if (method != null)
-            {
-                return (Enum)method.Invoke(unitObject, null);
-            }
-        }
+    //    if (iunitInterface != null)
+    //    {
+    //        // Use reflection to invoke the method
+    //        MethodInfo method = iunitInterface.GetMethod("GetCanonicalUnitType");
+    //        if (method != null)
+    //        {
+    //            return (Enum)method.Invoke(unitObject, null);
+    //        }
+    //    }
 
-        return null;
-    }
+    //    return null;
+    //}
 
-    private static Type? GetUnitTypeFromReading(object reading)
-    {
-        // Get the type of the object
-        Type objectType = reading.GetType();
+    //private static Type? GetUnitTypeFromReading(object reading)
+    //{
+    //    // Get the type of the object
+    //    Type objectType = reading.GetType();
 
-        // Find the IUnit interface implementation
-        Type iunitInterface = objectType.GetInterfaces()
-            .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IUnit<,>));
+    //    // Find the IUnit interface implementation
+    //    Type iunitInterface = objectType.GetInterfaces()
+    //        .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IUnit<,>));
 
-        if (iunitInterface != null)
-        {
-            // Get the generic arguments of the interface
-            Type[] genericArgs = iunitInterface.GetGenericArguments();
+    //    if (iunitInterface != null)
+    //    {
+    //        // Get the generic arguments of the interface
+    //        Type[] genericArgs = iunitInterface.GetGenericArguments();
 
-            // The second generic argument is TUnit
-            if (genericArgs.Length >= 2)
-            {
-                return genericArgs[1]; // TUnit is the second generic parameter
-            }
-        }
+    //        // The second generic argument is TUnit
+    //        if (genericArgs.Length >= 2)
+    //        {
+    //            return genericArgs[1]; // TUnit is the second generic parameter
+    //        }
+    //    }
 
-        return null; // If no IUnit interface is found
-    }
+    //    return null; // If no IUnit interface is found
+    //}
 }

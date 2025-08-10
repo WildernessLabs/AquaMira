@@ -77,9 +77,6 @@
       <Deploy />
     </Project>
     <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/VFDs.CerusXDrive/Driver/Motors.CerusXDrive.csproj" />
-    <Project Path="../../Meadow.Foundation/Source/Product/ProgrammableAnalogInput/Driver/ProgramableAnalogInput.csproj">
-      <Deploy />
-    </Project>
     <Project Path="../../Meadow.Logging/Source/Meadow.Logging/lib/Meadow.Logging.csproj" />
     <Project Path="../../Meadow.Modbus/src/Meadow.Modbus/Meadow.Modbus.csproj" />
     <Project Path="../../Meadow.ProjectLab/Source/Meadow.ProjectLab/Meadow.ProjectLab.csproj">
