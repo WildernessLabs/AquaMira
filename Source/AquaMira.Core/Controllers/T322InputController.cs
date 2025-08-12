@@ -11,7 +11,7 @@ namespace AquaMira.Core;
 
 public interface ISensingNodeController
 {
-    Task ConfigureInputs(IEnumerable<ExtendedChannelConfig> channels);
+    Task<IEnumerable<ISensingNode>> ConfigureInputs(IEnumerable<ExtendedChannelConfig> channels);
 }
 
 public class T322InputController : ISensingNodeController
@@ -23,8 +23,14 @@ public class T322InputController : ISensingNodeController
         T3Module = t3Module;
     }
 
-    public async Task ConfigureInputs(IEnumerable<ExtendedChannelConfig> channels)
+    public async Task<IEnumerable<ISensingNode>> ConfigureInputs(IEnumerable<ExtendedChannelConfig> channels)
     {
+        // bus contention or processor starvation can make port initializations fail,
+        // so we need to track what succeeds and keep retrying
+
+        List<(ExtendedChannelConfig ChannelConfig, bool Success)> channelResults = new List<(ExtendedChannelConfig, bool)>();
+        channelResults.AddRange(channels.Select(c => (c, false)));
+
         try
         {
             // read the serial number to verify comms
@@ -37,83 +43,99 @@ public class T322InputController : ISensingNodeController
             Resolver.Log.Error($"Unable to connect to T3-22i: {ex.Message}");
         }
 
-        foreach (var analog in channels)
+        var nodelist = new List<ISensingNode>();
+
+        do
         {
-            try
+            for (var r = 0; r < channelResults.Count; r++)
             {
-                var capture = analog;
+                var result = channelResults[r];
+                Resolver.Log.Info($"Configuring T3-22i input channel {result.ChannelConfig.ChannelNumber} ({result.ChannelConfig.Name})...");
 
-                switch (analog.ChannelType)
+                try
                 {
-                    case ChannelInputType.Current_4_20:
-                    case ChannelInputType.Current_0_20:
-                        // verify the pin is valid
-                        var pin = T3Module.Pins.FirstOrDefault(p => (int)p.Key == analog.ChannelNumber);
-                        if (pin == null)
-                        {
-                            Resolver.Log.Error($"No T3 Pin for requested channel {analog.ChannelNumber}");
-                            break;
-                        }
-                        // create an input
-                        var cinput = await T3Module.CreateCurrentInputPort(pin);
+                    var capture = result;
 
-                        ISensingNode node;
+                    ISensingNode? node = null;
 
-                        switch (analog.UnitType)
-                        {
-                            case nameof(Temperature):
-                                node = new UnitizedSensingNode<Temperature>(analog.Name, cinput, () => ReadUnitizedChannel(cinput, analog),
-                                TimeSpan.FromSeconds(analog.SenseIntervalSeconds));
+                    switch (result.ChannelConfig.ChannelType)
+                    {
+                        case ChannelInputType.Current_4_20:
+                        case ChannelInputType.Current_0_20:
+                            // verify the pin is valid
+                            var pin = T3Module.Pins.FirstOrDefault(p => (int)p.Key == result.ChannelConfig.ChannelNumber);
+                            if (pin == null)
+                            {
+                                Resolver.Log.Error($"No T3 Pin for requested channel {result.ChannelConfig.ChannelNumber}");
                                 break;
-                            default:
-                                node = new SensingNode(analog.Name, cinput, () => ReadUnitizedChannel(cinput, analog),
-                                TimeSpan.FromSeconds(analog.SenseIntervalSeconds));
-                                break;
-                        }
-                        break;
-                    case ChannelInputType.Voltage_0_10:
-                        Resolver.Log.Warn($"Voltage inputs are not supported on the T3-22i module, skipping channel {analog.ChannelNumber}");
-                        break;
-                    case ChannelInputType.Count:
-                        Resolver.Log.Warn($"Count inputs are not supported on the T3-22i module, skipping channel {analog.ChannelNumber}");
-                        // verify the pin is valid
-                        var countpin = T3Module.Pins.FirstOrDefault(p => (int)p.Key == analog.ChannelNumber);
-                        if (countpin == null)
-                        {
-                            Resolver.Log.Error($"No T3 Pin for requested channel {analog.ChannelNumber}");
+                            }
+                            // create an input
+                            var cinput = await T3Module.CreateCurrentInputPort(pin);
+
+                            switch (result.ChannelConfig.UnitType)
+                            {
+                                case nameof(Temperature):
+                                    node = new UnitizedSensingNode<Temperature>(result.ChannelConfig.Name, cinput, () => ReadUnitizedChannel(cinput, result.ChannelConfig),
+                                    TimeSpan.FromSeconds(result.ChannelConfig.SenseIntervalSeconds));
+                                    break;
+                                default:
+                                    node = new SensingNode(result.ChannelConfig.Name, cinput, () => ReadUnitizedChannel(cinput, result.ChannelConfig),
+                                    TimeSpan.FromSeconds(result.ChannelConfig.SenseIntervalSeconds));
+                                    break;
+                            }
                             break;
-                        }
-                        // create an input
-                        var countinput = T3Module.CreateCounter(countpin, Meadow.Hardware.InterruptMode.EdgeRising);
-                        // register the input for reading
-                        var countNode = new SensingNode(analog.Name, countinput, () =>
-                        {
-                            try
+                        case ChannelInputType.Voltage_0_10:
+                            Resolver.Log.Warn($"Voltage inputs are not supported on the T3-22i module, skipping channel {result.ChannelConfig.ChannelNumber}");
+                            break;
+                        case ChannelInputType.Count:
+                            Resolver.Log.Warn($"Count inputs are not supported on the T3-22i module, skipping channel {result.ChannelConfig.ChannelNumber}");
+                            // verify the pin is valid
+                            var countpin = T3Module.Pins.FirstOrDefault(p => (int)p.Key == result.ChannelConfig.ChannelNumber);
+                            if (countpin == null)
                             {
-                                var count = countinput.Count;
-                                // TODO: need to figure out how to convert that to the units requested
-                                return VolumetricFlow.Zero;
+                                Resolver.Log.Error($"No T3 Pin for requested channel {result.ChannelConfig.ChannelNumber}");
+                                break;
                             }
-                            catch (Exception rex)
+                            // create an input
+                            var countinput = T3Module.CreateCounter(countpin, Meadow.Hardware.InterruptMode.EdgeRising);
+                            // register the input for reading
+                            node = new SensingNode(result.ChannelConfig.Name, countinput, () =>
                             {
-                                Resolver.Log.Error($"Failed to read counter input channel: {rex.Message}");
-                                return null;
-                            }
-                        },
-                        TimeSpan.FromSeconds(analog.SenseIntervalSeconds)
-                        );
-                        break;
-                    case ChannelInputType.DiscreteInput:
-                        Resolver.Log.Warn($"Discrete inputs are not supported on the T3-22i module, skipping channel {analog.ChannelNumber}");
-                        break;
+                                try
+                                {
+                                    var count = countinput.Count;
+                                    // TODO: need to figure out how to convert that to the units requested
+                                    return VolumetricFlow.Zero;
+                                }
+                                catch (Exception rex)
+                                {
+                                    Resolver.Log.Error($"Failed to read counter input channel: {rex.Message}");
+                                    return null;
+                                }
+                            },
+                            TimeSpan.FromSeconds(result.ChannelConfig.SenseIntervalSeconds)
+                            );
+                            break;
+                        case ChannelInputType.DiscreteInput:
+                            Resolver.Log.Warn($"Discrete inputs are not supported on the T3-22i module, skipping channel {result.ChannelConfig.ChannelNumber}");
+                            break;
+                    }
+
+                    if (node != null)
+                    {
+                        nodelist.Add(node);
+                    }
+
+                    channelResults[r] = (channelResults[r].ChannelConfig, true);
                 }
+                catch (Exception ex)
+                {
+                    Resolver.Log.Error($"Failed to configure T322i input channel {result.ChannelConfig.ChannelNumber}: {ex.Message}");
+                }
+            }
+        } while (channelResults.Any(c => !c.Success));
 
-            }
-            catch (Exception ex)
-            {
-                Resolver.Log.Error($"Failed to configure T322i input channel {analog.ChannelNumber}");
-            }
-        }
+        return nodelist;
     }
 
     private IUnit? ReadUnitizedChannel(ICurrentInputPort cinput, ChannelConfig analog)

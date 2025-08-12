@@ -57,7 +57,8 @@ public class SensorController
                 }
 
                 t3Controller = new T322InputController(t3Module);
-                await t3Controller.ConfigureInputs(configuration.T322iInputs.Channels);
+                var nodes = await t3Controller.ConfigureInputs(configuration.T322iInputs.Channels);
+                AddSensingNodes(nodes);
             }
             catch (Exception ex)
             {
@@ -105,6 +106,14 @@ public class SensorController
             {
                 // TODO: log this to the cloud (it's probably an unsupported device/bad config)
             }
+        }
+    }
+
+    public void AddSensingNodes(IEnumerable<ISensingNode> nodes)
+    {
+        foreach (var node in nodes)
+        {
+            AddSensingNode(node);
         }
     }
 
@@ -203,7 +212,7 @@ public class SensorController
                                     value = node.ReadDelegate();
                                     if (value == null)
                                     {
-                                        Resolver.Log.Info($"Error reading from {node.Sensor.GetType().Name}");
+                                        Resolver.Log.Info($"Error reading from {node.Sensor.GetType().Name}", "sensors");
                                         continue;
                                     }
                                 }
@@ -226,6 +235,10 @@ public class SensorController
                                             telemetryList.Add(sensorItem.Key, sensorItem.Value);
                                         }
                                     }
+                                }
+                                else if (value is IUnit unitValue)
+                                {
+                                    telemetryList.Add(node.Name, unitValue.ToCanonical());
                                 }
                                 else
                                 {

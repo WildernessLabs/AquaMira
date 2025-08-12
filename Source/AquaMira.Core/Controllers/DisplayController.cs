@@ -150,6 +150,8 @@ public class DisplayController
 
     internal void UpdateSensorValues(Dictionary<string, object> e)
     {
+        Resolver.Log.Info($"Updating sensor values: {string.Join(", ", e.Keys)}", "DISPLAY");
+
         homeLayout.UpdateSensorValues(e);
     }
 }
