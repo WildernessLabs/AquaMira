@@ -164,6 +164,13 @@ public class SensorController
         }
     }
 
+    /// <summary>
+    /// This menthod walks through list of sensors in the to read list
+    /// calls the function that does the reading, and then saves the results
+    /// to the telemetry list. Finally, it passes the telemetry data to the 
+    /// storage controller.
+    /// </summary>
+    /// <returns></returns>
     private async Task SensorReadProc()
     {
         int tick = 0;
