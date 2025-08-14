@@ -406,3 +406,6 @@ meadow.config.yaml
 wifi.config.yaml
 sensor-config.json
 app.config.yaml
+
+# Mac
+**/.DS_Store
