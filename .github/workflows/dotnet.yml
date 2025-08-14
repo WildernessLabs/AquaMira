@@ -67,11 +67,11 @@ jobs:
         repository: WildernessLabs/Meadow.ProjectLab
         ref: develop
 
-    - name: Checkout Customer_ThurstonPUD
+    - name: Checkout AquaMira
       uses: actions/checkout@v4
       with:
-        path: Customer_ThurstonPUD
-        repository: WildernessLabs/Customer_ThurstonPUD
+        path: AquaMira
+        repository: WildernessLabs/AquaMira
 
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v1
@@ -80,4 +80,4 @@ jobs:
           9.0.200
     
     - name: Build Meadow Foundation
-      run: dotnet build -c Release Customer_ThurstonPUD/Source/Thurston_Monitor.slnx
+      run: dotnet build -c Release Customer_ThurstonPUD/Source/AquaMira.slnx
