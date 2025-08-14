@@ -80,4 +80,4 @@ jobs:
           9.0.200
     
     - name: Build Meadow Foundation
-      run: dotnet build -c Release Customer_ThurstonPUD/Source/AquaMira.slnx
+      run: dotnet build -c Release AquaMira/Source/AquaMira.slnx
