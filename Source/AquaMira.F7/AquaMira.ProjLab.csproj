@@ -9,26 +9,25 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Update="app.config.yaml">
-          <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-        </None>
         <None Update="app.build.yaml">
-          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
-        <None Update="meadow.config.yaml">
-          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
-        <None Update="app.config.yaml">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
-        <None Update="sensor-config.json">
-          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
-        <None Update="wifi.config.yaml">
           <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
         <None Update="cell.config.yaml">
           <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+    <ItemGroup>
+        <None Update="meadow.config.yaml" Condition="Exists('meadow.config.yaml')">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="sensor-config.json" Condition="Exists('sensor-config.yaml')">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Include="app.config.yaml" Condition="Exists('app.config.yaml')">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="wifi.config.yaml" Condition="Exists('wifi.config.yaml')">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
     </ItemGroup>
     <ItemGroup>

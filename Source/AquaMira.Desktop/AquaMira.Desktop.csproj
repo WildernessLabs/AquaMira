@@ -14,12 +14,13 @@
         <ProjectReference Include="..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\Sensors.Flow.HallEffect\Driver\Sensors.Flow.HallEffect.csproj" />
         <ProjectReference Include="..\AquaMira.Core\AquaMira.Core.csproj" />
     </ItemGroup>
-    
+
     <ItemGroup>
-        <None Include="app.config.yaml">
+        <None Include="app.config.yaml" Condition="Exists('app.config.yaml')">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
     </ItemGroup>
+    
     <ItemGroup>
       <None Update="sensor-config.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
