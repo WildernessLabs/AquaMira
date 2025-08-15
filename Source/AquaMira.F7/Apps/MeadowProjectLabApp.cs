@@ -1,4 +1,4 @@
-﻿using AquaMira.Core;
+using AquaMira.Core;
 using AquaMira.Core.Contracts;
 using Meadow;
 using Meadow.Devices;
@@ -29,6 +29,30 @@ public class MeadowProjectLabApp : ProjectLabCoreComputeApp
             Resolver.Log.Warn("Watchdog timer will trigger shortly");
         }, TaskCreationOptions.LongRunning)
             .Start();
+
+        var svc = Resolver.UpdateService;
+
+        svc.UpdateAvailable += async (updateService, info, token) =>
+        {
+            Resolver.Log.Info($"Update available!", "AquaMira");
+        };
+
+        svc.UpdateRetrieved += async (updateService, info, token) =>
+        {
+            Resolver.Log.Info($"Update retrieved!", "AquaMira");
+        };
+
+        svc.UpdateFailure += async (updateService, info, token) =>
+        {
+            Resolver.Log.Error($"Update failed: {info.Name}", "AquaMira");
+        };
+
+        svc.RetrieveProgress += async (updateService, info, token) =>
+        {
+            Resolver.Log.Info(
+                $"Update progress: {info.DownloadProgress} bytes downloaded"
+            );
+        };
 
         IAquaMiraHardware hardware;
         try
