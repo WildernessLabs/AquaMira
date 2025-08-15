@@ -1,4 +1,4 @@
-﻿using AquaMira.Core;
+using AquaMira.Core;
 using AquaMira.Core.Contracts;
 using Meadow;
 using Meadow.Devices;
@@ -50,8 +50,7 @@ public class MeadowProjectLabApp : ProjectLabCoreComputeApp
         svc.RetrieveProgress += async (updateService, info, token) =>
         {
             Resolver.Log.Info(
-                $"Update progress: {info.DownloadProgress} bytes downloaded",
-                "AquaMira"
+                $"Update progress: {info.DownloadProgress} bytes downloaded"
             );
         };
 
