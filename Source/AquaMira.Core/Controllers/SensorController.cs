@@ -139,6 +139,8 @@ public class SensorController
         {
             try
             {
+                Resolver.Log.Info($"Configuring Modbus device {device.Name} at address {device.Address}");
+
                 var sensor = ModbusDeviceFactory.CreateSensor(device, hardware);
                 var node = new SensingNode(device.Name, sensor, () =>
                 {
@@ -159,13 +161,13 @@ public class SensorController
             }
             catch (Exception ex)
             {
-                // TODO: log this to the cloud (it's probably an unsupported device/bad config)
+                Resolver.Log.Error($"Error configuring Modbus device {device.Name}: {ex.Message}");
             }
         }
     }
 
     /// <summary>
-    /// This menthod walks through list of sensors in the to read list
+    /// This method walks through list of sensors in the to read list
     /// calls the function that does the reading, and then saves the results
     /// to the telemetry list. Finally, it passes the telemetry data to the 
     /// storage controller.
@@ -197,11 +199,6 @@ public class SensorController
                                 {
                                     var value = usn.ReadAsCanonicalUnit();
 
-                                    if (value == null)
-                                    {
-                                        Resolver.Log.Info($"Error reading from {node.Sensor.GetType().Name}");
-                                        continue;
-                                    }
                                     telemetryList.Add(usn.Name, value);
                                 }
                                 catch (Exception ex)
@@ -249,11 +246,12 @@ public class SensorController
                                 }
                                 else
                                 {
+                                    Resolver.Log.Warn($"Sensor {node.Name} returned a value of type {value.GetType().Name} which is not a recognized unit type. Returning as-is.");
                                 }
                             }
                             else
                             {
-
+                                Resolver.Log.Warn($"Sensor {node.Name} is not a recognized sensing node type. Cannot read value.");
                             }
                         }
                     }

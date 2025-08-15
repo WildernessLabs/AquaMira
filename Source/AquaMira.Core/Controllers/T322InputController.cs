@@ -145,11 +145,15 @@ public class T322InputController : ISensingNodeController
             Resolver.Log.Info($"Reading T322i input channel {cinput.Pin.Name} ({analog.ChannelNumber})...");
 
             var rawCurrent = cinput.Read().GetAwaiter().GetResult();
+
+            Resolver.Log.Info($"T322i input channel {cinput.Pin.Name} ({analog.ChannelNumber}) read successfully: {rawCurrent.Milliamps} mA");
+
             return InputToUnitConverter.ConvertCurrentToUnit(
                 rawCurrent,
                 analog.UnitType,
                 analog.Scale,
                 analog.Offset);
+
         }
         catch (Exception rex)
         {
