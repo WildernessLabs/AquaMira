@@ -263,7 +263,10 @@ public class SensorController
                 SensorValuesUpdated?.Invoke(this, telemetryList);
             }
 
-            tick++;
+            if (sensingNodes.Count > 0)
+            {
+                tick++;
+            }
             await Task.Delay(1000);
         }
     }
