@@ -102,7 +102,7 @@ public class SensorController
 
                 AddSensingNode(node);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // TODO: log this to the cloud (it's probably an unsupported device/bad config)
             }
@@ -155,7 +155,14 @@ public class SensorController
                     }
                 }, TimeSpan.FromSeconds(device.SenseIntervalSeconds));
 
-                ModbusSensors.Add(node.NodeId, sensor);
+                if (ModbusSensors.ContainsKey(node.NodeId))
+                {
+                    Resolver.Log.Warn($"Duplicate modbus sensor key: {node.NodeId}");
+                }
+                else
+                {
+                    ModbusSensors.Add(node.NodeId, sensor);
+                }
 
                 AddSensingNode(node);
             }
@@ -185,76 +192,109 @@ public class SensorController
 
             lock (sensingNodes)
             {
-                foreach (var period in sensingNodes.Keys)
+                try
                 {
-                    if (tick % period == 0)
+                    foreach (var period in sensingNodes.Keys)
                     {
-                        foreach (var node in sensingNodes[period])
+                        if (tick % period == 0)
                         {
-                            Resolver.Log.Debug($"Reading sensor {node.Name}...");
-
-                            if (node is IUnitizedSensingNode usn)
+                            foreach (var node in sensingNodes[period])
                             {
-                                try
-                                {
-                                    var value = usn.ReadAsCanonicalUnit();
+                                Resolver.Log.Debug($"Reading sensor {node.Name}...");
 
-                                    telemetryList.Add(usn.Name, value);
-                                }
-                                catch (Exception ex)
+                                if (node is IUnitizedSensingNode usn)
                                 {
-                                    Resolver.Log.Error($"Error reading from node: {node.Name}: {ex.Message}");
-                                    continue;
-                                }
-                            }
-                            else if (node is ISensingNode sensingNode)
-                            {
-                                object? value;
-
-                                try
-                                {
-                                    value = node.ReadDelegate();
-                                    if (value == null)
+                                    try
                                     {
-                                        Resolver.Log.Info($"Error reading from {node.Sensor.GetType().Name}", "sensors");
+                                        var value = usn.ReadAsCanonicalUnit();
+
+                                        if (!telemetryList.ContainsKey(usn.Name))
+                                        {
+                                            telemetryList.Add(usn.Name, value);
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Resolver.Log.Error($"Error reading from node: {node.Name}: {ex.Message}");
                                         continue;
                                     }
                                 }
-                                catch (Exception ex)
+                                else if (node is ISensingNode sensingNode)
                                 {
-                                    Resolver.Log.Error($"Error reading from node: {node.Name}: {ex.Message}");
-                                    continue;
-                                }
+                                    object? value;
 
-                                if (value is Dictionary<string, object> valueDictionary)
-                                {
-                                    foreach (var sensorItem in valueDictionary)
+                                    try
                                     {
-                                        if (sensorItem.Value is IUnit unit)
+                                        value = node.ReadDelegate();
+                                        if (value == null)
                                         {
-                                            telemetryList.Add(sensorItem.Key, unit.ToCanonical());
-                                        }
-                                        else
-                                        {
-                                            telemetryList.Add(sensorItem.Key, sensorItem.Value);
+                                            Resolver.Log.Info($"Error reading from {node.Sensor.GetType().Name}", "sensors");
+                                            continue;
                                         }
                                     }
-                                }
-                                else if (value is IUnit unitValue)
-                                {
-                                    telemetryList.Add(node.Name, unitValue.ToCanonical());
+                                    catch (Exception ex)
+                                    {
+                                        Resolver.Log.Error($"Error reading from node: {node.Name}: {ex.Message}");
+                                        continue;
+                                    }
+
+                                    if (value is Dictionary<string, object> valueDictionary)
+                                    {
+                                        foreach (var sensorItem in valueDictionary)
+                                        {
+                                            try
+                                            {
+                                                if (sensorItem.Value is IUnit unit)
+                                                {
+                                                    if (!telemetryList.ContainsKey(sensorItem.Key))
+                                                    {
+                                                        telemetryList.Add(sensorItem.Key, unit.ToCanonical());
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    if (!telemetryList.ContainsKey(sensorItem.Key))
+                                                    {
+                                                        telemetryList.Add(sensorItem.Key, sensorItem.Value);
+                                                    }
+                                                }
+                                            }
+                                            catch (Exception vdx)
+                                            {
+                                                Resolver.Log.Warn($"Failed to read {sensorItem.Value}: {vdx.Message}");
+                                            }
+                                        }
+                                    }
+                                    else if (value is IUnit unitValue)
+                                    {
+                                        if (!telemetryList.ContainsKey(node.Name))
+                                        {
+                                            try
+                                            {
+                                                telemetryList.Add(node.Name, unitValue.ToCanonical());
+                                            }
+                                            catch (Exception uvx)
+                                            {
+                                                Resolver.Log.Warn($"Failed to read {node.Name}: {uvx.Message}");
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Resolver.Log.Warn($"Sensor {node.Name} returned a value of type {value.GetType().Name} which is not a recognized unit type. Returning as-is.");
+                                    }
                                 }
                                 else
                                 {
-                                    Resolver.Log.Warn($"Sensor {node.Name} returned a value of type {value.GetType().Name} which is not a recognized unit type. Returning as-is.");
+                                    Resolver.Log.Warn($"Sensor {node.Name} is not a recognized sensing node type. Cannot read value.");
                                 }
-                            }
-                            else
-                            {
-                                Resolver.Log.Warn($"Sensor {node.Name} is not a recognized sensing node type. Cannot read value.");
                             }
                         }
                     }
+                }
+                catch (Exception ex)
+                {
+                    Resolver.Log.Error($"Error reading telemetry: {ex.Message}");
                 }
             }
 
