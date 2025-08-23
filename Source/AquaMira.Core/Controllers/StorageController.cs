@@ -4,19 +4,6 @@ using System.Collections.Generic;
 
 namespace AquaMira.Core;
 
-public class SensorRecord
-{
-    public string? SensorName { get; set; }
-    public DateTimeOffset? LastRecordTime { get; set; }
-    public object? LastRecordValue { get; set; }
-}
-
-public class RecordBatch
-{
-    public DateTimeOffset BatchTime { get; set; } = DateTimeOffset.UtcNow;
-    public Dictionary<string, object> Values { get; set; } = new();
-}
-
 public class StorageController
 {
     private readonly Dictionary<string, SensorRecord> _lastValues = new();

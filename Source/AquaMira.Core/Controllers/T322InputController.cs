@@ -9,11 +9,6 @@ using System.Threading.Tasks;
 
 namespace AquaMira.Core;
 
-public interface ISensingNodeController
-{
-    Task<IEnumerable<ISensingNode>> ConfigureInputs(IEnumerable<ExtendedChannelConfig> channels);
-}
-
 public class T322InputController : ISensingNodeController
 {
     public IT322ai T3Module { get; private set; }

@@ -1,6 +1,7 @@
 ﻿using Meadow;
 using Meadow.Foundation.Serialization;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 
@@ -13,6 +14,7 @@ public class ConfigurationController
     public const string DefaultSettingsFileName = "sensor-config.json";
 
     private string SettingsFileName { get; set; }
+    private readonly Dictionary<string, string> configNodes = new();
 
     public SensorConfiguration SensorConfiguration { get; private set; }
 
@@ -32,16 +34,19 @@ public class ConfigurationController
     {
         if (File.Exists(SettingsFileName))
         {
-            Resolver.Log.Info($"Loading sensor config from {SettingsFileName}");
+            Resolver.Log?.Info($"Loading sensor config from {SettingsFileName}");
 
             try
             {
                 var json = File.ReadAllText(SettingsFileName);
+
+                PopulateConfigNodes(json);
+
                 SensorConfiguration = MicroJson.Deserialize<SensorConfiguration>(json);
             }
             catch (Exception ex)
             {
-                Resolver.Log.Error($"Unable to load configuration: {ex.Message}");
+                Resolver.Log?.Error($"Unable to load configuration: {ex.Message}");
 
                 SensorConfiguration = SensorConfiguration.Default;
             }
@@ -52,6 +57,29 @@ public class ConfigurationController
 
             SensorConfiguration = SensorConfiguration.Default;
         }
+    }
+
+    private void PopulateConfigNodes(string json)
+    {
+        configNodes.Clear();
+
+        // Use MicroJson utilities to get all root properties
+        var allProperties = MicroJson.JsonUtilities.GetAllRootProperties(json);
+
+        foreach (var kvp in allProperties)
+        {
+            configNodes[kvp.Key] = kvp.Value;
+        }
+    }
+
+    public string? GetConfigurationNode(string nodeName)
+    {
+        return configNodes.TryGetValue(nodeName, out var nodeJson) ? nodeJson : null;
+    }
+
+    public IEnumerable<string> GetRegisteredNodeNames()
+    {
+        return configNodes.Keys;
     }
 
     public static AquaMiraAppSettings AppSettings { get; } = new();

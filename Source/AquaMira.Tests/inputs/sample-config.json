@@ -4,7 +4,7 @@
       "Driver": "FranklinElectric.XDrive",
       "Address": 1,
       "Name": "Pump1_Motor",
-      "IsSimulated":  "True"
+      "IsSimulated": "True"
     }
   ],
   "FrequencyInputs": [
@@ -45,6 +45,25 @@
         "Offset": 0.0,
         "UnitType": "Pressure",
         "Name": "0-30psi Pressure Sensor (0-10V)"
+      }
+    ]
+  },
+  "MyCustomSensorConfig": {
+    "Setting1": "Value1",
+    "Setting2": 42
+  },
+  "AnotherSensorConfig": {
+    "IsSimulated": "False",
+    "ModbusAddress": 1,
+    "Channels": [
+      {
+        "ChannelNumber": 42,
+        "ChannelType": "Voltage_0_10",
+        "Scale": 0.2068,
+        "Offset": 0.0,
+        "UnitType": "Pressure",
+        "Name": "0-30psi Pressure Sensor (0-10V)",
+        "CustomProperty": "CustomValue"
       }
     ]
   }

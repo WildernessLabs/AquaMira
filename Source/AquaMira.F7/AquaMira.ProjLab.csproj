@@ -26,6 +26,9 @@
         <None Include="app.config.yaml" Condition="Exists('app.config.yaml')">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
+        <None Update="sensor-config.json">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
         <None Update="wifi.config.yaml" Condition="Exists('wifi.config.yaml')">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>

@@ -5,21 +5,6 @@ using System.Reflection;
 
 namespace AquaMira.Core;
 
-public interface IUnitizedSensingNode : ISensingNode
-{
-    double ReadAsCanonicalUnit();
-    Enum? CanonicalUnit { get; set; }
-}
-
-public interface ISensingNode
-{
-    string Name { get; }
-    int NodeId { get; }
-    object Sensor { get; }
-    Func<object?> ReadDelegate { get; }
-    TimeSpan QueryPeriod { get; }
-}
-
 public class UnitizedSensingNode<TUnit> : SensingNode, IUnitizedSensingNode
     where TUnit : IUnit
 {
@@ -67,23 +52,5 @@ public class UnitizedSensingNode<TUnit> : SensingNode, IUnitizedSensingNode
     public UnitizedSensingNode(string nodeName, object sensor, Func<IUnit?> readDelegate, TimeSpan queryPeriod)
         : base(nodeName, sensor, readDelegate, queryPeriod)
     {
-    }
-}
-
-public class SensingNode : ISensingNode
-{
-    public TimeSpan QueryPeriod { get; }
-    public int NodeId { get; }
-    public object Sensor { get; }
-    public Func<object?> ReadDelegate { get; }
-    public string Name { get; }
-
-    public SensingNode(string nodeName, object sensor, Func<object?> readDelegate, TimeSpan queryPeriod)
-    {
-        Name = nodeName;
-        NodeId = sensor.GetType().GetHashCode() | nodeName.GetHashCode();
-        Sensor = sensor;
-        ReadDelegate = readDelegate;
-        QueryPeriod = queryPeriod;
     }
 }

@@ -67,6 +67,8 @@ internal class HomeLayout : StackLayout
                 continue;
             }
 
+            Resolver.Log.Info($"Updating row {index}", "DISPLAY");
+
             dataGridLabels[index][0].Text = key;
             dataGridLabels[index][1].Text = DateTime.Now.ToString("HH:mm:ss");
             dataGridLabels[index][2].Text = e[key].ToString();
