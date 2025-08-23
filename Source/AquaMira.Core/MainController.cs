@@ -40,8 +40,15 @@ public class MainController
         // Register the CloudController so we can avoid passing it around to everyone that needs to log errors
         Resolver.Services.Add(cloudController);
 
-        sensorController = new SensorController(hardware);
+        sensorController = new SensorController(hardware, configurationController);
+        sensorController.RegisterSensingNodeController<T322InputNodeController>("T322iInputs");
+
+
+
         sensorController.SensorValuesUpdated += OnSensorValuesUpdated;
+        await sensorController.LoadSensingNodeControllers(hardware);
+
+        sensorController.Start();
 
         displayController = new DisplayController(
             this.hardware.Display,

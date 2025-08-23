@@ -1,10 +1,10 @@
 ﻿using AquaMira.Core.Contracts;
 using Meadow;
-using Meadow.Foundation.IOExpanders;
 using Meadow.Peripherals.Sensors;
 using Meadow.Units;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AquaMira.Core;
@@ -14,18 +14,99 @@ public class SensorController
     private readonly IAquaMiraHardware hardware;
 
     private readonly Dictionary<int, List<ISensingNode>> sensingNodes = new();
+    private readonly ConfigurationController configurationController;
+    private readonly Dictionary<string, ISensingNodeController> registeredSensingNodeControllers = new();
+    private readonly SemaphoreSlim nodeSemaphore = new(1, 1);
+    private bool controllersLoaded = false;
 
     public event EventHandler<Dictionary<string, object>>? SensorValuesUpdated;
-
-    private ISensingNodeController? t3Controller;
 
     public Dictionary<int, IVolumetricFlowSensor> FlowSensors { get; } = new();
     public Dictionary<int, ICompositeSensor> ModbusSensors { get; } = new();
     public Task SensorProc { get; set; }
 
-    public SensorController(IAquaMiraHardware hardware)
+    public SensorController(IAquaMiraHardware hardware, ConfigurationController configurationController)
     {
         this.hardware = hardware;
+        this.configurationController = configurationController;
+    }
+
+    public async Task RegisterSensingNodeController<TController>(string? configRoot)
+        where TController : ISensingNodeController, new()
+    {
+        nodeSemaphore.Wait();
+        try
+        {
+            var key = typeof(TController).Name;
+            if (registeredSensingNodeControllers.ContainsKey(key))
+            {
+                Resolver.Log.Warn($"Sensing node controller {key} is already registered");
+                return;
+            }
+            // TODO: make sure no duplicate was registered
+            var configJson = configurationController.GetConfigurationNode(configRoot);
+
+            if (configJson == null)
+            {
+                Resolver.Log.Warn($"No configuration found for {key} at root '{configRoot}'");
+                return;
+            }
+
+            // TODO: create the controller
+            var controller = new TController();
+
+            registeredSensingNodeControllers.Add(key, controller);
+        }
+        finally
+        {
+            nodeSemaphore.Release();
+        }
+    }
+
+    public async Task LoadSensingNodeControllers(IAquaMiraHardware hardware)
+    {
+        // make sure this is called once and only once.  Ever.
+        if (controllersLoaded)
+        {
+            Resolver.Log.Warn("Sensing node controllers have already been loaded");
+            return;
+        }
+
+        nodeSemaphore.Wait();
+        try
+        {
+            foreach (var controller in registeredSensingNodeControllers.Values)
+            {
+                try
+                {
+                    var configJson = configurationController.GetConfigurationNode(controller.GetType().Name);
+                    if (configJson == null)
+                    {
+                        Resolver.Log.Warn($"No configuration found for {controller.GetType().Name}");
+                        continue;
+                    }
+                    var nodes = await controller.ConfigureFromJson(configJson, hardware);
+                    AddSensingNodes(nodes);
+                }
+                catch (Exception ex)
+                {
+                    Resolver.Log.Error($"Error loading sensing node controller {controller.GetType().Name}: {ex.Message}");
+                }
+            }
+            controllersLoaded = true;
+        }
+        finally
+        {
+            nodeSemaphore.Release();
+        }
+    }
+
+    internal void Start()
+    {
+        if (!controllersLoaded && registeredSensingNodeControllers.Count > 0)
+        {
+            Resolver.Log.Warn("Sensing node controllers have not been loaded. Call LoadSensingNodeControllers() before starting the sensor controller.");
+        }
 
         SensorProc = Task.Run(SensorReadProc);
     }
@@ -34,42 +115,6 @@ public class SensorController
     {
         ConfigureModbusDevices(configuration.ModbusDevices);
         ConfigureDigitalInputs(configuration.DigitalInputs);
-
-        if (configuration.T322iInputs != null)
-        {
-            try
-            {
-                IT322ai t3Module;
-                if (configuration.T322iInputs.IsSimulated)
-                {
-                    Resolver.Log.Info("Using simulated T3-22i module");
-                    t3Module = new SimulatedT322ai();
-                }
-                else
-                {
-                    Resolver.Log.Info($"Using T3-22i module at address {configuration.T322iInputs.ModbusAddress}");
-                    var client = hardware.GetModbusSerialClient();
-                    if (!client.IsConnected)
-                    {
-                        await client.Connect();
-                    }
-                    t3Module = new T322ai(client, (byte)configuration.T322iInputs.ModbusAddress);
-                }
-
-                t3Controller = new T322InputController(t3Module);
-                var nodes = await t3Controller.ConfigureInputs(configuration.T322iInputs.Channels);
-                AddSensingNodes(nodes);
-            }
-            catch (Exception ex)
-            {
-                Resolver.Log.Error($"Error configuring T3-22i inputs: {ex.Message}");
-                t3Controller = null;
-            }
-        }
-        else
-        {
-            Resolver.Log.Warn($"No T322i configured for this device");
-        }
     }
 
     private void ConfigureDigitalInputs(IEnumerable<DigitalInputConfig> inputConfigs)

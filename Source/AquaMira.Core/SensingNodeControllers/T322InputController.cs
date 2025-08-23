@@ -1,5 +1,7 @@
-﻿using Meadow;
+﻿using AquaMira.Core.Contracts;
+using Meadow;
 using Meadow.Foundation.IOExpanders;
+using Meadow.Foundation.Serialization;
 using Meadow.Hardware;
 using Meadow.Units;
 using System;
@@ -9,16 +11,50 @@ using System.Threading.Tasks;
 
 namespace AquaMira.Core;
 
-public class T322InputController : ISensingNodeController
+public class T322InputNodeController : ISensingNodeController
 {
     public IT322ai T3Module { get; private set; }
 
-    public T322InputController(IT322ai t3Module)
+    public T322InputNodeController(IT322ai t3Module)
     {
         T3Module = t3Module;
     }
 
-    public async Task<IEnumerable<ISensingNode>> ConfigureInputs(IEnumerable<ExtendedChannelConfig> channels)
+    public T322InputNodeController()
+    {
+    }
+
+    public Task<IEnumerable<ISensingNode>> ConfigureFromJson(string configJson, IAquaMiraHardware hardware)
+    {
+        T322iConfiguration config;
+        try
+        {
+            config = MicroJson.Deserialize<T322iConfiguration>(configJson);
+            if (config == null)
+            {
+                Resolver.Log?.Error("Failed to deserialize T3-22i configuration from JSON");
+                return Task.FromResult(Enumerable.Empty<ISensingNode>());
+            }
+        }
+        catch (Exception ex)
+        {
+            Resolver.Log?.Error($"Failed to deserialize T3-22i configuration from JSON: {ex.Message}");
+            return Task.FromResult(Enumerable.Empty<ISensingNode>());
+        }
+
+        if (config.IsSimulated)
+        {
+            T3Module = new SimulatedT322ai();
+        }
+        else
+        {
+            T3Module = new T322ai(hardware.GetModbusSerialClient(), (byte)config.ModbusAddress);
+        }
+
+        return ConfigureInputs(config.Channels);
+    }
+
+    private async Task<IEnumerable<ISensingNode>> ConfigureInputs(IEnumerable<ExtendedChannelConfig> channels)
     {
         // bus contention or processor starvation can make port initializations fail,
         // so we need to track what succeeds and keep retrying

@@ -13,7 +13,6 @@
 
     <ItemGroup>
         <EmbeddedResource Include="Assets\heart.bmp" />
-        <EmbeddedResource Include="Assets\logo-small.bmp" />
         <EmbeddedResource Include="Assets\logo.bmp" />
         <EmbeddedResource Include="Assets\net-connected.bmp" />
         <EmbeddedResource Include="Assets\net-disconnected.bmp" />

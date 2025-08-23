@@ -15,9 +15,9 @@ internal class HeaderControl : AbsoluteLayout
     {
         var logo = new Picture(
                  0, 0,
-                 Resources.LogoSmall.Width,
-                 Resources.LogoSmall.Height,
-                 Resources.LogoSmall);
+                 Resources.Logo.Width,
+                 Resources.Logo.Height,
+                 Resources.Logo);
 
         heart = new Picture(
                 screen.Width - Resources.Heart.Width,
