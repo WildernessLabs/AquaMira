@@ -1,4 +1,5 @@
-﻿using AquaMira.Core.Contracts;
+﻿using AquaMira.Core;
+using AquaMira.Core.Contracts;
 using Meadow;
 using Meadow.Foundation.IOExpanders;
 using Meadow.Foundation.Serialization;
@@ -9,7 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace AquaMira.Core;
+namespace AquaMira;
 
 public class T322InputNodeController : ISensingNodeController
 {

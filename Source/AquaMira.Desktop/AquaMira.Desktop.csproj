@@ -13,6 +13,7 @@
         <ProjectReference Include="..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\Sensors.Hid.Keyboard\Driver\Sensors.Hid.Keyboard.csproj" />
         <ProjectReference Include="..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\Sensors.Flow.HallEffect\Driver\Sensors.Flow.HallEffect.csproj" />
         <ProjectReference Include="..\AquaMira.Core\AquaMira.Core.csproj" />
+        <ProjectReference Include="..\NodeControllers\AquaMira.T322InputNodeController\AquaMira.T322InputNodeController.csproj" />
     </ItemGroup>
 
     <ItemGroup>

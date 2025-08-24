@@ -35,5 +35,6 @@
         <ProjectReference Include="..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Core\Meadow.Foundation.Core.csproj" />
         <ProjectReference Include="..\..\..\Meadow.ProjectLab\Source\Meadow.ProjectLab\Meadow.ProjectLab.csproj" />
         <ProjectReference Include="..\AquaMira.Core\AquaMira.Core.csproj" />
+        <ProjectReference Include="..\NodeControllers\AquaMira.T322InputNodeController\AquaMira.T322InputNodeController.csproj" />
     </ItemGroup>
 </Project>

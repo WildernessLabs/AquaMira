@@ -105,4 +105,5 @@
     <Deploy />
   </Project>
   <Project Path="AquaMira.Tests/AquaMira.Tests.csproj" Id="db40a163-759c-4086-9410-66d968f66abc" />
+  <Project Path="NodeControllers/AquaMira.T322InputNodeController/AquaMira.T322InputNodeController.csproj" Id="5aebd2a7-6001-41b2-a6f6-c1263896d4d2" />
 </Solution>

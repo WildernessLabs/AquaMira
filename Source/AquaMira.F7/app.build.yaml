@@ -1,2 +1,7 @@
 Deploy:
-  NoLink: [ AquaMira.Core, ProgrammableAnalogInput, Temco.T3xxx, ProjectLab ]
+  NoLink: 
+  - AquaMira.Core
+  - AquaMira.T322InputNodeController
+  - ProgrammableAnalogInput
+  - Temco.T3xxx
+  - ProjectLab
