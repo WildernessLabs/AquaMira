@@ -31,31 +31,81 @@ public class SensorController
         this.configurationController = configurationController;
     }
 
-    public async Task RegisterSensingNodeController<TController>(string? configRoot)
+    //public void RegisterSensingNodeController<TController>(string? configRoot)
+    //    where TController : ISensingNodeController, new()
+    //{
+    //    nodeSemaphore.Wait();
+    //    try
+    //    {
+    //        var key = typeof(TController).Name;
+    //        if (registeredSensingNodeControllers.ContainsKey(key))
+    //        {
+    //            Resolver.Log.Warn($"Sensing node controller {key} is already registered");
+    //            return;
+    //        }
+
+    //        var configJson = configurationController.GetConfigurationNode(configRoot);
+
+    //        if (configJson == null)
+    //        {
+    //            Resolver.Log.Warn($"No configuration found for {key} at root '{configRoot}'");
+    //            return;
+    //        }
+
+    //        var controller = new TController();
+    //        registeredSensingNodeControllers.Add(key, controller);
+    //    }
+    //    finally
+    //    {
+    //        nodeSemaphore.Release();
+    //    }
+    //}
+
+    public void RegisterSensingNodeController<TController>(string configurationName)
         where TController : ISensingNodeController, new()
     {
+        RegisterSensingNodeController(typeof(TController), configurationName);
+    }
+
+    public void RegisterSensingNodeController((Type ControllerType, string ConfigurationName) descriptor)
+    {
+        RegisterSensingNodeController(descriptor.ControllerType, descriptor.ConfigurationName);
+    }
+
+    public void RegisterSensingNodeController(Type controllerType, string configurationName)
+    {
+        if (controllerType is not ISensingNodeController)
+        {
+            throw new ArgumentException($"Type {controllerType.Name} does not implement ISensingNodeController");
+        }
+
         nodeSemaphore.Wait();
+        var key = controllerType.Name;
         try
         {
-            var key = typeof(TController).Name;
             if (registeredSensingNodeControllers.ContainsKey(key))
             {
                 Resolver.Log.Warn($"Sensing node controller {key} is already registered");
                 return;
             }
-            // TODO: make sure no duplicate was registered
-            var configJson = configurationController.GetConfigurationNode(configRoot);
+
+            var configJson = configurationController.GetConfigurationNode(configurationName);
 
             if (configJson == null)
             {
-                Resolver.Log.Warn($"No configuration found for {key} at root '{configRoot}'");
-                return;
+                Resolver.Log.Warn($"No configuration found for {configurationName}");
             }
 
-            // TODO: create the controller
-            var controller = new TController();
+            // Create instance using reflection (since we can't use generics here)
+            var controller = (ISensingNodeController)Activator.CreateInstance(controllerType)!;
 
             registeredSensingNodeControllers.Add(key, controller);
+
+            Resolver.Log.Info($"Registered sensing node controller: {key}");
+        }
+        catch (Exception ex)
+        {
+            Resolver.Log.Error($"Failed to register sensing node controller {key}: {ex.Message}");
         }
         finally
         {

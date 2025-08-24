@@ -10,6 +10,8 @@ using Meadow.Peripherals.Displays;
 using Meadow.Peripherals.Sensors;
 using Meadow.Peripherals.Sensors.Buttons;
 using Meadow.Units;
+using System;
+using System.Collections.Generic;
 
 namespace AquaMira.DT;
 
@@ -47,7 +49,6 @@ internal class AquaMiraHardware : IAquaMiraHardware
         InputController = new InputController();
     }
 
-
     public ModbusRtuClient GetModbusSerialClient()
     {
         if (modbusClient == null)
@@ -60,5 +61,14 @@ internal class AquaMiraHardware : IAquaMiraHardware
         }
 
         return modbusClient;
+    }
+
+    public IEnumerable<(Type ControllerType, string ConfigurationName)> GetAvailableSensingNodeControllers()
+    {
+        // Return the sensing node controllers available on the Desktop platform
+        return new[]
+        {
+            (typeof(T322InputNodeController), "T322iInputs"),
+        };
     }
 }

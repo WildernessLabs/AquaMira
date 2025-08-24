@@ -41,9 +41,13 @@ public class MainController
         Resolver.Services.Add(cloudController);
 
         sensorController = new SensorController(hardware, configurationController);
-        sensorController.RegisterSensingNodeController<T322InputNodeController>("T322iInputs");
 
-
+        // Dynamically register all available sensing node controllers for this hardware
+        var availableControllers = hardware.GetAvailableSensingNodeControllers();
+        foreach (var controllerDescriptor in availableControllers)
+        {
+            sensorController.RegisterSensingNodeController(controllerDescriptor);
+        }
 
         sensorController.SensorValuesUpdated += OnSensorValuesUpdated;
         await sensorController.LoadSensingNodeControllers(hardware);

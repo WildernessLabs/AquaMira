@@ -2,6 +2,8 @@
 using Meadow.Peripherals.Displays;
 using Meadow.Peripherals.Sensors;
 using Meadow.Peripherals.Sensors.Buttons;
+using System;
+using System.Collections.Generic;
 
 namespace AquaMira.Core.Contracts;
 
@@ -22,4 +24,10 @@ public interface IAquaMiraHardware
     INetworkController NetworkController { get; }
 
     ModbusRtuClient GetModbusSerialClient();
+
+    /// <summary>
+    /// Gets the available sensing node controllers for this hardware platform
+    /// </summary>
+    /// <returns>Collection of sensing node controller descriptors</returns>
+    IEnumerable<(Type ControllerType, string ConfigurationName)> GetAvailableSensingNodeControllers();
 }

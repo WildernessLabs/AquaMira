@@ -6,6 +6,8 @@ using Meadow.Modbus;
 using Meadow.Peripherals.Displays;
 using Meadow.Peripherals.Sensors;
 using Meadow.Peripherals.Sensors.Buttons;
+using System;
+using System.Collections.Generic;
 
 namespace AquaMira.F7;
 
@@ -43,5 +45,14 @@ internal class AquaMiraProjectLabHardware : IAquaMiraHardware
         Resolver.Log.Info($"Modbus RTU is running at {baud} baud");
 
         return projLab.GetModbusRtuClient(baud);
+    }
+
+    public IEnumerable<(Type ControllerType, string ConfigurationName)> GetAvailableSensingNodeControllers()
+    {
+        // Return the sensing node controllers available on this hardware platform
+        return new[]
+        {
+            (typeof(T322InputNodeController), "T322iInputs"),
+        };
     }
 }
