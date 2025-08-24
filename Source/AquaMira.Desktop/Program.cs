@@ -19,6 +19,12 @@ public static class Program
 
         _ = MeadowOS.Start(args);
 
+        while (true)
+        {
+            ProcessMainThreadQueue();
+            Thread.Sleep(10);
+        }
+
         while (_mainThreadQueue.TryDequeue(out var action))
         {
             action();

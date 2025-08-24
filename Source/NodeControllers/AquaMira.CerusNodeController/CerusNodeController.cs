@@ -15,7 +15,7 @@ public class CerusNodeController : ISensingNodeController
 {
     private IXDrive? cerusXDrive;
 
-    public Task<IEnumerable<ISensingNode>> ConfigureFromJson(string configJson, IAquaMiraHardware hardware)
+    public async Task<IEnumerable<ISensingNode>> ConfigureFromJson(string configJson, IAquaMiraHardware hardware)
     {
         CerusConfiguration config;
         try
@@ -24,13 +24,13 @@ public class CerusNodeController : ISensingNodeController
             if (config == null)
             {
                 Resolver.Log?.Error("Failed to deserialize CerusConfiguration configuration from JSON");
-                return Task.FromResult(Enumerable.Empty<ISensingNode>());
+                return Enumerable.Empty<ISensingNode>();
             }
         }
         catch (Exception ex)
         {
             Resolver.Log?.Error("Failed to deserialize CerusConfiguration configuration from JSON");
-            return Task.FromResult(Enumerable.Empty<ISensingNode>());
+            return Enumerable.Empty<ISensingNode>();
         }
 
         if (config.IsSimulated)
@@ -43,6 +43,8 @@ public class CerusNodeController : ISensingNodeController
                 hardware.GetModbusSerialClient(),
                 (byte)config.ModbusAddress);
         }
+
+        await cerusXDrive.Connect();
 
         var nodes = new List<ISensingNode>
         {
@@ -73,6 +75,6 @@ public class CerusNodeController : ISensingNodeController
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)),
         };
 
-        return Task.FromResult<IEnumerable<ISensingNode>>(nodes);
+        return nodes;
     }
 }

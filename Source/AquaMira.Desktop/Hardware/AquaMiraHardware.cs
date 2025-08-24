@@ -60,6 +60,10 @@ internal class AquaMiraHardware : IAquaMiraHardware
             modbusClient = new ModbusRtuClient(port);
         }
 
+        if (!modbusClient.IsConnected)
+        {
+            modbusClient.Connect();
+        }
         return modbusClient;
     }
 
