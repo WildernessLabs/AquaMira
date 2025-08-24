@@ -9,6 +9,14 @@ using System.Threading.Tasks;
 
 namespace AquaMira.Core;
 
+internal static class Extensions
+{
+    public static bool Implements<TInterface>(this Type type)
+    {
+        return typeof(TInterface).IsAssignableFrom(type);
+    }
+}
+
 public class SensorController
 {
     private readonly IAquaMiraHardware hardware;
@@ -74,13 +82,13 @@ public class SensorController
 
     public void RegisterSensingNodeController(Type controllerType, string configurationName)
     {
-        if (controllerType is not ISensingNodeController)
+        if (!controllerType.Implements<ISensingNodeController>())
         {
             throw new ArgumentException($"Type {controllerType.Name} does not implement ISensingNodeController");
         }
 
         nodeSemaphore.Wait();
-        var key = controllerType.Name;
+        var key = configurationName;
         try
         {
             if (registeredSensingNodeControllers.ContainsKey(key))
@@ -125,22 +133,22 @@ public class SensorController
         nodeSemaphore.Wait();
         try
         {
-            foreach (var controller in registeredSensingNodeControllers.Values)
+            foreach (var key in registeredSensingNodeControllers.Keys)
             {
                 try
                 {
-                    var configJson = configurationController.GetConfigurationNode(controller.GetType().Name);
+                    var configJson = configurationController.GetConfigurationNode(key);
                     if (configJson == null)
                     {
-                        Resolver.Log.Warn($"No configuration found for {controller.GetType().Name}");
+                        Resolver.Log.Warn($"No configuration found for {key}");
                         continue;
                     }
-                    var nodes = await controller.ConfigureFromJson(configJson, hardware);
+                    var nodes = await registeredSensingNodeControllers[key].ConfigureFromJson(configJson, hardware);
                     AddSensingNodes(nodes);
                 }
                 catch (Exception ex)
                 {
-                    Resolver.Log.Error($"Error loading sensing node controller {controller.GetType().Name}: {ex.Message}");
+                    Resolver.Log.Error($"Error loading sensing node controller {key}: {ex.Message}");
                 }
             }
             controllersLoaded = true;

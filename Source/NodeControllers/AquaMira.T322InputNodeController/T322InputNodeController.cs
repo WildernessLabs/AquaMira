@@ -16,11 +16,6 @@ public class T322InputNodeController : ISensingNodeController
 {
     public IT322ai T3Module { get; private set; }
 
-    public T322InputNodeController(IT322ai t3Module)
-    {
-        T3Module = t3Module;
-    }
-
     public T322InputNodeController()
     {
     }

@@ -4,6 +4,11 @@
     <File Path="../Documentation/bom-v1.md" />
     <File Path="../README.md" />
   </Folder>
+  <Folder Name="/NodeControllers/">
+    <Project Path="NodeControllers/AquaMira.SPM1xPowerNodeController/AquaMira.SPM1xPowerNodeController.csproj" Id="200f9299-01b8-42d9-a572-af4ab862e715" />
+    <Project Path="NodeControllers/AquaMira.T322InputNodeController/AquaMira.T322InputNodeController.csproj" Id="5aebd2a7-6001-41b2-a6f6-c1263896d4d2" />
+  </Folder>
+  <Folder Name="/Solution Items/" />
   <Folder Name="/_meadow_refs/">
     <Project Path="../../Meadow.Contracts/Source/Meadow.Contracts/Meadow.Contracts.csproj">
       <Deploy />
@@ -105,5 +110,4 @@
     <Deploy />
   </Project>
   <Project Path="AquaMira.Tests/AquaMira.Tests.csproj" Id="db40a163-759c-4086-9410-66d968f66abc" />
-  <Project Path="NodeControllers/AquaMira.T322InputNodeController/AquaMira.T322InputNodeController.csproj" Id="5aebd2a7-6001-41b2-a6f6-c1263896d4d2" />
 </Solution>

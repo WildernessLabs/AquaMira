@@ -1,4 +1,6 @@
-﻿namespace AquaMira.Core;
+﻿using AquaMira.Core;
+
+namespace AquaMira;
 
 public class T322iConfiguration
 {

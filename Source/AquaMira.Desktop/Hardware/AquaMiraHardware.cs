@@ -69,6 +69,7 @@ internal class AquaMiraHardware : IAquaMiraHardware
         return new[]
         {
             (typeof(T322InputNodeController), "T322iInputs"),
+            (typeof(SPM1xPowerNodeController), "Spm1x"),
         };
     }
 }

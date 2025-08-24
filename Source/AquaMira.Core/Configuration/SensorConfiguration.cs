@@ -9,7 +9,6 @@ public class SensorConfiguration
     public AnalogModuleConfig? ConfigurableAnalogs { get; set; }
     public FrequencyInputConfig[] FrequencyInputs { get; set; } = Array.Empty<FrequencyInputConfig>();
     public ModbusDeviceConfig[] ModbusDevices { get; set; } = Array.Empty<ModbusDeviceConfig>();
-    public T322iConfiguration? T322iInputs { get; set; }
 
     public static SensorConfiguration Default
     {
@@ -21,7 +20,6 @@ public class SensorConfiguration
                 ConfigurableAnalogs = null,
                 FrequencyInputs = Array.Empty<FrequencyInputConfig>(),
                 ModbusDevices = Array.Empty<ModbusDeviceConfig>(),
-                T322iInputs = null
             };
         }
     }

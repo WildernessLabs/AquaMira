@@ -168,32 +168,32 @@ public class CloudController : ILogProvider
             }
         }
 
-        if (configuration.T322iInputs == null)
-        {
-            configDictionary.Add("T322iInputs", "null");
-        }
-        else if (configuration.T322iInputs.Channels.Length == 0)
-        {
-            configDictionary.Add("T322iInputs.Channels", "Zero channels");
-        }
-        else
-        {
-            configDictionary.Add("T322iInputs.IsSimulated",
-                configuration.T322iInputs.IsSimulated);
+        //if (configuration.T322iInputs == null)
+        //{
+        //    configDictionary.Add("T322iInputs", "null");
+        //}
+        //else if (configuration.T322iInputs.Channels.Length == 0)
+        //{
+        //    configDictionary.Add("T322iInputs.Channels", "Zero channels");
+        //}
+        //else
+        //{
+        //    configDictionary.Add("T322iInputs.IsSimulated",
+        //        configuration.T322iInputs.IsSimulated);
 
-            for (var i = 0; i < configuration.T322iInputs.Channels.Length; i++)
-            {
-                configDictionary.Add(
-                    $"T322iInputs.Channel{i}.Name",
-                    configuration.T322iInputs.Channels[i].Name);
-                configDictionary.Add(
-                    $"T322iInputs.Channel{i}.Type",
-                    configuration.T322iInputs.Channels[i].ChannelType);
-                configDictionary.Add(
-                    $"T322iInputs.Channel{i}.Unit",
-                    configuration.T322iInputs.Channels[i].UnitType);
-            }
-        }
+        //    for (var i = 0; i < configuration.T322iInputs.Channels.Length; i++)
+        //    {
+        //        configDictionary.Add(
+        //            $"T322iInputs.Channel{i}.Name",
+        //            configuration.T322iInputs.Channels[i].Name);
+        //        configDictionary.Add(
+        //            $"T322iInputs.Channel{i}.Type",
+        //            configuration.T322iInputs.Channels[i].ChannelType);
+        //        configDictionary.Add(
+        //            $"T322iInputs.Channel{i}.Unit",
+        //            configuration.T322iInputs.Channels[i].UnitType);
+        //    }
+        //}
 
         foreach (var device in configuration.ModbusDevices)
         {
