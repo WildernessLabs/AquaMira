@@ -9,6 +9,7 @@
     <Project Path="NodeControllers/AquaMira.KellerTransducerNodeController/AquaMira.KellerTransducerNodeController.csproj" Id="5b14c073-33d9-4d76-9b06-cc529667970b" />
     <Project Path="NodeControllers/AquaMira.SPM1xPowerNodeController/AquaMira.SPM1xPowerNodeController.csproj" Id="200f9299-01b8-42d9-a572-af4ab862e715" />
     <Project Path="NodeControllers/AquaMira.T322InputNodeController/AquaMira.T322InputNodeController.csproj" Id="5aebd2a7-6001-41b2-a6f6-c1263896d4d2" />
+    <Project Path="NodeControllers/AquaMira.VoltaicBatteryNodeController/AquaMira.VoltaicBatteryNodeController.csproj" Id="2150a344-21b0-4002-a3a1-19ed0bc0ca7a" />
   </Folder>
   <Folder Name="/Solution Items/" />
   <Folder Name="/_meadow_refs/">
@@ -35,6 +36,9 @@
     </Project>
     <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Libraries_and_Frameworks/Graphics.MicroLayout/Driver/Graphics.MicroLayout.csproj" />
     <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Libraries_and_Frameworks/Serialization.MicroJson/Driver/Serialization.MicroJson.csproj" />
+    <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/Batteries.Voltaic.V10x/Driver/Batteries.Voltaic.V10x.csproj">
+      <Deploy />
+    </Project>
     <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/Displays.Silk/Driver/Displays.Silk.csproj" />
     <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/Displays.TftSpi/Driver/Displays.TftSpi.csproj">
       <Deploy />
