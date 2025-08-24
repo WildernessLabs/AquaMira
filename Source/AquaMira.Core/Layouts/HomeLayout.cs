@@ -8,8 +8,10 @@ namespace AquaMira.Core;
 
 internal class HomeLayout : StackLayout
 {
-    private readonly GridLayout dataGrid;
-    private readonly Label[][] dataGridLabels;
+    private readonly DataGrid grid;
+    private readonly Dictionary<string, int> dataToRoLookup = new();
+    private readonly List<string> rowMap = new();
+
     private readonly IFont smallFont;
 
     public HomeLayout(int left, int top, int width, int height)
@@ -19,36 +21,24 @@ internal class HomeLayout : StackLayout
 
         this.BackgroundColor = Color.FromRgb(50, 50, 50);
 
-        var rowCount = 15;
-        dataGridLabels = new Label[rowCount][];
-        for (int i = 0; i < rowCount; i++)
-        {
-            dataGridLabels[i] = GetRow();
-        }
-        dataGrid = new GridLayout(0, 0, width, height, rowCount, 3);
-
-        for (int r = 0; r < dataGridLabels.Length; r++)
-        {
-            for (int c = 0; c < dataGridLabels[r].Length; c++)
+        grid = new DataGrid(0, 0, width, height,
+            new[]
             {
-                dataGrid.Add(dataGridLabels[r][c], r, c, 1, 1, GridLayout.Alignment.Left);
-            }
-        }
-        this.Controls.Add(dataGrid);
-
-    }
-
-    private Label[] GetRow()
-    {
-        return new Label[3]
+                new DataGrid.ColumnDefinition(210, "Sensor"),
+                new DataGrid.ColumnDefinition(60, "Time") { TextColor = Color.FromHex("#C8DC3D"), HorizontalAlignment = HorizontalAlignment.Center },
+                new DataGrid.ColumnDefinition(50, "Value"),
+            })
         {
-                new Label(100, 20, "-") { Font = smallFont, TextColor = Color.White },
-                new Label(100, 20, "-") { Font = smallFont, TextColor = Color.Blue, HorizontalAlignment = HorizontalAlignment.Right },
-                new Label(100, 20, "-") { Font = smallFont, TextColor = Color.White },
+            HeaderFont = new Font8x12(),
+            RowFont = smallFont,
+            RowHeight = 12,
+            HeaderRowHeight = 20,
+            BackgroundColor = Color.FromHex("#1B485D")
         };
-    }
 
-    private readonly List<string> rowMap = new();
+        this.Controls.Add(grid);
+
+    }
 
     internal void UpdateSensorValues(Dictionary<string, object> e)
     {
@@ -61,17 +51,14 @@ internal class HomeLayout : StackLayout
                 index = rowMap.Count - 1;
             }
 
-            if (index >= dataGridLabels.Length)
+            if (index >= grid.RowCount)
             {
-                // If we run out of rows, just skip this key
-                continue;
+                grid.AddRow(key, DateTime.Now.ToString("HH:mm:ss"), e[key]);
             }
 
-            Resolver.Log.Info($"Updating row {index}", "DISPLAY");
-
-            dataGridLabels[index][0].Text = key;
-            dataGridLabels[index][1].Text = DateTime.Now.ToString("HH:mm:ss");
-            dataGridLabels[index][2].Text = e[key].ToString();
+            grid.UpdateCell(index, 0, key);
+            grid.UpdateCell(index, 1, DateTime.Now.ToString("HH:mm:ss"));
+            grid.UpdateCell(index, 2, e[key]);
         }
     }
 }
