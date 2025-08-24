@@ -47,18 +47,7 @@ public class SPM1xPowerNodeController : ISensingNodeController
         var currentNode = new UnitizedSensingNode<Current>(
             $"{config.Name}.Current",
             spm1x,
-            () =>
-            {
-                try
-                {
-                    return spm1x.ReadCurrent().GetAwaiter().GetResult();
-                }
-                catch (Exception ex)
-                {
-                    Resolver.Log.Error($"Error reading current from SPM1x: {ex.Message}");
-                    throw;
-                }
-            },
+            () => spm1x.ReadCurrent().GetAwaiter().GetResult(),
             TimeSpan.FromSeconds(config.SenseIntervalSeconds));
 
         var voltageNode = new UnitizedSensingNode<Voltage>(

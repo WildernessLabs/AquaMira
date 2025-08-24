@@ -30,7 +30,6 @@ public class SensorController
     public event EventHandler<Dictionary<string, object>>? SensorValuesUpdated;
 
     public Dictionary<int, IVolumetricFlowSensor> FlowSensors { get; } = new();
-    public Dictionary<int, ICompositeSensor> ModbusSensors { get; } = new();
     public Task SensorProc { get; set; }
 
     public SensorController(IAquaMiraHardware hardware, ConfigurationController configurationController)
@@ -169,49 +168,6 @@ public class SensorController
         SensorProc = Task.Run(SensorReadProc);
     }
 
-    public async Task ApplySensorConfig(SensorConfiguration configuration)
-    {
-        ConfigureModbusDevices(configuration.ModbusDevices);
-        ConfigureDigitalInputs(configuration.DigitalInputs);
-    }
-
-    private void ConfigureDigitalInputs(IEnumerable<DigitalInputConfig> inputConfigs)
-    {
-        foreach (var config in inputConfigs)
-        {
-            try
-            {
-                Resolver.Log.Info($"digital input: {config.Name} on channel {config.ChannelNumber}");
-
-                var input = config.IsSimulated
-                    ? new RandomizedSimulatedDigitalInputPort(config.Name)
-                    : hardware.InputController.GetInputForChannel(config.ChannelNumber);
-
-                if (input == null)
-                {
-                    // TODO: log this!
-                    continue;
-                }
-
-                // TODO: separate handling for interruptable inputs?
-                //if (input is IDigitalInterruptPort) { }
-                var node = new UnitizedSensingNode<Scalar>(
-                    config.Name,
-                    input, () =>
-                    {
-                        return new Scalar(input.State ? 1 : 0);
-                    },
-                    TimeSpan.FromSeconds(config.SenseIntervalSeconds));
-
-                AddSensingNode(node);
-            }
-            catch (Exception)
-            {
-                // TODO: log this to the cloud (it's probably an unsupported device/bad config)
-            }
-        }
-    }
-
     public void AddSensingNodes(IEnumerable<ISensingNode> nodes)
     {
         foreach (var node in nodes)
@@ -233,46 +189,6 @@ public class SensorController
                 sensingNodes.Add(interval, new List<ISensingNode>());
             }
             sensingNodes[interval].Add(node);
-        }
-    }
-
-    private void ConfigureModbusDevices(IEnumerable<ModbusDeviceConfig> modbusDevices)
-    {
-        foreach (var device in modbusDevices)
-        {
-            try
-            {
-                Resolver.Log.Info($"Configuring Modbus device {device.Name} at address {device.Address}");
-
-                var sensor = ModbusDeviceFactory.CreateSensor(device, hardware);
-                var node = new SensingNode(device.Name, sensor, () =>
-                {
-                    try
-                    {
-                        return sensor.GetCurrentValues();
-                    }
-                    catch (Exception mex)
-                    {
-                        Resolver.Log.Error($"Error reading Modbus device {device.Name} values: {mex.Message}");
-                        return null;
-                    }
-                }, TimeSpan.FromSeconds(device.SenseIntervalSeconds));
-
-                if (ModbusSensors.ContainsKey(node.NodeId))
-                {
-                    Resolver.Log.Warn($"Duplicate modbus sensor key: {node.NodeId}");
-                }
-                else
-                {
-                    ModbusSensors.Add(node.NodeId, sensor);
-                }
-
-                AddSensingNode(node);
-            }
-            catch (Exception ex)
-            {
-                Resolver.Log.Error($"Error configuring Modbus device {device.Name}: {ex.Message}");
-            }
         }
     }
 
@@ -410,50 +326,4 @@ public class SensorController
             await Task.Delay(1000);
         }
     }
-
-    //private static Enum? GetCanonicalUnitTypeValue(object unitObject)
-    //{
-    //    // Get the type of the object
-    //    Type objectType = unitObject.GetType();
-
-    //    // Find the IUnit interface implementation
-    //    Type iunitInterface = objectType.GetInterfaces()
-    //        .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IUnit<,>));
-
-    //    if (iunitInterface != null)
-    //    {
-    //        // Use reflection to invoke the method
-    //        MethodInfo method = iunitInterface.GetMethod("GetCanonicalUnitType");
-    //        if (method != null)
-    //        {
-    //            return (Enum)method.Invoke(unitObject, null);
-    //        }
-    //    }
-
-    //    return null;
-    //}
-
-    //private static Type? GetUnitTypeFromReading(object reading)
-    //{
-    //    // Get the type of the object
-    //    Type objectType = reading.GetType();
-
-    //    // Find the IUnit interface implementation
-    //    Type iunitInterface = objectType.GetInterfaces()
-    //        .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IUnit<,>));
-
-    //    if (iunitInterface != null)
-    //    {
-    //        // Get the generic arguments of the interface
-    //        Type[] genericArgs = iunitInterface.GetGenericArguments();
-
-    //        // The second generic argument is TUnit
-    //        if (genericArgs.Length >= 2)
-    //        {
-    //            return genericArgs[1]; // TUnit is the second generic parameter
-    //        }
-    //    }
-
-    //    return null; // If no IUnit interface is found
-    //}
 }

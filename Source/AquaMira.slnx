@@ -5,6 +5,7 @@
     <File Path="../README.md" />
   </Folder>
   <Folder Name="/NodeControllers/">
+    <Project Path="NodeControllers/AquaMira.CerusNodeController/AquaMira.CerusNodeController.csproj" Id="a61e8d0d-82d7-4f27-9559-352e018e6396" />
     <Project Path="NodeControllers/AquaMira.SPM1xPowerNodeController/AquaMira.SPM1xPowerNodeController.csproj" Id="200f9299-01b8-42d9-a572-af4ab862e715" />
     <Project Path="NodeControllers/AquaMira.T322InputNodeController/AquaMira.T322InputNodeController.csproj" Id="5aebd2a7-6001-41b2-a6f6-c1263896d4d2" />
   </Folder>

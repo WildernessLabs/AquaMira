@@ -63,9 +63,6 @@ public class MainController
         NetworkController.NetworkConnectedChanged += OnNetworkConnectedChanged;
         NetworkController.SignalStrengthChanged += OnNetworkSignalStrengthChanged;
 
-        await sensorController.ApplySensorConfig(
-            configurationController.SensorConfiguration);
-
         _ = Task.Run(async () =>
         {
             await cloudController.ReportDeviceStartup();
