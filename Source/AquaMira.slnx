@@ -10,6 +10,7 @@
     <Project Path="NodeControllers/AquaMira.SPM1xPowerNodeController/AquaMira.SPM1xPowerNodeController.csproj" Id="200f9299-01b8-42d9-a572-af4ab862e715" />
     <Project Path="NodeControllers/AquaMira.T322InputNodeController/AquaMira.T322InputNodeController.csproj" Id="5aebd2a7-6001-41b2-a6f6-c1263896d4d2" />
     <Project Path="NodeControllers/AquaMira.VoltaicBatteryNodeController/AquaMira.VoltaicBatteryNodeController.csproj" Id="2150a344-21b0-4002-a3a1-19ed0bc0ca7a" />
+    <Project Path="NodeControllers/AquaMira.YsiSondeNodeController/AquaMira.YsiSondeNodeController.csproj" Id="d2edc9dc-dfa1-4ff9-b392-e6252ba65aac" />
   </Folder>
   <Folder Name="/Solution Items/" />
   <Folder Name="/_meadow_refs/">

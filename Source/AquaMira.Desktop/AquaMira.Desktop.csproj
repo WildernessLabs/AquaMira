@@ -17,6 +17,7 @@
         <ProjectReference Include="..\NodeControllers\AquaMira.CerusNodeController\AquaMira.CerusNodeController.csproj" />
         <ProjectReference Include="..\NodeControllers\AquaMira.SPM1xPowerNodeController\AquaMira.SPM1xPowerNodeController.csproj" />
         <ProjectReference Include="..\NodeControllers\AquaMira.T322InputNodeController\AquaMira.T322InputNodeController.csproj" />
+        <ProjectReference Include="..\NodeControllers\AquaMira.YsiSondeNodeController\AquaMira.YsiSondeNodeController.csproj" />
     </ItemGroup>
 
     <ItemGroup>

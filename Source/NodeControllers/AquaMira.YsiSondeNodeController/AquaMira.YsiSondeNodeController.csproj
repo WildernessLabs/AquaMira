@@ -6,4 +6,9 @@
       <LangVersion>10</LangVersion>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\Sensors.Environmental.Ysi.Exo\Driver\Sensors.Environmental.Ysi.Exo.csproj" />
+    <ProjectReference Include="..\..\AquaMira.Core\AquaMira.Core.csproj" />
+  </ItemGroup>
+
 </Project>
