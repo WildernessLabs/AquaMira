@@ -36,6 +36,8 @@ public class YsiSondeNodeController : ISensingNodeController
 
     public Task<IEnumerable<ISensingNode>> ConfigureFromJson(string configJson, IAquaMiraHardware hardware)
     {
+        Resolver.Log?.Info("Configuring YsiSonde node controller from JSON");
+
         YsiSondeConfiguration config;
         try
         {

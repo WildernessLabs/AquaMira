@@ -17,6 +17,8 @@ public class CerusNodeController : ISensingNodeController
 
     public async Task<IEnumerable<ISensingNode>> ConfigureFromJson(string configJson, IAquaMiraHardware hardware)
     {
+        Resolver.Log?.Info("Configuring Cerus node controller from JSON");
+
         CerusConfiguration config;
         try
         {

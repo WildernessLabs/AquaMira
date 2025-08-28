@@ -2,6 +2,7 @@ Deploy:
   NoLink: 
   - AquaMira.Core
   - AquaMira.T322InputNodeController
-  - ProgrammableAnalogInput
+  - AquaMira.SPM1xPowerNodeController
+  - AquaMira.CerusNodeController
   - Temco.T3xxx
   - ProjectLab

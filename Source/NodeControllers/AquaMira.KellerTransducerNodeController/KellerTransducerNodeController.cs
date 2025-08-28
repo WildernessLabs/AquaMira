@@ -17,6 +17,8 @@ public class KellerTransducerNodeController
 
     public Task<IEnumerable<ISensingNode>> ConfigureFromJson(string configJson, IAquaMiraHardware hardware)
     {
+        Resolver.Log?.Info("Configuring KellerTransducer node controller from JSON");
+
         KellerConfiguration config;
         try
         {

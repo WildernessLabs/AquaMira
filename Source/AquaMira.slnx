@@ -12,7 +12,9 @@
     <Project Path="NodeControllers/AquaMira.VoltaicBatteryNodeController/AquaMira.VoltaicBatteryNodeController.csproj" Id="2150a344-21b0-4002-a3a1-19ed0bc0ca7a" />
     <Project Path="NodeControllers/AquaMira.YsiSondeNodeController/AquaMira.YsiSondeNodeController.csproj" Id="d2edc9dc-dfa1-4ff9-b392-e6252ba65aac" />
   </Folder>
-  <Folder Name="/Solution Items/" />
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.build.props" />
+  </Folder>
   <Folder Name="/_meadow_refs/">
     <Project Path="../../Meadow.Contracts/Source/Meadow.Contracts/Meadow.Contracts.csproj">
       <Deploy />

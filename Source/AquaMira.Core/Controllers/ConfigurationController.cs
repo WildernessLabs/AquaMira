@@ -66,8 +66,11 @@ public class ConfigurationController
         // Use MicroJson utilities to get all root properties
         var allProperties = MicroJson.JsonUtilities.GetAllRootProperties(json);
 
+        Resolver.Log?.Info($"Found {allProperties.Count} configuration nodes.", "aquamira");
+
         foreach (var kvp in allProperties)
         {
+            Resolver.Log?.Info($" - '{kvp.Key}'", "aquamira");
             configNodes[kvp.Key] = kvp.Value;
         }
     }

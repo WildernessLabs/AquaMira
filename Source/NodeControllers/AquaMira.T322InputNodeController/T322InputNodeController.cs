@@ -22,6 +22,8 @@ public class T322InputNodeController : ISensingNodeController
 
     public Task<IEnumerable<ISensingNode>> ConfigureFromJson(string configJson, IAquaMiraHardware hardware)
     {
+        Resolver.Log?.Info("Configuring T3-22i input node controller from JSON");
+
         T322iConfiguration config;
         try
         {
@@ -97,7 +99,20 @@ public class T322InputNodeController : ISensingNodeController
                                 break;
                             }
                             // create an input
-                            var cinput = await T3Module.CreateCurrentInputPort(pin);
+                            ICurrentInputPort? cinput = null;
+
+                            do
+                            {
+                                try
+                                {
+                                    cinput = await T3Module.CreateCurrentInputPort(pin);
+                                }
+                                catch (Exception iex)
+                                {
+                                    Resolver.Log.Info($"Failed to create current input port for channel {result.ChannelConfig.ChannelNumber}: {iex.Message}.  Will retry.");
+                                    await Task.Delay(1000);
+                                }
+                            } while (cinput == null);
 
                             switch (result.ChannelConfig.UnitType)
                             {
@@ -124,6 +139,7 @@ public class T322InputNodeController : ISensingNodeController
                                 break;
                             }
                             // create an input
+                            // TODO: need retry logic here
                             var countinput = T3Module.CreateCounter(countpin, Meadow.Hardware.InterruptMode.EdgeRising);
                             // register the input for reading
                             node = new SensingNode(result.ChannelConfig.Name, countinput, () =>

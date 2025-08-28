@@ -1,6 +1,7 @@
 ﻿using AquaMira.Core.Contracts;
 using Meadow;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace AquaMira.Core;
@@ -44,8 +45,10 @@ public class MainController
 
         // Dynamically register all available sensing node controllers for this hardware
         var availableControllers = hardware.GetAvailableSensingNodeControllers();
+        Resolver.Log.Info($"Found {availableControllers?.Count()} registered sensing node controllers", Constants.LoggingSource);
         foreach (var controllerDescriptor in availableControllers)
         {
+            Resolver.Log.Info($"Registering sensing node controller {controllerDescriptor.ControllerType.Name} with configuration name '{controllerDescriptor.ConfigurationName}'", Constants.LoggingSource);
             sensorController.RegisterSensingNodeController(controllerDescriptor);
         }
 
@@ -88,7 +91,7 @@ public class MainController
 
     private void OnNetworkConnectedChanged(object sender, bool e)
     {
-        Resolver.Log.Info($"Network connection state changed to {e}");
+        Resolver.Log.Info($"Network connection state changed to {e}", Constants.LoggingSource);
         displayController?.SetNetworkStatus(e);
     }
 

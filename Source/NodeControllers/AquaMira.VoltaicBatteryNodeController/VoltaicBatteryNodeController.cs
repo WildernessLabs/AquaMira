@@ -17,6 +17,8 @@ public class VoltaicBatteryNodeController
 
     public Task<IEnumerable<ISensingNode>> ConfigureFromJson(string configJson, IAquaMiraHardware hardware)
     {
+        Resolver.Log?.Info("Configuring Voltaic battery node controller from JSON");
+
         VoltaicConfiguration config;
         try
         {

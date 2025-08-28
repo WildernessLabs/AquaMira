@@ -17,6 +17,8 @@ public class SPM1xPowerNodeController : ISensingNodeController
 
     public Task<IEnumerable<ISensingNode>> ConfigureFromJson(string configJson, IAquaMiraHardware hardware)
     {
+        Resolver.Log?.Info("Configuring SPM1x power node controller from JSON");
+
         SPM1xConfiguration config;
         try
         {

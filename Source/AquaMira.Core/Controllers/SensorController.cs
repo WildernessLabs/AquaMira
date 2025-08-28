@@ -9,14 +9,6 @@ using System.Threading.Tasks;
 
 namespace AquaMira.Core;
 
-internal static class Extensions
-{
-    public static bool Implements<TInterface>(this Type type)
-    {
-        return typeof(TInterface).IsAssignableFrom(type);
-    }
-}
-
 public class SensorController
 {
     private readonly IAquaMiraHardware hardware;
@@ -37,36 +29,6 @@ public class SensorController
         this.hardware = hardware;
         this.configurationController = configurationController;
     }
-
-    //public void RegisterSensingNodeController<TController>(string? configRoot)
-    //    where TController : ISensingNodeController, new()
-    //{
-    //    nodeSemaphore.Wait();
-    //    try
-    //    {
-    //        var key = typeof(TController).Name;
-    //        if (registeredSensingNodeControllers.ContainsKey(key))
-    //        {
-    //            Resolver.Log.Warn($"Sensing node controller {key} is already registered");
-    //            return;
-    //        }
-
-    //        var configJson = configurationController.GetConfigurationNode(configRoot);
-
-    //        if (configJson == null)
-    //        {
-    //            Resolver.Log.Warn($"No configuration found for {key} at root '{configRoot}'");
-    //            return;
-    //        }
-
-    //        var controller = new TController();
-    //        registeredSensingNodeControllers.Add(key, controller);
-    //    }
-    //    finally
-    //    {
-    //        nodeSemaphore.Release();
-    //    }
-    //}
 
     public void RegisterSensingNodeController<TController>(string configurationName)
         where TController : ISensingNodeController, new()
@@ -92,7 +54,7 @@ public class SensorController
         {
             if (registeredSensingNodeControllers.ContainsKey(key))
             {
-                Resolver.Log.Warn($"Sensing node controller {key} is already registered");
+                Resolver.Log.Warn($"Sensing node controller {key} is already registered", Constants.LoggingSource);
                 return;
             }
 
@@ -100,7 +62,7 @@ public class SensorController
 
             if (configJson == null)
             {
-                Resolver.Log.Warn($"No configuration found for {configurationName}");
+                Resolver.Log.Warn($"No configuration found for {configurationName}", Constants.LoggingSource);
             }
 
             // Create instance using reflection (since we can't use generics here)
@@ -108,11 +70,11 @@ public class SensorController
 
             registeredSensingNodeControllers.Add(key, controller);
 
-            Resolver.Log.Info($"Registered sensing node controller: {key}");
+            Resolver.Log.Info($"Registered sensing node controller: {key}", Constants.LoggingSource);
         }
         catch (Exception ex)
         {
-            Resolver.Log.Error($"Failed to register sensing node controller {key}: {ex.Message}");
+            Resolver.Log.Error($"Failed to register sensing node controller {key}: {ex.Message}", Constants.LoggingSource);
         }
         finally
         {
@@ -125,31 +87,31 @@ public class SensorController
         // make sure this is called once and only once.  Ever.
         if (controllersLoaded)
         {
-            Resolver.Log.Warn("Sensing node controllers have already been loaded");
+            Resolver.Log.Warn("Sensing node controllers have already been loaded", Constants.LoggingSource);
             return;
         }
 
-        nodeSemaphore.Wait();
+        await nodeSemaphore.WaitAsync();
         try
         {
+            var configurationTasks = new List<Task>();
+
             foreach (var key in registeredSensingNodeControllers.Keys)
             {
-                try
+                var configJson = configurationController.GetConfigurationNode(key);
+                if (configJson == null)
                 {
-                    var configJson = configurationController.GetConfigurationNode(key);
-                    if (configJson == null)
-                    {
-                        Resolver.Log.Warn($"No configuration found for {key}");
-                        continue;
-                    }
-                    var nodes = await registeredSensingNodeControllers[key].ConfigureFromJson(configJson, hardware);
-                    AddSensingNodes(nodes);
+                    Resolver.Log.Warn($"No configuration found for {key}", Constants.LoggingSource);
+                    continue;
                 }
-                catch (Exception ex)
-                {
-                    Resolver.Log.Error($"Error loading sensing node controller {key}: {ex.Message}");
-                }
+
+                // it's possible that a node controller cannot come up immediately (i.e. a communication bus is unavailable, etc)
+                // so we need to background the configure call and add the nodes as they become available.
+                var task = ConfigureController(key, configJson, hardware);
+                configurationTasks.Add(task);
             }
+
+            // Wait for all configuration tasks to complete
             controllersLoaded = true;
         }
         finally
@@ -158,11 +120,24 @@ public class SensorController
         }
     }
 
+    private async Task ConfigureController(string key, string configJson, IAquaMiraHardware hardware)
+    {
+        try
+        {
+            var nodes = await registeredSensingNodeControllers[key].ConfigureFromJson(configJson, hardware);
+            AddSensingNodes(nodes);
+        }
+        catch (Exception ex)
+        {
+            Resolver.Log.Error($"Error loading sensing node controller {key}: {ex.Message}", Constants.LoggingSource);
+        }
+    }
+
     internal void Start()
     {
         if (!controllersLoaded && registeredSensingNodeControllers.Count > 0)
         {
-            Resolver.Log.Warn("Sensing node controllers have not been loaded. Call LoadSensingNodeControllers() before starting the sensor controller.");
+            Resolver.Log.Warn("Sensing node controllers have not been loaded. Call LoadSensingNodeControllers() before starting the sensor controller.", Constants.LoggingSource);
         }
 
         SensorProc = Task.Run(SensorReadProc);
@@ -180,7 +155,7 @@ public class SensorController
     {
         lock (sensingNodes)
         {
-            Resolver.Log.Info($"Adding sensing node {node.Name} with period {node.QueryPeriod.TotalSeconds} seconds");
+            Resolver.Log.Info($"Adding sensing node {node.Name} with period {node.QueryPeriod.TotalSeconds} seconds", Constants.LoggingSource);
 
             var interval = (int)node.QueryPeriod.TotalSeconds;
 
@@ -205,7 +180,7 @@ public class SensorController
 
         var telemetryList = new Dictionary<string, object>();
 
-        while (true)
+        while (!Resolver.App.CancellationToken.IsCancellationRequested)
         {
             telemetryList.Clear();
 
@@ -219,7 +194,7 @@ public class SensorController
                         {
                             foreach (var node in sensingNodes[period])
                             {
-                                Resolver.Log.Debug($"Reading sensor {node.Name}...");
+                                Resolver.Log.Debug($"Reading sensor {node.Name}...", Constants.LoggingSource);
 
                                 if (node is IUnitizedSensingNode usn)
                                 {
@@ -234,7 +209,7 @@ public class SensorController
                                     }
                                     catch (Exception ex)
                                     {
-                                        Resolver.Log.Error($"Error reading from node: {node.Name}: {ex.Message}");
+                                        Resolver.Log.Error($"Error reading from node: {node.Name}: {ex.Message}", Constants.LoggingSource);
                                         continue;
                                     }
                                 }
@@ -247,13 +222,13 @@ public class SensorController
                                         value = node.ReadDelegate();
                                         if (value == null)
                                         {
-                                            Resolver.Log.Info($"Error reading from {node.Sensor.GetType().Name}", "sensors");
+                                            Resolver.Log.Info($"Error reading from {node.Sensor.GetType().Name}", Constants.LoggingSource);
                                             continue;
                                         }
                                     }
                                     catch (Exception ex)
                                     {
-                                        Resolver.Log.Error($"Error reading from node: {node.Name}: {ex.Message}");
+                                        Resolver.Log.Error($"Error reading from node: {node.Name}: {ex.Message}", Constants.LoggingSource);
                                         continue;
                                     }
 
@@ -280,7 +255,7 @@ public class SensorController
                                             }
                                             catch (Exception vdx)
                                             {
-                                                Resolver.Log.Warn($"Failed to read {sensorItem.Value}: {vdx.Message}");
+                                                Resolver.Log.Warn($"Failed to read {sensorItem.Value}: {vdx.Message}", Constants.LoggingSource);
                                             }
                                         }
                                     }
@@ -294,18 +269,18 @@ public class SensorController
                                             }
                                             catch (Exception uvx)
                                             {
-                                                Resolver.Log.Warn($"Failed to read {node.Name}: {uvx.Message}");
+                                                Resolver.Log.Warn($"Failed to read {node.Name}: {uvx.Message}", Constants.LoggingSource);
                                             }
                                         }
                                     }
                                     else
                                     {
-                                        Resolver.Log.Warn($"Sensor {node.Name} returned a value of type {value.GetType().Name} which is not a recognized unit type. Returning as-is.");
+                                        Resolver.Log.Warn($"Sensor {node.Name} returned a value of type {value.GetType().Name} which is not a recognized unit type. Returning as-is.", Constants.LoggingSource);
                                     }
                                 }
                                 else
                                 {
-                                    Resolver.Log.Warn($"Sensor {node.Name} is not a recognized sensing node type. Cannot read value.");
+                                    Resolver.Log.Warn($"Sensor {node.Name} is not a recognized sensing node type. Cannot read value.", Constants.LoggingSource);
                                 }
                             }
                         }
@@ -313,7 +288,7 @@ public class SensorController
                 }
                 catch (Exception ex)
                 {
-                    Resolver.Log.Error($"Error reading telemetry: {ex.Message}");
+                    Resolver.Log.Error($"Error reading telemetry: {ex.Message}", Constants.LoggingSource);
                 }
             }
 
@@ -328,5 +303,7 @@ public class SensorController
             }
             await Task.Delay(1000);
         }
+
+        Resolver.Log.Error($"Sensor read loop exited", Constants.LoggingSource);
     }
 }
