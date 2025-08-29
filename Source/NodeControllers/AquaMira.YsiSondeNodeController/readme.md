@@ -2,6 +2,20 @@
 
 This is an AquaMira node controller specifically for the YSI EXO Water Quality Sonde. It is designed to interface with the YSI EXO Sonde and collect data from its various sensors.
 
+## Registration
+
+Inside your app's `IAquaMiraHardware` implementation:
+
+```csharp
+public IEnumerable<(Type ControllerType, string ConfigurationName)> GetAvailableSensingNodeControllers()
+{
+    return new[]
+    {
+        (typeof(YsiSondeNodeController), "YSISonde")
+    };
+}
+```
+
 ## Behavior
 
 The YsiSondeNodeController will connect to the sonde at startup and make requests to the sode for data at a period that is 1/2 of the configured `SenseIntervalSeconds` to ensure that it can publish the most recent data.  It will publish data on a period of `SenseIntervalSeconds` using the last-read values for each sensor configured.
@@ -19,6 +33,8 @@ Configuration Properties:
 | Parameters | Array of Strings | Yes | N/A | A list of parameters to read from the YSI Sonde. Valid parameters include: Temperature, Chloriform, Conductivity, LFChloriform, DOSat, DOmgL, Salinity, SpCond, BGARFU, TDS, Turbidity, TSS, WiperPos, pH, pHmv, Battery, CablePower. A parameter of 'All' will include all supported parameters|
 
 ### Sample Configuration Section
+
+The root node name must match the name used (second parameter) in the registration above.
 
 ```yaml
   "YSISonde": {

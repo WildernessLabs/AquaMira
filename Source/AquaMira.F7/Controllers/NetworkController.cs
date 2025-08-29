@@ -27,6 +27,8 @@ namespace AquaMira.F7
                 Resolver.Log.Info("Using WiFi Network Adapter");
                 wifi.NetworkConnected += OnNetworkConnected;
                 wifi.NetworkDisconnected += OnNetworkDisconnected;
+                wifi.NetworkConnectFailed += OnNetworkConnectFailed;
+                wifi.NetworkError += OnNetworkError;
             }
             else if (cell != null)
             {
@@ -45,6 +47,16 @@ namespace AquaMira.F7
             //_ = Task.Run(SignalMonitor);
 
             Resolver.Device.PlatformOS.NtpClient.TimeChanged += OnNtpTimeSync;
+        }
+
+        private void OnNetworkError(INetworkAdapter sender, NetworkErrorEventArgs args)
+        {
+            Resolver.Log.Info($"{sender.GetType().Name} Network Error: {args.ErrorCode}", Constants.LoggingSource);
+        }
+
+        private void OnNetworkConnectFailed(INetworkAdapter sender)
+        {
+            Resolver.Log.Info($"{sender.GetType().Name} Network connect failed", Constants.LoggingSource);
         }
 
         private async Task SignalMonitor()
