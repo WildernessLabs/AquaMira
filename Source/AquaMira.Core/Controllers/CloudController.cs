@@ -110,13 +110,30 @@ public class CloudController : ILogProvider
         return cloudService.SendLog(log);
     }
 
-    public async Task ReportDeviceStartup()
+    public async Task ReportDeviceStartup(IMeadowDevice device)
     {
         var deviceInfo = new Dictionary<string, object>
         {
             { "DeviceName", Resolver.Device.Information.DeviceName },
             { "Device ID", Resolver.Device.Information.UniqueID }
         };
+
+        if (device.ReliabilityService != null)
+        {
+            if (device.ReliabilityService.SystemResetCount > 0)
+            {
+                deviceInfo.Add("ResetCount", device.ReliabilityService.SystemResetCount);
+            }
+            if (device.ReliabilityService.SystemPowerCycleCount > 0)
+            {
+                deviceInfo.Add("PowerCycleCount", device.ReliabilityService.SystemPowerCycleCount);
+            }
+            if (device.ReliabilityService.LastBootWasFromCrash)
+            {
+                deviceInfo.Add("LastBootWasFromCrash", true);
+            }
+            deviceInfo.Add("LastResetReason", device.ReliabilityService.LastResetReason.ToString());
+        }
 
         var evt = new CloudEvent
         {
@@ -137,95 +154,15 @@ public class CloudController : ILogProvider
         }
     }
 
-    public async Task ReportSensorConfiguration(SensorConfiguration configuration)
+    public async Task ReportSensorConfiguration(SensorController sensorController)
     {
         var configDictionary = new Dictionary<string, object>();
 
-        if (configuration.ConfigurableAnalogs == null)
-        {
-            configDictionary.Add("ConfigurableAnalogs", "null");
-        }
-        else if (configuration.ConfigurableAnalogs.Channels.Length == 0)
-        {
-            configDictionary.Add("ConfigurableAnalogs.Channels", "Zero channels");
-        }
-        else
-        {
-            configDictionary.Add("ConfigurableAnalogs.IsSimulated",
-                configuration.ConfigurableAnalogs.IsSimulated);
+        // TODO: improve this (is simulated, etc) - maybe the controller should have a Descriptor property or similar?
 
-            for (var i = 0; i < configuration.ConfigurableAnalogs.Channels.Length; i++)
-            {
-                configDictionary.Add(
-                    $"ConfigurableAnalogs.Channel{i}.Name",
-                    configuration.ConfigurableAnalogs.Channels[i].Name);
-                configDictionary.Add(
-                    $"ConfigurableAnalogs.Channel{i}.Type",
-                    configuration.ConfigurableAnalogs.Channels[i].ChannelType);
-                configDictionary.Add(
-                    $"ConfigurableAnalogs.Channel{i}.Unit",
-                    configuration.ConfigurableAnalogs.Channels[i].UnitType);
-            }
-        }
-
-        //if (configuration.T322iInputs == null)
-        //{
-        //    configDictionary.Add("T322iInputs", "null");
-        //}
-        //else if (configuration.T322iInputs.Channels.Length == 0)
-        //{
-        //    configDictionary.Add("T322iInputs.Channels", "Zero channels");
-        //}
-        //else
-        //{
-        //    configDictionary.Add("T322iInputs.IsSimulated",
-        //        configuration.T322iInputs.IsSimulated);
-
-        //    for (var i = 0; i < configuration.T322iInputs.Channels.Length; i++)
-        //    {
-        //        configDictionary.Add(
-        //            $"T322iInputs.Channel{i}.Name",
-        //            configuration.T322iInputs.Channels[i].Name);
-        //        configDictionary.Add(
-        //            $"T322iInputs.Channel{i}.Type",
-        //            configuration.T322iInputs.Channels[i].ChannelType);
-        //        configDictionary.Add(
-        //            $"T322iInputs.Channel{i}.Unit",
-        //            configuration.T322iInputs.Channels[i].UnitType);
-        //    }
-        //}
-
-        foreach (var device in configuration.ModbusDevices)
+        foreach (var node in sensorController.Nodes)
         {
-            configDictionary.Add(
-                $"Modbus.{device.Driver}.IsSimulated",
-                device.IsSimulated);
-            configDictionary.Add(
-                $"Modbus.{device.Driver}.Address",
-                device.Address);
-        }
-
-        foreach (var input in configuration.DigitalInputs)
-        {
-            configDictionary.Add(
-                $"DigitalInputs.Channel{input.ChannelNumber}.IsSimulated",
-                input.IsSimulated);
-            configDictionary.Add(
-                $"DigitalInputs.Channel{input.ChannelNumber}.Name",
-                input.Name);
-        }
-
-        foreach (var input in configuration.FrequencyInputs)
-        {
-            configDictionary.Add(
-                $"FrequencyInputs.Channel{input.ChannelNumber}.IsSimulated",
-                input.IsSimulated);
-            configDictionary.Add(
-                $"FrequencyInputs.Channel{input.ChannelNumber}.Name",
-                input.Name);
-            configDictionary.Add(
-                $"FrequencyInputs.Channel{input.ChannelNumber}.Unit",
-                input.UnitType);
+            configDictionary.Add(node.Value.GetType().Name, $"{node.Key} seconds");
         }
 
         var evt = new CloudEvent

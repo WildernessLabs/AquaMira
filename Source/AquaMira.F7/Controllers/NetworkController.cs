@@ -17,6 +17,11 @@ namespace AquaMira.F7
 
         public NetworkController(IMeadowDevice device)
         {
+            device.PlatformOS.TimeChanged += (s) =>
+            {
+                Resolver.Log.Info($"System time changed to {DateTime.UtcNow:MM/dd/yyyy HH:mm:ss}", "AquaMira");
+            };
+
             this.settings = ConfigurationController.AppSettings;
 
             wifi = device.NetworkAdapters.Primary<IWiFiNetworkAdapter>();
@@ -47,6 +52,11 @@ namespace AquaMira.F7
             //_ = Task.Run(SignalMonitor);
 
             Resolver.Device.PlatformOS.NtpClient.TimeChanged += OnNtpTimeSync;
+        }
+
+        private void PlatformOS_TimeChanged(DateTime utcTime)
+        {
+            throw new NotImplementedException();
         }
 
         private void OnNetworkError(INetworkAdapter sender, NetworkErrorEventArgs args)

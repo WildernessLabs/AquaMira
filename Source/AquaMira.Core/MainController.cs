@@ -24,14 +24,15 @@ public class MainController
 
     public async Task Initialize(IAquaMiraHardware hardware)
     {
-        this.hardware = hardware;
+        Resolver.Log.Debug("MainController Initialize", Constants.LoggingSource);
 
-        var a = Resolver.Device.NetworkAdapters;
+        this.hardware = hardware;
 
         // create generic services
         configurationController = new ConfigurationController();
         storageController = new StorageController(configurationController);
 
+        Resolver.Log.Debug("Creating NetworkController", Constants.LoggingSource);
         cloudController = new CloudController(
             Resolver.MeadowCloudService,
             Resolver.CommandService,
@@ -41,35 +42,50 @@ public class MainController
         // Register the CloudController so we can avoid passing it around to everyone that needs to log errors
         Resolver.Services.Add(cloudController);
 
+        Resolver.Log.Debug("Creating SensorController", Constants.LoggingSource);
         sensorController = new SensorController(hardware, configurationController);
 
         // Dynamically register all available sensing node controllers for this hardware
+        Resolver.Log.Debug("Registering available sensing node controllers", Constants.LoggingSource);
         var availableControllers = hardware.GetAvailableSensingNodeControllers();
         Resolver.Log.Info($"Found {availableControllers?.Count()} registered sensing node controllers", Constants.LoggingSource);
-        foreach (var controllerDescriptor in availableControllers)
+        if (availableControllers != null)
         {
-            Resolver.Log.Info($"Registering sensing node controller {controllerDescriptor.ControllerType.Name} with configuration name '{controllerDescriptor.ConfigurationName}'", Constants.LoggingSource);
-            sensorController.RegisterSensingNodeController(controllerDescriptor);
+            foreach (var controllerDescriptor in availableControllers)
+            {
+                Resolver.Log.Info($"Registering sensing node controller {controllerDescriptor.ControllerType.Name} with configuration name '{controllerDescriptor.ConfigurationName}'", Constants.LoggingSource);
+                sensorController.RegisterSensingNodeController(controllerDescriptor);
+            }
         }
-
         sensorController.SensorValuesUpdated += OnSensorValuesUpdated;
-        await sensorController.LoadSensingNodeControllers(hardware);
 
+        Resolver.Log.Debug("Loading sensing node controllers", Constants.LoggingSource);
+        await sensorController.LoadSensingNodeControllers(hardware);
         sensorController.Start();
 
+        Resolver.Log.Debug("Creating DisplayController", Constants.LoggingSource);
         displayController = new DisplayController(
             this.hardware.Display,
             this.hardware.DisplayRotation,
             this.hardware);
 
         // connect events
+        Resolver.Log.Debug("Connecting events", Constants.LoggingSource);
         NetworkController.NetworkConnectedChanged += OnNetworkConnectedChanged;
         NetworkController.SignalStrengthChanged += OnNetworkSignalStrengthChanged;
 
         _ = Task.Run(async () =>
         {
-            await cloudController.ReportDeviceStartup();
-            await cloudController.ReportSensorConfiguration(configurationController.SensorConfiguration);
+            Resolver.Log.Debug("Reporting device startup to cloud", Constants.LoggingSource);
+            try
+            {
+                await cloudController.ReportDeviceStartup(Resolver.Device);
+                await cloudController.ReportSensorConfiguration(sensorController);
+            }
+            catch (Exception ex)
+            {
+                Resolver.Log.Info($"Failed to send to cloud: {ex.Message}", Constants.LoggingSource);
+            }
         });
     }
 

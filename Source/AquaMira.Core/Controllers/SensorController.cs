@@ -1,6 +1,5 @@
 ﻿using AquaMira.Core.Contracts;
 using Meadow;
-using Meadow.Peripherals.Sensors;
 using Meadow.Units;
 using System;
 using System.Collections.Generic;
@@ -11,9 +10,8 @@ namespace AquaMira.Core;
 
 public class SensorController
 {
-    private readonly IAquaMiraHardware hardware;
+    public Dictionary<int, List<ISensingNode>> Nodes { get; } = new();
 
-    private readonly Dictionary<int, List<ISensingNode>> sensingNodes = new();
     private readonly ConfigurationController configurationController;
     private readonly Dictionary<string, ISensingNodeController> registeredSensingNodeControllers = new();
     private readonly SemaphoreSlim nodeSemaphore = new(1, 1);
@@ -21,12 +19,10 @@ public class SensorController
 
     public event EventHandler<Dictionary<string, object>>? SensorValuesUpdated;
 
-    public Dictionary<int, IVolumetricFlowSensor> FlowSensors { get; } = new();
     public Task SensorProc { get; set; }
 
-    public SensorController(IAquaMiraHardware hardware, ConfigurationController configurationController)
+    public SensorController(IAquaMiraHardware _, ConfigurationController configurationController)
     {
-        this.hardware = hardware;
         this.configurationController = configurationController;
     }
 
@@ -153,17 +149,17 @@ public class SensorController
 
     public void AddSensingNode(ISensingNode node)
     {
-        lock (sensingNodes)
+        lock (Nodes)
         {
             Resolver.Log.Info($"Adding sensing node {node.Name} with period {node.QueryPeriod.TotalSeconds} seconds", Constants.LoggingSource);
 
             var interval = (int)node.QueryPeriod.TotalSeconds;
 
-            if (!sensingNodes.ContainsKey(interval))
+            if (!Nodes.ContainsKey(interval))
             {
-                sensingNodes.Add(interval, new List<ISensingNode>());
+                Nodes.Add(interval, new List<ISensingNode>());
             }
-            sensingNodes[interval].Add(node);
+            Nodes[interval].Add(node);
         }
     }
 
@@ -184,15 +180,15 @@ public class SensorController
         {
             telemetryList.Clear();
 
-            lock (sensingNodes)
+            lock (Nodes)
             {
                 try
                 {
-                    foreach (var period in sensingNodes.Keys)
+                    foreach (var period in Nodes.Keys)
                     {
                         if (tick % period == 0)
                         {
-                            foreach (var node in sensingNodes[period])
+                            foreach (var node in Nodes[period])
                             {
                                 Resolver.Log.Debug($"Reading sensor {node.Name}...", Constants.LoggingSource);
 
@@ -297,7 +293,7 @@ public class SensorController
                 SensorValuesUpdated?.Invoke(this, telemetryList);
             }
 
-            if (sensingNodes.Count > 0)
+            if (Nodes.Count > 0)
             {
                 tick++;
             }
