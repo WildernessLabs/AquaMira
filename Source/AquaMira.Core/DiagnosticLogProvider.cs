@@ -18,7 +18,7 @@ public class DiagnosticLogProvider : ILogProvider
                 DiagnosticMessageReceived?.Invoke(this, message);
                 break;
             default:
-                if (messageGroup != null && messageGroup.Contains("AquaMira"))
+                if (messageGroup != null && messageGroup.Contains(Constants.LoggingSource, StringComparison.InvariantCultureIgnoreCase))
                 {
                     DiagnosticMessageReceived?.Invoke(this, message);
                 }

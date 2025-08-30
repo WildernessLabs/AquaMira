@@ -22,7 +22,6 @@ internal class AquaMiraProjectLabHardware : IAquaMiraHardware
     public ITemperatureSensor? TemperatureSensor => projLab.TemperatureSensor;
     public IPixelDisplay? Display => projLab.Display;
     public INetworkController NetworkController { get; }
-
     public IInputController InputController { get; }
 
     public AquaMiraProjectLabHardware(IMeadowDevice device)
