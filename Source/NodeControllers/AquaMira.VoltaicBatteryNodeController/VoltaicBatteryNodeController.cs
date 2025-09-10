@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace AquaMira;
 
-public class VoltaicBatteryNodeController
+public class VoltaicBatteryNodeController : ISensingNodeController
 {
     private IV10x? battery;
 

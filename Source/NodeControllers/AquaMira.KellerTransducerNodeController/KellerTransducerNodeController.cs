@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace AquaMira;
 
-public class KellerTransducerNodeController
+public class KellerTransducerNodeController : ISensingNodeController
 {
     private IKellerTransducer? kellerTransducer;
 
