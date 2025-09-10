@@ -13,6 +13,12 @@ public class UnitizedSensingNode<TUnit> : SensingNode, IUnitizedSensingNode
     public double ReadAsCanonicalUnit()
     {
         var value = ReadDelegate.Invoke();
+
+        if (value == null)
+        {
+            return 0;
+        }
+
         if (value is IUnit unit)
         {
             if (CanonicalUnit == null)

@@ -16,22 +16,22 @@ public class YsiSondeNodeController : ISensingNodeController
 {
     private IExoSonde? sonde;
     private Temperature? sondeTemp = null;
-    private Scalar chlor;
-    private Scalar cond;
-    private Scalar lfCond;
-    private Scalar doSat;
-    private Scalar domgL;
-    private Scalar salintiy;
-    private Scalar spCond;
-    private Scalar bgarfu;
-    private Scalar tds;
-    private Scalar turb;
-    private Scalar tss;
-    private Scalar wiper;
-    private Scalar pH;
-    private Scalar pHmV;
-    private Scalar battery;
-    private Scalar cablePower;
+    private Scalar? chlor;
+    private Scalar? cond;
+    private Scalar? lfCond;
+    private Scalar? doSat;
+    private Scalar? domgL;
+    private Scalar? salintiy;
+    private readonly Scalar? spCond;
+    private Scalar? bgarfu;
+    private readonly Scalar? tds;
+    private readonly Scalar? turb;
+    private readonly Scalar? tss;
+    private readonly Scalar? wiper;
+    private readonly Scalar? pH;
+    private readonly Scalar? pHmV;
+    private readonly Scalar? battery;
+    private readonly Scalar? cablePower;
     private Timer readTimer;
 
     public Task<IEnumerable<ISensingNode>> ConfigureFromJson(string configJson, IAquaMiraHardware hardware)
@@ -230,6 +230,19 @@ public class YsiSondeNodeController : ISensingNodeController
         return Task.FromResult<IEnumerable<ISensingNode>>(nodes);
     }
 
+    private Scalar? ConvertReadingToScalar((ParameterCode parameter, object reading) value)
+    {
+        try
+        {
+            return (Scalar)Convert.ToDouble(value.reading);
+        }
+        catch
+        {
+            Resolver.Log.Warn($"Unable to convert {value.parameter} reading {value.reading} to Scalar");
+            return null;
+        }
+    }
+
     private async Task ManageSondeData()
     {
         if (sonde != null)
@@ -268,82 +281,82 @@ public class YsiSondeNodeController : ISensingNodeController
 
                 if (chlorTuple != default)
                 {
-                    chlor = (Scalar)(double)chlorTuple.Value;
+                    chlor = ConvertReadingToScalar(chlorTuple);
                 }
 
                 if (condTuple != default)
                 {
-                    cond = (Scalar)(float)condTuple.Value;
+                    cond = ConvertReadingToScalar(condTuple);
                 }
 
                 if (lfCondTuple != default)
                 {
-                    lfCond = (Scalar)(float)lfCondTuple.Value;
+                    lfCond = ConvertReadingToScalar(lfCondTuple);
                 }
 
                 if (doSatTuple != default)
                 {
-                    doSat = (Scalar)(float)doSatTuple.Value;
+                    doSat = ConvertReadingToScalar(doSatTuple);
                 }
 
                 if (momgLTuple != default)
                 {
-                    domgL = (Scalar)(float)momgLTuple.Value;
+                    domgL = ConvertReadingToScalar(momgLTuple);
                 }
 
                 if (salTuple != default)
                 {
-                    salintiy = (Scalar)(float)salTuple.Value;
+                    salintiy = ConvertReadingToScalar(salTuple);
                 }
 
                 if (spCondTuple != default)
                 {
-                    spCond = (Scalar)(float)spCondTuple.Value;
+                    ConvertReadingToScalar(spCondTuple);
                 }
 
                 if (bgarfuTuple != default)
                 {
-                    bgarfu = (Scalar)(float)bgarfuTuple.Value;
+                    bgarfu = ConvertReadingToScalar(bgarfuTuple);
                 }
 
                 if (tdstuple != default)
                 {
-                    tds = (Scalar)(float)tdstuple.Value;
+                    ConvertReadingToScalar(tdstuple);
                 }
 
                 if (turbTuple != default)
                 {
-                    turb = (Scalar)(float)turbTuple.Value;
+                    ConvertReadingToScalar(turbTuple);
                 }
 
                 if (tssTuple != default)
                 {
-                    tss = (Scalar)(float)tssTuple.Value;
+                    ConvertReadingToScalar(tssTuple);
                 }
 
                 if (wiperTuple != default)
                 {
-                    wiper = (Scalar)(float)wiperTuple.Value;
+                    ConvertReadingToScalar(wiperTuple);
                 }
 
                 if (pHTuple != default)
                 {
-                    pH = (Scalar)(float)pHTuple.Value;
+                    ConvertReadingToScalar(pHTuple);
                 }
 
                 if (pHmVTuple != default)
                 {
-                    pHmV = (Scalar)(float)pHmVTuple.Value;
+                    ConvertReadingToScalar(pHmVTuple);
                 }
 
                 if (batteryTuple != default)
                 {
-                    battery = (Scalar)(float)batteryTuple.Value;
+                    ConvertReadingToScalar(batteryTuple);
                 }
 
                 if (cablePowerTuple != default)
                 {
-                    cablePower = (Scalar)(float)cablePowerTuple.Value;
+                    ConvertReadingToScalar(cablePowerTuple);
                 }
             }
             catch (Exception ex)
