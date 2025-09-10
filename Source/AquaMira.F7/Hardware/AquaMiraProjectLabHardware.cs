@@ -53,7 +53,9 @@ internal class AquaMiraProjectLabHardware : IAquaMiraHardware
         {
             (typeof(T322InputNodeController), "T322iInputs"),
             (typeof(SPM1xPowerNodeController), "Spm1x"),
-            (typeof(CerusNodeController), "CerusXDrive"),
+            (typeof(CerusNodeController), "CerusXDrive5"),
+            (typeof(CerusNodeController), "CerusXDrive6"),
+            (typeof(CerusNodeController), "CerusXDrive7")
         };
     }
 }

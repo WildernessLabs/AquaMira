@@ -1,44 +1,38 @@
 {
-  "ModbusDevices": [
-    {
-      "Driver": "CerusXDrive",
-      "Address": 5,
-      "Name": "BoosterPump1",
-      "IsSimulated": false,
-      "SenseIntervalSeconds": 60
-    },
-    { 
-      "Driver": "CerusXDrive",
-      "Address": 6,
-      "Name": "BoosterPump2",
-      "IsSimulated": false,
-      "SenseIntervalSeconds": 60
-    },
-    {
-      "Driver": "CerusXDrive",
-      "Address": 7,
-      "Name": "WellPump1",
-      "IsSimulated": false,
-      "SenseIntervalSeconds": 60
-    },
-    {
-      "Driver": "Spm1x",
-      "Address": 2,
-      "Name": "InputPower",
-      "IsSimulated": false,
-      "SenseIntervalSeconds": 60
-    } 
-  ],
+  "CerusXDrive5": {
+    "ModbusAddress": 5,
+    "Name": "BoosterPump1",
+    "IsSimulated": false,
+    "SenseIntervalSeconds": 60
+  },
+  "CerusXDrive6": {
+    "ModbusAddress": 6,
+    "Name": "BoosterPump2",
+    "IsSimulated": false,
+    "SenseIntervalSeconds": 60
+  },
+  "CerusXDrive7": {
+    "ModbusAddress": 7,
+    "Name": "WellPump1",
+    "IsSimulated": false,
+    "SenseIntervalSeconds": 60
+  },
+  "Spm1x": {
+    "ModbusAddress": 2,
+    "Name": "InputPower",
+    "IsSimulated": false,
+    "SenseIntervalSeconds": 60
+  },
   "T322iInputs": {
-   "ModbusAddress": 254,
-   "IsSimulated": false,
-   "Channels": [
+    "ModbusAddress": 254,
+    "IsSimulated": false,
+    "Channels": [
       {
         "ChannelNumber": 0,
         "ChannelType": "Current_4_20",
         "Scale": 0.0006703,
         "Offset": -0.002681,
-        "UnitType": "VolumetricFlow" ,
+        "UnitType": "VolumetricFlow",
         "Name": "FlowMeter",
         "SenseIntervalSeconds": 60
       },
