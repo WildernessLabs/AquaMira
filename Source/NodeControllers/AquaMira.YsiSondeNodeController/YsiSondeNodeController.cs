@@ -73,7 +73,7 @@ public class YsiSondeNodeController : ISensingNodeController
             nodes.Add(new UnitizedSensingNode<Temperature>(
                 $"{config.Name}.Temperature",
                 sonde,
-                () => sondeTemp,
+                () => Task.FromResult<IUnit?>(sondeTemp),
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)));
         }
         if (config.Parameters.Contains("Chloriform", StringComparer.OrdinalIgnoreCase) ||
@@ -82,7 +82,7 @@ public class YsiSondeNodeController : ISensingNodeController
             nodes.Add(new UnitizedSensingNode<Scalar>(
                 $"{config.Name}.Chloriform",
                 sonde,
-                () => chlor,
+                () => Task.FromResult<IUnit?>(chlor),
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)));
         }
         if (config.Parameters.Contains("Conductivity", StringComparer.OrdinalIgnoreCase) ||
@@ -91,7 +91,7 @@ public class YsiSondeNodeController : ISensingNodeController
             nodes.Add(new UnitizedSensingNode<Scalar>(
                 $"{config.Name}.Conductivity",
                 sonde,
-                () => cond,
+                () => Task.FromResult<IUnit?>(cond),
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)));
         }
         if (config.Parameters.Contains("LFChloriform", StringComparer.OrdinalIgnoreCase) ||
@@ -100,7 +100,7 @@ public class YsiSondeNodeController : ISensingNodeController
             nodes.Add(new UnitizedSensingNode<Scalar>(
                 $"{config.Name}.LFChloriform",
                 sonde,
-                () => lfCond,
+                () => Task.FromResult<IUnit?>(lfCond),
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)));
         }
         if (config.Parameters.Contains("DOSat", StringComparer.OrdinalIgnoreCase) ||
@@ -109,7 +109,7 @@ public class YsiSondeNodeController : ISensingNodeController
             nodes.Add(new UnitizedSensingNode<Scalar>(
                 $"{config.Name}.DOSat",
                 sonde,
-                () => doSat,
+                () => Task.FromResult<IUnit?>(doSat),
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)));
         }
         if (config.Parameters.Contains("DOmgL", StringComparer.OrdinalIgnoreCase) ||
@@ -118,7 +118,7 @@ public class YsiSondeNodeController : ISensingNodeController
             nodes.Add(new UnitizedSensingNode<Scalar>(
                 $"{config.Name}.DOmgL",
                 sonde,
-                () => domgL,
+                () => Task.FromResult<IUnit?>(domgL),
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)));
         }
         if (config.Parameters.Contains("Salinity", StringComparer.OrdinalIgnoreCase) ||
@@ -127,7 +127,7 @@ public class YsiSondeNodeController : ISensingNodeController
             nodes.Add(new UnitizedSensingNode<Scalar>(
                 $"{config.Name}.Salinity",
                 sonde,
-                () => salintiy,
+                () => Task.FromResult<IUnit?>(salintiy),
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)));
         }
         if (config.Parameters.Contains("SpCond", StringComparer.OrdinalIgnoreCase) ||
@@ -136,7 +136,7 @@ public class YsiSondeNodeController : ISensingNodeController
             nodes.Add(new UnitizedSensingNode<Scalar>(
                 $"{config.Name}.SpCond",
                 sonde,
-                () => spCond,
+                () => Task.FromResult<IUnit?>(spCond),
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)));
         }
         if (config.Parameters.Contains("BGARFU", StringComparer.OrdinalIgnoreCase) ||
@@ -145,7 +145,7 @@ public class YsiSondeNodeController : ISensingNodeController
             nodes.Add(new UnitizedSensingNode<Scalar>(
                 $"{config.Name}.BGARFU",
                 sonde,
-                () => bgarfu,
+                () => Task.FromResult<IUnit?>(bgarfu),
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)));
         }
         if (config.Parameters.Contains("TDS", StringComparer.OrdinalIgnoreCase) ||
@@ -154,7 +154,7 @@ public class YsiSondeNodeController : ISensingNodeController
             nodes.Add(new UnitizedSensingNode<Scalar>(
             $"{config.Name}.TDS",
             sonde,
-            () => tds,
+            () => Task.FromResult<IUnit?>(tds),
             TimeSpan.FromSeconds(config.SenseIntervalSeconds)));
         }
         if (config.Parameters.Contains("Turbidity", StringComparer.OrdinalIgnoreCase) ||
@@ -163,7 +163,7 @@ public class YsiSondeNodeController : ISensingNodeController
             nodes.Add(new UnitizedSensingNode<Scalar>(
                 $"{config.Name}.Turbidity",
                 sonde,
-                () => turb,
+                () => Task.FromResult<IUnit?>(turb),
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)));
         }
         if (config.Parameters.Contains("TSS", StringComparer.OrdinalIgnoreCase) ||
@@ -172,7 +172,7 @@ public class YsiSondeNodeController : ISensingNodeController
             nodes.Add(new UnitizedSensingNode<Scalar>(
                 $"{config.Name}.TSS",
                 sonde,
-                () => tss,
+                () => Task.FromResult<IUnit?>(tss),
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)));
         }
         if (config.Parameters.Contains("WiperPos", StringComparer.OrdinalIgnoreCase) ||
@@ -181,7 +181,7 @@ public class YsiSondeNodeController : ISensingNodeController
             nodes.Add(new UnitizedSensingNode<Scalar>(
                 $"{config.Name}.WiperPos",
                 sonde,
-                () => wiper,
+                () => Task.FromResult<IUnit?>(wiper),
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)));
         }
         if (config.Parameters.Contains("pH", StringComparer.OrdinalIgnoreCase) ||
@@ -190,7 +190,7 @@ public class YsiSondeNodeController : ISensingNodeController
             nodes.Add(new UnitizedSensingNode<Scalar>(
                 $"{config.Name}.pH",
                 sonde,
-                () => pH,
+                () => Task.FromResult<IUnit?>(pH),
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)));
         }
         if (config.Parameters.Contains("pHmV", StringComparer.OrdinalIgnoreCase) ||
@@ -199,7 +199,7 @@ public class YsiSondeNodeController : ISensingNodeController
             nodes.Add(new UnitizedSensingNode<Scalar>(
                 $"{config.Name}.pHmV",
                 sonde,
-                () => pHmV,
+                () => Task.FromResult<IUnit?>(pHmV),
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)));
         }
         if (config.Parameters.Contains("Battery", StringComparer.OrdinalIgnoreCase) ||
@@ -208,7 +208,7 @@ public class YsiSondeNodeController : ISensingNodeController
             nodes.Add(new UnitizedSensingNode<Scalar>(
                 $"{config.Name}.Battery",
                 sonde,
-                () => battery,
+                () => Task.FromResult<IUnit?>(battery),
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)));
         }
         if (config.Parameters.Contains("CablePower", StringComparer.OrdinalIgnoreCase) ||
@@ -217,7 +217,7 @@ public class YsiSondeNodeController : ISensingNodeController
             nodes.Add(new UnitizedSensingNode<Scalar>(
                 $"{config.Name}.CablePower",
                 sonde,
-                () => cablePower,
+                () => Task.FromResult<IUnit?>(cablePower),
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)));
         }
 

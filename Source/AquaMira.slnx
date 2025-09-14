@@ -112,6 +112,7 @@
     <Project Path="../../MQTTnet/Source/MQTTnet/MQTTnet.csproj">
       <Deploy />
     </Project>
+    <Project Path="../../talusdb/src/WildernessLabs.TalusDB/WildernessLabs.TalusDB.csproj" />
   </Folder>
   <Folder Name="/_tests/" Id="02ea681e-c7d8-13c7-8484-4ac65e1b71e8">
     <Project Path="HardwareValidation/HardwareValidation.csproj" Id="edfce0dc-f1bc-4b22-a946-6586bdffc61e">

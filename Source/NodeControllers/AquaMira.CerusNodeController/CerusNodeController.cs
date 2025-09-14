@@ -53,27 +53,81 @@ public class CerusNodeController : ISensingNodeController
             new UnitizedSensingNode<Current>(
                 $"{config.Name}.OutputCurrent",
                 cerusXDrive,
-                () => cerusXDrive.ReadOutputCurrent().GetAwaiter().GetResult(),
+                async () =>
+                {
+                    try
+                    {
+                        return await cerusXDrive.ReadOutputCurrent();
+                    }
+                    catch(TimeoutException)
+                    {
+                        // timeouts shouldn't log to the cloud
+                        return null;
+                    }
+                },
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)),
             new UnitizedSensingNode<Temperature>(
                 $"{config.Name}.AmbientTemp",
                 cerusXDrive,
-                () => cerusXDrive.ReadAmbientTemperature().GetAwaiter().GetResult(),
+                async () =>
+                {
+                    try
+                    {
+                        return await cerusXDrive.ReadAmbientTemperature();
+                    }
+                    catch(TimeoutException)
+                    {
+                        // timeouts shouldn't log to the cloud
+                        return null;
+                    }
+                },
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)),
             new UnitizedSensingNode<Voltage>(
                 $"{config.Name}.DCBusVoltage",
                 cerusXDrive,
-                () => cerusXDrive.ReadDCBusVoltage().GetAwaiter().GetResult(),
+                async () =>
+                {
+                    try
+                    {
+                        return await cerusXDrive.ReadDCBusVoltage();
+                    }
+                    catch(TimeoutException)
+                    {
+                        return null;
+                    }
+                },
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)),
             new UnitizedSensingNode<Frequency>(
                 $"{config.Name}.OutputFrequency",
                 cerusXDrive,
-                () => cerusXDrive.ReadOutputFrequency().GetAwaiter().GetResult(),
+                async () =>
+                {
+                    try
+                    {
+                        return await cerusXDrive.ReadOutputFrequency();
+                    }
+                    catch(TimeoutException)
+                    {
+                        // timeouts shouldn't log to the cloud
+                        return null;
+                    }
+                },
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)),
             new UnitizedSensingNode<Voltage>(
                 $"{config.Name}.OutputVoltage",
                 cerusXDrive,
-                () => cerusXDrive.ReadOutputVoltage().GetAwaiter().GetResult(),
+                async () =>
+                {
+                    try
+                    {
+                        return await cerusXDrive.ReadOutputVoltage();
+                    }
+                    catch(TimeoutException)
+                    {
+                        // timeouts shouldn't log to the cloud
+                        return null;
+                    }
+                },
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)),
         };
 

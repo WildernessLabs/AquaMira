@@ -1,5 +1,6 @@
 ﻿using Meadow.Foundation.Graphics;
 using Meadow.Foundation.Graphics.MicroLayout;
+using System.Reflection;
 
 namespace AquaMira.Core;
 
@@ -8,7 +9,7 @@ internal class HeaderControl : AbsoluteLayout
     private readonly Picture disconnected;
     private readonly Picture connected;
     private readonly Picture heart;
-    private readonly Label signal;
+    private readonly Label version;
 
     public HeaderControl(DisplayScreen screen)
         : base(0, 0, screen.Width, 34)
@@ -35,22 +36,22 @@ internal class HeaderControl : AbsoluteLayout
             1,
             Resources.NetDisconnected.Width, Resources.NetDisconnected.Height, Resources.NetDisconnected);
 
-        signal = new Label(
+        version = new Label(
             connected.Left - 40, 0, 40, logo.Height)
         {
             VerticalAlignment = VerticalAlignment.Center,
-            Text = "--",
+            Text = Assembly.GetExecutingAssembly().GetName().Version.ToString(3),
             Font = new Font8x12()
         };
 
-        this.Controls.Add(logo, disconnected, connected, heart, signal);
+        this.Controls.Add(logo, disconnected, connected, heart, version);
 
         connected.IsVisible = false;
     }
 
     public void SetSignal(int? signal)
     {
-        this.signal.Text = signal?.ToString() ?? "--";
+        this.version.Text = signal?.ToString() ?? "--";
     }
 
     public void SetConnectedState(bool isConnected)

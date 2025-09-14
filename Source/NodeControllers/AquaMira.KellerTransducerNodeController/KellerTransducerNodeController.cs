@@ -51,12 +51,34 @@ public class KellerTransducerNodeController : ISensingNodeController
             new UnitizedSensingNode<Pressure>(
                 $"{config.Name}.PressureChannel1",
                 kellerTransducer,
-                () => kellerTransducer.ReadPressure(PressureChannel.P1).GetAwaiter().GetResult(),
+                async () =>
+                {
+                    try
+                    {
+                        return await kellerTransducer.ReadPressure(PressureChannel.P1);
+                    }
+                    catch(TimeoutException)
+                    {
+                        // timeouts shouldn't log to the cloud
+                        return null;
+                    }
+                },
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)),
             new UnitizedSensingNode<Temperature>(
                 $"{config.Name}.TemperatureChannel1",
                 kellerTransducer,
-                () => kellerTransducer.ReadTemperature(TemperatureChannel.TOB1).GetAwaiter().GetResult(),
+                async () =>
+                {
+                    try
+                    {
+                        return await kellerTransducer.ReadTemperature(TemperatureChannel.TOB1);
+                    }
+                    catch(TimeoutException)
+                    {
+                        // timeouts shouldn't log to the cloud
+                        return null;
+                    }
+                },
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds))
         };
 

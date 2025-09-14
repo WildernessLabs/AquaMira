@@ -197,10 +197,12 @@ public class SensorController
                                     try
                                     {
                                         var value = usn.ReadAsCanonicalUnit();
-
-                                        if (!telemetryList.ContainsKey(usn.Name))
+                                        if (value != null)
                                         {
-                                            telemetryList.Add(usn.Name, value);
+                                            if (!telemetryList.ContainsKey(usn.Name))
+                                            {
+                                                telemetryList.Add(usn.Name, value);
+                                            }
                                         }
                                     }
                                     catch (Exception ex)

@@ -117,11 +117,17 @@ public class T322InputNodeController : ISensingNodeController
                             switch (result.ChannelConfig.UnitType)
                             {
                                 case nameof(Temperature):
-                                    node = new UnitizedSensingNode<Temperature>(result.ChannelConfig.Name, cinput, () => ReadUnitizedChannel(cinput, result.ChannelConfig),
+                                    node = new UnitizedSensingNode<Temperature>(result.ChannelConfig.Name, cinput, () =>
+                                    {
+                                        return Task.FromResult(ReadUnitizedChannel(cinput, result.ChannelConfig));
+                                    },
                                     TimeSpan.FromSeconds(result.ChannelConfig.SenseIntervalSeconds));
                                     break;
                                 default:
-                                    node = new SensingNode(result.ChannelConfig.Name, cinput, () => ReadUnitizedChannel(cinput, result.ChannelConfig),
+                                    node = new SensingNode(result.ChannelConfig.Name, cinput, () =>
+                                    {
+                                        return ReadUnitizedChannel(cinput, result.ChannelConfig);
+                                    },
                                     TimeSpan.FromSeconds(result.ChannelConfig.SenseIntervalSeconds));
                                     break;
                             }

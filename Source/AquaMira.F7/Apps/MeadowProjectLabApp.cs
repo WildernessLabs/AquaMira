@@ -20,11 +20,17 @@ public class MeadowProjectLabApp : ProjectLabCoreComputeApp
             Hardware.ComputeModule.WatchdogEnable(TimeSpan.FromSeconds(WatchdogIntervalSeconds));
 
             Resolver.Log.Info("Watchdog timer enabled");
+            int i = 0;
             while (!shutdownHappened)
             {
                 await Task.Delay(TimeSpan.FromSeconds(3));
                 Hardware.ComputeModule.WatchdogReset();
                 mainController?.WatchdogNotify();
+
+                if (i++ > 5)
+                {
+                    //                    throw new Exception("Simulated watchdog failure");
+                }
             }
             Resolver.Log.Warn("Watchdog timer will trigger shortly");
         }, TaskCreationOptions.LongRunning)

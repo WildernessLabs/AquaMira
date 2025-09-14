@@ -49,13 +49,35 @@ public class SPM1xPowerNodeController : ISensingNodeController
         var currentNode = new UnitizedSensingNode<Current>(
             $"{config.Name}.Current",
             spm1x,
-            () => spm1x.ReadCurrent().GetAwaiter().GetResult(),
+            async () =>
+            {
+                try
+                {
+                    return await spm1x.ReadCurrent();
+                }
+                catch (TimeoutException)
+                {
+                    // timeouts shouldn't log to the cloud
+                    return null;
+                }
+            },
             TimeSpan.FromSeconds(config.SenseIntervalSeconds));
 
         var voltageNode = new UnitizedSensingNode<Voltage>(
             $"{config.Name}.Voltage",
             spm1x,
-            () => spm1x.ReadVoltage().GetAwaiter().GetResult(),
+            async () =>
+            {
+                try
+                {
+                    return await spm1x.ReadVoltage();
+                }
+                catch (TimeoutException)
+                {
+                    // timeouts shouldn't log to the cloud
+                    return null;
+                }
+            },
             TimeSpan.FromSeconds(config.SenseIntervalSeconds));
 
         return Task.FromResult<IEnumerable<ISensingNode>>(

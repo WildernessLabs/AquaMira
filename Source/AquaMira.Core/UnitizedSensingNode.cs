@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace AquaMira.Core;
 
@@ -10,13 +11,13 @@ public class UnitizedSensingNode<TUnit> : SensingNode, IUnitizedSensingNode
 {
     public Enum? CanonicalUnit { get; set; }
 
-    public double ReadAsCanonicalUnit()
+    public double? ReadAsCanonicalUnit()
     {
         var value = ReadDelegate.Invoke();
 
         if (value == null)
         {
-            return 0;
+            return null;
         }
 
         if (value is IUnit unit)
@@ -26,6 +27,19 @@ public class UnitizedSensingNode<TUnit> : SensingNode, IUnitizedSensingNode
                 CanonicalUnit = GetCanonicalUnitTypeValue(value);
             }
             return unit.ToCanonical();
+        }
+        else if (value is Task<IUnit?> task)
+        {
+            var result = task.GetAwaiter().GetResult();
+            if (result == null)
+            {
+                return null;
+            }
+            if (CanonicalUnit == null)
+            {
+                CanonicalUnit = GetCanonicalUnitTypeValue(result);
+            }
+            return result.ToCanonical();
         }
         else
         {
@@ -55,7 +69,7 @@ public class UnitizedSensingNode<TUnit> : SensingNode, IUnitizedSensingNode
         return null;
     }
 
-    public UnitizedSensingNode(string nodeName, object sensor, Func<IUnit?> readDelegate, TimeSpan queryPeriod)
+    public UnitizedSensingNode(string nodeName, object sensor, Func<Task<IUnit?>> readDelegate, TimeSpan queryPeriod)
         : base(nodeName, sensor, readDelegate, queryPeriod)
     {
     }

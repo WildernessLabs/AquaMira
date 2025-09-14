@@ -44,7 +44,8 @@ public class VoltaicBatteryNodeController : ISensingNodeController
         {
             battery = new V10x(
                 hardware.GetModbusSerialClient(),
-                (byte)config.ModbusAddress);
+                (byte)config.ModbusAddress,
+                TimeSpan.FromSeconds(config.SenseIntervalSeconds / 2));
         }
 
         var nodes = new List<ISensingNode>
@@ -52,32 +53,32 @@ public class VoltaicBatteryNodeController : ISensingNodeController
             new UnitizedSensingNode<Current>(
                 $"{config.Name}.InputCurrent",
                 battery,
-                () => battery.InputCurrent,
+                () => Task.FromResult<IUnit?>(battery.InputCurrent),
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)),
             new UnitizedSensingNode<Voltage>(
                 $"{config.Name}.BatteryVoltage",
                 battery,
-                () => battery.BatteryVoltage,
+                () => Task.FromResult<IUnit?>(battery.BatteryVoltage),
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)),
             new UnitizedSensingNode<Current>(
                 $"{config.Name}.InputCurrent",
                 battery,
-                () => battery.InputCurrent,
+                () => Task.FromResult<IUnit?>(battery.InputCurrent),
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)),
             new UnitizedSensingNode<Voltage>(
                 $"{config.Name}.InputVoltage",
                 battery,
-                () => battery.InputVoltage,
+                () => Task.FromResult<IUnit?>(battery.InputVoltage),
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)),
             new UnitizedSensingNode<Temperature>(
                 $"{config.Name}.ControllerTemp",
                 battery,
-                () => battery.ControllerTemp,
+                () => Task.FromResult<IUnit?>(battery.ControllerTemp),
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)),
             new UnitizedSensingNode<Temperature>(
                 $"{config.Name}.EnvironmentTemp",
                 battery,
-                () => battery.EnvironmentTemp,
+                () => Task.FromResult<IUnit?>(battery.EnvironmentTemp),
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)),
         };
 

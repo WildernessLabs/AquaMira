@@ -4,6 +4,6 @@ namespace AquaMira.Core;
 
 public interface IUnitizedSensingNode : ISensingNode
 {
-    double ReadAsCanonicalUnit();
+    double? ReadAsCanonicalUnit();
     Enum? CanonicalUnit { get; set; }
 }
