@@ -2,6 +2,7 @@
   <Folder Name="/docs/">
     <File Path="../Documentation/BenchTesting.md" />
     <File Path="../Documentation/bom-v1.md" />
+    <File Path="../Documentation/forking.md" />
     <File Path="../README.md" />
   </Folder>
   <Folder Name="/NodeControllers/">
