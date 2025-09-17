@@ -33,6 +33,7 @@ public class YsiSondeNodeController : ISensingNodeController
     private readonly Scalar? battery;
     private readonly Scalar? cablePower;
     private Timer readTimer;
+    private bool reportCompleted = false;
 
     public Task<IEnumerable<ISensingNode>> ConfigureFromJson(string configJson, IAquaMiraHardware hardware)
     {
@@ -243,12 +244,41 @@ public class YsiSondeNodeController : ISensingNodeController
         }
     }
 
+    private async Task ReportSondeConfiguration()
+    {
+        if (sonde != null)
+        {
+            if (reportCompleted)
+            {
+                return;
+            }
+
+            var configuredParameters = await sonde.GetParametersToRead();
+
+            Resolver.Log.Info($"Sonde is configured to record the following:", "ysi-sonde");
+
+            foreach (var param in configuredParameters)
+            {
+                Resolver.Log.Trace($" - {param}", "ysi-sonde");
+            }
+
+            var samplePeriod = await sonde.GetSamplePeriod();
+            Resolver.Log.Trace($"Sample period: {samplePeriod:HH:mm}", "ysi-sonde");
+
+            reportCompleted = true;
+        }
+    }
+
     private async Task ManageSondeData()
     {
         if (sonde != null)
         {
             try
             {
+                await ReportSondeConfiguration();
+
+                var statusArray = await sonde.GetParameterStatus();
+
                 Resolver.Log.Trace($"Reading sonde information...");
                 var data = await sonde.GetCurrentData();
 
