@@ -542,7 +542,7 @@ public class YsiSondeNodeController : ISensingNodeController
             }
 
             var samplePeriod = await sonde.GetSamplePeriod();
-            Resolver.Log.Trace($"Sample period: {samplePeriod:HH:mm}", "ysi-sonde");
+            Resolver.Log.Trace($"Sample period: {samplePeriod}", "ysi-sonde");
 
             reportCompleted = true;
         }
@@ -663,7 +663,7 @@ public class YsiSondeNodeController : ISensingNodeController
 
                 // PAR
                 TryExtractValue(data, ParameterCode.PARChannel1, ref parChannel1);
-                TryExtractValue(data, ParameterCode.PARChannel2, ref parChannel2); 
+                TryExtractValue(data, ParameterCode.PARChannel2, ref parChannel2);
 
             }
             catch (Exception ex)
