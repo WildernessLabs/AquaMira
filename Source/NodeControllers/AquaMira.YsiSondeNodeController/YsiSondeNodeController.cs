@@ -15,23 +15,16 @@ namespace AquaMira;
 public class YsiSondeNodeController : ISensingNodeController
 {
     private IExoSonde? sonde;
-    private Temperature? sondeTemp = null;
-    private Scalar? chlor;
-    private Scalar? cond;
-    private Scalar? lfCond;
-    private Scalar? doSat;
-    private Scalar? domgL;
-    private Scalar? salintiy;
-    private readonly Scalar? spCond;
-    private Scalar? bgarfu;
-    private readonly Scalar? tds;
-    private readonly Scalar? turb;
-    private readonly Scalar? tss;
-    private readonly Scalar? wiper;
-    private readonly Scalar? pH;
-    private readonly Scalar? pHmV;
-    private readonly Scalar? battery;
-    private readonly Scalar? cablePower;
+
+    private Temperature sondeTemp = new Temperature(-99);
+    private Conductivity conductivity = Conductivity.Zero;
+    private ConcentrationInWater salinity = ConcentrationInWater.Zero;
+    private PotentialHydrogen pH = PotentialHydrogen.Neutral;
+    private Voltage batteryVoltage = Voltage.Zero;
+    private Voltage cablePower = Voltage.Zero;
+    private Scalar doSat = Scalar.Zero;
+    private ConcentrationInWater domgL = ConcentrationInWater.Zero;
+
     private Timer readTimer;
     private bool reportCompleted = false;
 
@@ -77,31 +70,31 @@ public class YsiSondeNodeController : ISensingNodeController
                 () => Task.FromResult<IUnit?>(sondeTemp),
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)));
         }
-        if (config.Parameters.Contains("Chloriform", StringComparer.OrdinalIgnoreCase) ||
-           config.Parameters.Contains("All", StringComparer.OrdinalIgnoreCase))
-        {
-            nodes.Add(new UnitizedSensingNode<Scalar>(
-                $"{config.Name}.Chloriform",
-                sonde,
-                () => Task.FromResult<IUnit?>(chlor),
-                TimeSpan.FromSeconds(config.SenseIntervalSeconds)));
-        }
         if (config.Parameters.Contains("Conductivity", StringComparer.OrdinalIgnoreCase) ||
            config.Parameters.Contains("All", StringComparer.OrdinalIgnoreCase))
         {
-            nodes.Add(new UnitizedSensingNode<Scalar>(
+            nodes.Add(new UnitizedSensingNode<Conductivity>(
                 $"{config.Name}.Conductivity",
                 sonde,
-                () => Task.FromResult<IUnit?>(cond),
+                () => Task.FromResult<IUnit?>(conductivity),
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)));
         }
-        if (config.Parameters.Contains("LFChloriform", StringComparer.OrdinalIgnoreCase) ||
+        if (config.Parameters.Contains("Salinity", StringComparer.OrdinalIgnoreCase) ||
            config.Parameters.Contains("All", StringComparer.OrdinalIgnoreCase))
         {
-            nodes.Add(new UnitizedSensingNode<Scalar>(
-                $"{config.Name}.LFChloriform",
+            nodes.Add(new UnitizedSensingNode<ConcentrationInWater>(
+                $"{config.Name}.Salinity",
                 sonde,
-                () => Task.FromResult<IUnit?>(lfCond),
+                () => Task.FromResult<IUnit?>(salinity),
+                TimeSpan.FromSeconds(config.SenseIntervalSeconds)));
+        }
+        if (config.Parameters.Contains("pH", StringComparer.OrdinalIgnoreCase) ||
+              config.Parameters.Contains("All", StringComparer.OrdinalIgnoreCase))
+        {
+            nodes.Add(new UnitizedSensingNode<PotentialHydrogen>(
+                $"{config.Name}.pH",
+                sonde,
+                () => Task.FromResult<IUnit?>(pH),
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)));
         }
         if (config.Parameters.Contains("DOSat", StringComparer.OrdinalIgnoreCase) ||
@@ -116,19 +109,82 @@ public class YsiSondeNodeController : ISensingNodeController
         if (config.Parameters.Contains("DOmgL", StringComparer.OrdinalIgnoreCase) ||
            config.Parameters.Contains("All", StringComparer.OrdinalIgnoreCase))
         {
-            nodes.Add(new UnitizedSensingNode<Scalar>(
+            nodes.Add(new UnitizedSensingNode<ConcentrationInWater>(
                 $"{config.Name}.DOmgL",
                 sonde,
                 () => Task.FromResult<IUnit?>(domgL),
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)));
         }
-        if (config.Parameters.Contains("Salinity", StringComparer.OrdinalIgnoreCase) ||
+
+
+
+
+
+        if (config.Parameters.Contains("Chloriform", StringComparer.OrdinalIgnoreCase) ||
+           config.Parameters.Contains("All", StringComparer.OrdinalIgnoreCase))
+        {
+        }
+        if (config.Parameters.Contains("LFChloriform", StringComparer.OrdinalIgnoreCase) ||
+           config.Parameters.Contains("All", StringComparer.OrdinalIgnoreCase))
+        {
+        }
+        if (config.Parameters.Contains("SpCond", StringComparer.OrdinalIgnoreCase) ||
+              config.Parameters.Contains("All", StringComparer.OrdinalIgnoreCase))
+        {
+        }
+        if (config.Parameters.Contains("BGARFU", StringComparer.OrdinalIgnoreCase) ||
+              config.Parameters.Contains("All", StringComparer.OrdinalIgnoreCase))
+        {
+        }
+        if (config.Parameters.Contains("TDS", StringComparer.OrdinalIgnoreCase) ||
+              config.Parameters.Contains("All", StringComparer.OrdinalIgnoreCase))
+        {
+        }
+        if (config.Parameters.Contains("Turbidity", StringComparer.OrdinalIgnoreCase) ||
+              config.Parameters.Contains("All", StringComparer.OrdinalIgnoreCase))
+        {
+        }
+        if (config.Parameters.Contains("TSS", StringComparer.OrdinalIgnoreCase) ||
+              config.Parameters.Contains("All", StringComparer.OrdinalIgnoreCase))
+        {
+        }
+        if (config.Parameters.Contains("WiperPos", StringComparer.OrdinalIgnoreCase) ||
+              config.Parameters.Contains("All", StringComparer.OrdinalIgnoreCase))
+        {
+        }
+        if (config.Parameters.Contains("pHmV", StringComparer.OrdinalIgnoreCase) ||
+              config.Parameters.Contains("All", StringComparer.OrdinalIgnoreCase))
+        {
+        }
+        if (config.Parameters.Contains("Battery", StringComparer.OrdinalIgnoreCase) ||
+              config.Parameters.Contains("All", StringComparer.OrdinalIgnoreCase))
+        {
+        }
+        if (config.Parameters.Contains("CablePower", StringComparer.OrdinalIgnoreCase) ||
+              config.Parameters.Contains("All", StringComparer.OrdinalIgnoreCase))
+        {
+        }
+
+
+
+
+
+        if (config.Parameters.Contains("Chloriform", StringComparer.OrdinalIgnoreCase) ||
            config.Parameters.Contains("All", StringComparer.OrdinalIgnoreCase))
         {
             nodes.Add(new UnitizedSensingNode<Scalar>(
-                $"{config.Name}.Salinity",
+                $"{config.Name}.Chloriform",
                 sonde,
-                () => Task.FromResult<IUnit?>(salintiy),
+                () => Task.FromResult<IUnit?>(chlor),
+                TimeSpan.FromSeconds(config.SenseIntervalSeconds)));
+        }
+        if (config.Parameters.Contains("LFChloriform", StringComparer.OrdinalIgnoreCase) ||
+           config.Parameters.Contains("All", StringComparer.OrdinalIgnoreCase))
+        {
+            nodes.Add(new UnitizedSensingNode<Scalar>(
+                $"{config.Name}.LFChloriform",
+                sonde,
+                () => Task.FromResult<IUnit?>(lfCond),
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)));
         }
         if (config.Parameters.Contains("SpCond", StringComparer.OrdinalIgnoreCase) ||
@@ -183,15 +239,6 @@ public class YsiSondeNodeController : ISensingNodeController
                 $"{config.Name}.WiperPos",
                 sonde,
                 () => Task.FromResult<IUnit?>(wiper),
-                TimeSpan.FromSeconds(config.SenseIntervalSeconds)));
-        }
-        if (config.Parameters.Contains("pH", StringComparer.OrdinalIgnoreCase) ||
-              config.Parameters.Contains("All", StringComparer.OrdinalIgnoreCase))
-        {
-            nodes.Add(new UnitizedSensingNode<Scalar>(
-                $"{config.Name}.pH",
-                sonde,
-                () => Task.FromResult<IUnit?>(pH),
                 TimeSpan.FromSeconds(config.SenseIntervalSeconds)));
         }
         if (config.Parameters.Contains("pHmV", StringComparer.OrdinalIgnoreCase) ||
@@ -269,6 +316,21 @@ public class YsiSondeNodeController : ISensingNodeController
         }
     }
 
+    private bool TryExtractValue<TUnit>((ParameterCode ParameterCode, IUnit Value)[]? readings, ParameterCode desiredCode, ref TUnit field)
+        where TUnit : IUnit
+    {
+        if (readings != null)
+        {
+            var reading = readings.FirstOrDefault(d => d.ParameterCode == ParameterCode.TemperatureC);
+            if (reading.ParameterCode == desiredCode && reading.Value is TUnit t)
+            {
+                field = t;
+                return true;
+            }
+        }
+        return false;
+    }
+
     private async Task ManageSondeData()
     {
         if (sonde != null)
@@ -277,46 +339,44 @@ public class YsiSondeNodeController : ISensingNodeController
             {
                 await ReportSondeConfiguration();
 
-                var statusArray = await sonde.GetParameterStatus();
+                // var statusArray = await sonde.GetParameterStatus();
 
                 Resolver.Log.Trace($"Reading sonde information...");
                 var data = await sonde.GetCurrentData();
 
-                var tempFTuple = data.FirstOrDefault(d => d.ParameterCode == ParameterCode.TemperatureC);
+                TryExtractValue(data, ParameterCode.TemperatureC, ref sondeTemp);
+                TryExtractValue(data, ParameterCode.TemperatureF, ref sondeTemp);
+                TryExtractValue(data, ParameterCode.TemperatureK, ref sondeTemp);
+                TryExtractValue(data, ParameterCode.ConductivityuScm, ref conductivity);
+                TryExtractValue(data, ParameterCode.Salinity, ref salinity);
+
+                TryExtractValue(data, ParameterCode.pH, ref pH);
+                TryExtractValue(data, ParameterCode.BatteryVoltage, ref batteryVoltage);
+                TryExtractValue(data, ParameterCode.ExternalPower, ref cablePower);
+
+                TryExtractValue(data, ParameterCode.ODOPercentSat, ref doSat);
+                TryExtractValue(data, ParameterCode.ODOmgL, ref doSat);
+
+                // TODO: TryExtractValue(data, ParameterCode.ChlorophyllRFU, 
+
+
+
                 var chlorTuple = data.FirstOrDefault(d => d.ParameterCode == ParameterCode.ChlorophyllRFU);
-                var condTuple = data.FirstOrDefault(d => d.ParameterCode == ParameterCode.ConductivityuScm);
                 var lfCondTuple = data.FirstOrDefault(d => d.ParameterCode == ParameterCode.nLFConductivityuScm);
-                var doSatTuple = data.FirstOrDefault(d => d.ParameterCode == ParameterCode.ODOPercentSat);
                 var momgLTuple = data.FirstOrDefault(d => d.ParameterCode == ParameterCode.ODOmgL);
-                var salTuple = data.FirstOrDefault(d => d.ParameterCode == ParameterCode.Salinity);
                 var spCondTuple = data.FirstOrDefault(d => d.ParameterCode == ParameterCode.SpecificConductanceuScm);
                 var bgarfuTuple = data.FirstOrDefault(d => d.ParameterCode == ParameterCode.BGAPErfu);
                 var tdstuple = data.FirstOrDefault(d => d.ParameterCode == ParameterCode.TDSmgL);
                 var turbTuple = data.FirstOrDefault(d => d.ParameterCode == ParameterCode.TurbidityFNU);
                 var tssTuple = data.FirstOrDefault(d => d.ParameterCode == ParameterCode.TSSmgL);
                 var wiperTuple = data.FirstOrDefault(d => d.ParameterCode == ParameterCode.WiperPosition);
-                var pHTuple = data.FirstOrDefault(d => d.ParameterCode == ParameterCode.pH);
                 var pHmVTuple = data.FirstOrDefault(d => d.ParameterCode == ParameterCode.pHmV);
-                var batteryTuple = data.FirstOrDefault(d => d.ParameterCode == ParameterCode.BatteryVoltage);
                 var cablePowerTuple = data.FirstOrDefault(d => d.ParameterCode == ParameterCode.ExternalPower);
 
-                if (tempFTuple != default)
-                {
-                    sondeTemp = new Temperature(Convert.ToDouble(tempFTuple.Value), Temperature.UnitType.Celsius);
-                }
-                if (sondeTemp == null)
-                {
-                    sondeTemp = new Temperature(Convert.ToDouble(-99));
-                }
 
                 if (chlorTuple != default)
                 {
                     chlor = ConvertReadingToScalar(chlorTuple);
-                }
-
-                if (condTuple != default)
-                {
-                    cond = ConvertReadingToScalar(condTuple);
                 }
 
                 if (lfCondTuple != default)
@@ -332,11 +392,6 @@ public class YsiSondeNodeController : ISensingNodeController
                 if (momgLTuple != default)
                 {
                     domgL = ConvertReadingToScalar(momgLTuple);
-                }
-
-                if (salTuple != default)
-                {
-                    salintiy = ConvertReadingToScalar(salTuple);
                 }
 
                 if (spCondTuple != default)
@@ -367,11 +422,6 @@ public class YsiSondeNodeController : ISensingNodeController
                 if (wiperTuple != default)
                 {
                     ConvertReadingToScalar(wiperTuple);
-                }
-
-                if (pHTuple != default)
-                {
-                    ConvertReadingToScalar(pHTuple);
                 }
 
                 if (pHmVTuple != default)
