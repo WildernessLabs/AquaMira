@@ -125,6 +125,61 @@ public class YsiSondeNodeController : ISensingNodeController
 
         var nodes = new List<ISensingNode>();
 
+        // Define all valid parameter names
+        var validParameters = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "All",
+            "Temperature",
+            "Conductivity",
+            "Salinity",
+            "pH",
+            "DOSat",
+            "DOmgL",
+            "TDSmgL",
+            "TDSgL",
+            "TDSkgL",
+            "TSSmgL",
+            "TSSgL",
+            "SpecificConductivity",
+            "nLFConductivity",
+            "pHmV",
+            "ORP",
+            "PressurePsia",
+            "PressurePsig",
+            "DepthMeters",
+            "DepthFeet",
+            "TurbidityNTU",
+            "TurbidityFNU",
+            "NH3",
+            "NH4",
+            "NO3",
+            "Chloride",
+            "Potassium",
+            "ChlorophyllugL",
+            "ChlorophyllRFU",
+            "BGAPCugL",
+            "BGAPEugL",
+            "ODOPercentLocal",
+            "fDOMrfu",
+            "fDOMqsu",
+            "RhodamineugL",
+            "PARChannel1",
+            "PARChannel2",
+            "WiperPosition",
+            "WiperPeakCurrent",
+            "VerticalPositionm",
+            "VerticalPositionft"
+        };
+
+        // Check for undefined parameters in the configuration
+        foreach (var parameter in config.Parameters)
+        {
+            if (!validParameters.Contains(parameter))
+            {
+                Resolver.Log?.Warn($"Unknown parameter '{parameter}' specified in configuration and will be ignored");
+            }
+        }
+
         if (config.Parameters.Contains("Temperature", StringComparer.OrdinalIgnoreCase) ||
            config.Parameters.Contains("All", StringComparer.OrdinalIgnoreCase))
         {
@@ -542,7 +597,7 @@ public class YsiSondeNodeController : ISensingNodeController
             }
 
             var samplePeriod = await sonde.GetSamplePeriod();
-            Resolver.Log.Trace($"Sample period: {samplePeriod}", "ysi-sonde");
+            Resolver.Log.Trace($"Sample period: {samplePeriod:HH:mm}", "ysi-sonde");
 
             reportCompleted = true;
         }
@@ -663,7 +718,7 @@ public class YsiSondeNodeController : ISensingNodeController
 
                 // PAR
                 TryExtractValue(data, ParameterCode.PARChannel1, ref parChannel1);
-                TryExtractValue(data, ParameterCode.PARChannel2, ref parChannel2);
+                TryExtractValue(data, ParameterCode.PARChannel2, ref parChannel2); 
 
             }
             catch (Exception ex)

@@ -30,37 +30,36 @@ Configuration Properties:
 | Name | String | Yes | N/A | The name of the sensor instance. This name will be the prefix of all data items. |
 | IsSimulated | Boolean | No | false | If true, the node controller will simulate data instead of reading from the actual device. |
 | SenseIntervalSeconds | Integer | No | 60 | The interval in seconds at which the node controller will read data from the YSI Sonde. |
-| Parameters | Array of Strings | Yes | N/A | A list of parameters to read from the YSI Sonde. See the Complete Parameter List section below for all valid parameters. A parameter of 'All' will include all supported parameters|
+| Parameters | Array of Strings | Yes | N/A | A list of parameters to read from the YSI Sonde. See "Valid Parameters" section below. A parameter of 'All' will include all supported parameters. Unknown parameters will be logged and ignored.|
 
-## Complete Parameter List
+### Valid Parameters
 
-The following parameters are supported by the YSI Sonde Node Controller:
+The following parameters are supported (case-insensitive):
 
-### Basic Water Quality
+**Basic Water Quality:**
+- `All` - Includes all supported parameters
 - `Temperature` - Water temperature
 - `Conductivity` - Electrical conductivity
-- `SpecificConductivity` - Temperature-compensated conductivity
-- `nLFConductivity` - Non-linear function conductivity
-- `Salinity` - Salinity in practical salinity units
-- `pH` - pH in standard units
+- `SpecificConductivity` - Specific conductance
+- `nLFConductivity` - Non-linear frequency conductivity
+- `Salinity` - Salinity
+- `pH` - pH value
 - `pHmV` - pH in millivolts
 - `ORP` - Oxidation-reduction potential
 
-### Dissolved Oxygen
+**Dissolved Oxygen:**
 - `DOSat` - Dissolved oxygen percent saturation
 - `DOmgL` - Dissolved oxygen in mg/L
-- `ODOPercentLocal` - Dissolved oxygen percent local saturation
+- `ODOPercentLocal` - Optical dissolved oxygen percent local
 
-### Total Dissolved Solids (TDS)
-- `TDSmgL` - TDS in mg/L
-- `TDSgL` - TDS in g/L
-- `TDSkgL` - TDS in kg/L
+**Total Dissolved/Suspended Solids:**
+- `TDSmgL` - Total dissolved solids in mg/L
+- `TDSgL` - Total dissolved solids in g/L
+- `TDSkgL` - Total dissolved solids in kg/L
+- `TSSmgL` - Total suspended solids in mg/L
+- `TSSgL` - Total suspended solids in g/L
 
-### Total Suspended Solids (TSS)
-- `TSSmgL` - TSS in mg/L
-- `TSSgL` - TSS in g/L
-
-### Pressure and Depth
+**Pressure and Depth:**
 - `PressurePsia` - Pressure in psia
 - `PressurePsig` - Pressure in psig
 - `DepthMeters` - Depth in meters
@@ -68,43 +67,41 @@ The following parameters are supported by the YSI Sonde Node Controller:
 - `VerticalPositionm` - Vertical position in meters
 - `VerticalPositionft` - Vertical position in feet
 
-### Turbidity
+**Turbidity:**
 - `TurbidityNTU` - Turbidity in NTU
 - `TurbidityFNU` - Turbidity in FNU
 
-### Nutrients
-- `NH3` - Ammonia in mg/L
-- `NH4` - Ammonium in mg/L
-- `NO3` - Nitrate in mg/L
-- `Chloride` - Chloride in mg/L
-- `Potassium` - Potassium in mg/L
+**Nutrients:**
+- `NH3` - Ammonia
+- `NH4` - Ammonium
+- `NO3` - Nitrate
+- `Chloride` - Chloride
+- `Potassium` - Potassium
 
-### Chlorophyll and Algae
-- `ChlorophyllugL` - Chlorophyll in μg/L
+**Chlorophyll and Algae:**
+- `ChlorophyllugL` - Chlorophyll in µg/L
 - `ChlorophyllRFU` - Chlorophyll in RFU
-- `BGAPCugL` - Blue-green algae phycocyanin in μg/L
-- `BGAPEugL` - Blue-green algae phycoerythrin in μg/L
+- `BGAPCugL` - Blue-green algae phycocyanin in µg/L
+- `BGAPEugL` - Blue-green algae phycoerythrin in µg/L
 
-### Fluorescence and Organic Matter
+**Fluorescence and Organic Matter:**
 - `fDOMrfu` - Fluorescent dissolved organic matter in RFU
 - `fDOMqsu` - Fluorescent dissolved organic matter in QSU
-- `RhodamineugL` - Rhodamine in μg/L
+- `RhodamineugL` - Rhodamine in µg/L
 
-### Light and Radiation
-- `PARChannel1` - PAR Channel 1
-- `PARChannel2` - PAR Channel 2
+**PAR (Photosynthetically Active Radiation):**
+- `PARChannel1` - PAR channel 1
+- `PARChannel2` - PAR channel 2
 
-### System Monitoring
-- `BatteryVoltage` - Battery voltage
-- `ExternalPower` - External power voltage
-- `WiperPosition` - Wiper position
+**System Monitoring:**
+- `WiperPosition` - Wiper position voltage
 - `WiperPeakCurrent` - Wiper peak current
 
 ### Sample Configuration Section
 
 The root node name must match the name used (second parameter) in the registration above.
 
-```yaml
+```json
   "YSISonde": {
     "ModbusAddress": 5,
     "Name": "Sonde",
@@ -113,29 +110,12 @@ The root node name must match the name used (second parameter) in the registrati
     "Parameters": [
       "Temperature",
       "Conductivity",
-      "Salinity",
-      "pH",
       "DOSat",
       "DOmgL",
+      "Salinity",
+      "pH",
       "TurbidityNTU",
-      "ChlorophyllugL",
-      "BatteryVoltage"
+      "ChlorophyllugL"
     ]
-  },
-
-```
-
-### Using All Parameters
-
-To enable all supported parameters, use the special "All" parameter:
-
-```yaml
-  "YSISonde": {
-    "ModbusAddress": 5,
-    "Name": "Sonde",
-    "IsSimulated": false,
-    "SenseIntervalSeconds": 60,
-    "Parameters": ["All"]
-  },
-
+  }
 ```
