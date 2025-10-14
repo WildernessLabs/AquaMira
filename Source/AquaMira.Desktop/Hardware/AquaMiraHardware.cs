@@ -72,9 +72,9 @@ internal class AquaMiraHardware : IAquaMiraHardware
         // Return the sensing node controllers available on the Desktop platform
         return new[]
         {
-            (typeof(T322InputNodeController), "T322iInputs"),
-            (typeof(SPM1xPowerNodeController), "Spm1x"),
-            (typeof(CerusNodeController), "CerusXDrive"),
+//            (typeof(T322InputNodeController), "T322iInputs"),
+//            (typeof(SPM1xPowerNodeController), "Spm1x"),
+//            (typeof(CerusNodeController), "CerusXDrive"),
             (typeof(YsiSondeNodeController), "YSISonde")
         };
     }

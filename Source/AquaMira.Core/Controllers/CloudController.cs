@@ -85,7 +85,7 @@ public class CloudController : ILogProvider
             Message = message ?? exception.Message,
             Exception = exception.ToString()
         };
-        return cloudService.SendLog(log);
+        return cloudService.SendLog(log, CloudTelemetryPriority.High);
     }
 
     public Task LogError(string message)
@@ -96,7 +96,7 @@ public class CloudController : ILogProvider
             Message = message,
             Severity = "error"
         };
-        return cloudService.SendLog(log);
+        return cloudService.SendLog(log, CloudTelemetryPriority.High);
     }
 
     public Task LogWarning(string message)
@@ -107,7 +107,7 @@ public class CloudController : ILogProvider
             Message = message,
             Severity = "warning"
         };
-        return cloudService.SendLog(log);
+        return cloudService.SendLog(log, CloudTelemetryPriority.High);
     }
 
     public async Task ReportDeviceStartup(IMeadowDevice device)
