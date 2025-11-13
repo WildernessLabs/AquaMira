@@ -7,6 +7,7 @@
   </Folder>
   <Folder Name="/NodeControllers/">
     <Project Path="NodeControllers/AquaMira.CerusNodeController/AquaMira.CerusNodeController.csproj" Id="a61e8d0d-82d7-4f27-9559-352e018e6396" />
+    <Project Path="NodeControllers/AquaMira.GroPointNodeController/AquaMira.GroPointNodeController.csproj" />
     <Project Path="NodeControllers/AquaMira.KellerTransducerNodeController/AquaMira.KellerTransducerNodeController.csproj" Id="5b14c073-33d9-4d76-9b06-cc529667970b" />
     <Project Path="NodeControllers/AquaMira.SPM1xPowerNodeController/AquaMira.SPM1xPowerNodeController.csproj" Id="200f9299-01b8-42d9-a572-af4ab862e715" />
     <Project Path="NodeControllers/AquaMira.T322InputNodeController/AquaMira.T322InputNodeController.csproj" Id="5aebd2a7-6001-41b2-a6f6-c1263896d4d2" />
@@ -74,6 +75,9 @@
       <Deploy />
     </Project>
     <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/Sensors.Atmospheric.Bme68x/Driver/Sensors.Atmospheric.Bme68x.csproj">
+      <Deploy />
+    </Project>
+    <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/Sensors.Environmental.GroPoint/Driver/Sensors.Environmental.GroPoint.csproj">
       <Deploy />
     </Project>
     <Project Path="../../Meadow.Foundation/Source/Meadow.Foundation.Peripherals/Sensors.Environmental.Keller.XLine/Driver/Sensors.Environmental.Keller.XLine.csproj">
