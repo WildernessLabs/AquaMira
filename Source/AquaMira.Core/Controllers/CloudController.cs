@@ -3,6 +3,7 @@ using Meadow.Cloud;
 using Meadow.Logging;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AquaMira.Core;
@@ -14,7 +15,7 @@ public class StateController
 
 }
 
-public class CloudController : ILogProvider
+public class CloudController : ILogProvider, IDisposable
 {
     public enum EventIds
     {
@@ -27,6 +28,11 @@ public class CloudController : ILogProvider
     private readonly ICommandService commandService;
     private readonly StorageController storageController;
     private readonly INetworkController networkController;
+    private bool disposed = false;
+
+    private DateTimeOffset lastSuccessfulSend = DateTimeOffset.UtcNow;
+    private DateTimeOffset lastEventRaised = DateTimeOffset.MinValue;
+    private Timer? statusCheckTimer;
 
     public CloudController(
         IMeadowCloudService cloudService,
@@ -42,6 +48,16 @@ public class CloudController : ILogProvider
         storageController.Records.ItemAdded += Records_ItemAdded;
 
         Resolver.Log.AddProvider(this);
+    }
+
+    public void Dispose()
+    {
+        if (!disposed)
+        {
+            storageController.Records.ItemAdded -= Records_ItemAdded;
+            Resolver.Log.RemoveProvider(this);
+            disposed = true;
+        }
     }
 
     private void Records_ItemAdded(object sender, EventArgs e)
