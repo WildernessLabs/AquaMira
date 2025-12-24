@@ -74,6 +74,15 @@ public class MainController
         NetworkController.NetworkConnectedChanged += OnNetworkConnectedChanged;
         NetworkController.SignalStrengthChanged += OnNetworkSignalStrengthChanged;
 
+        // if this is a cell install, watch for cloud send failures
+        if (NetworkController.IsCellular)
+        {
+            cloudController.CloudSendFailure += async (s, e) =>
+            {
+                await NetworkController.ResetModem();
+            };
+        }
+
         _ = Task.Run(async () =>
         {
             Resolver.Log.Debug("Reporting device startup to cloud", Constants.LoggingSource);

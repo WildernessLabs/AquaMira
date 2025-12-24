@@ -15,6 +15,8 @@ namespace AquaMira.F7
         private readonly ICellNetworkAdapter? cell;
         private readonly AquaMiraAppSettings settings;
 
+        public bool IsCellular { get; } = false;
+
         public NetworkController(IMeadowDevice device)
         {
             device.PlatformOS.TimeChanged += (s) =>
@@ -40,6 +42,8 @@ namespace AquaMira.F7
                 Resolver.Log.Info("Using Cell Network Adapter", "AquaMira");
                 cell.NetworkConnected += OnNetworkConnected;
                 cell.NetworkDisconnected += OnNetworkDisconnected;
+
+                IsCellular = true;
 
                 Resolver.Log.Info($"  IMEI: {cell.Imei}", "AquaMira");
                 Resolver.Log.Info($"  CSQ:  {cell.Csq}", "AquaMira");
@@ -67,6 +71,30 @@ namespace AquaMira.F7
         private void OnNetworkConnectFailed(INetworkAdapter sender)
         {
             Resolver.Log.Info($"{sender.GetType().Name} Network connect failed", Constants.LoggingSource);
+        }
+
+        private IDigitalOutputPort? _h10Output;
+
+        public async Task ResetModem()
+        {
+            if (cell != null)
+            {
+                Resolver.Log.Info("Resetting cellular modem", "AquaMira");
+
+                // HACK HACK HACK!
+                // this is just a POC to see if this fixes it on ProjLab 3.e
+                if (_h10Output == null)
+                {
+                    var pin = Resolver.Device.GetPin("PH10");
+                    _h10Output = Resolver.Device.CreateDigitalOutputPort(pin);
+                }
+
+                _h10Output.State = false; // assert low to reset
+                await Task.Delay(500);
+                _h10Output.State = true; // de-assert
+            }
+
+            await Task.CompletedTask;
         }
 
         private async Task SignalMonitor()

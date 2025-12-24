@@ -8,13 +8,6 @@ using System.Threading.Tasks;
 
 namespace AquaMira.Core;
 
-public class StateController
-{
-    public bool IsError { get; private set; }
-    public bool IsWarn { get; private set; }
-
-}
-
 public class CloudController : ILogProvider, IDisposable
 {
     public enum EventIds
@@ -24,6 +17,12 @@ public class CloudController : ILogProvider, IDisposable
         DeviceData = 201,
     }
 
+    public const int CloudFailureCheckPeriodMinutes = 1;
+    public const int CloudFailureThresholdMinutes = 30;
+    public const int CloudFailureEventCooldownMinutes = 5;
+
+    public event EventHandler? CloudSendFailure;
+
     private readonly IMeadowCloudService cloudService;
     private readonly ICommandService commandService;
     private readonly StorageController storageController;
@@ -32,7 +31,7 @@ public class CloudController : ILogProvider, IDisposable
 
     private DateTimeOffset lastSuccessfulSend = DateTimeOffset.UtcNow;
     private DateTimeOffset lastEventRaised = DateTimeOffset.MinValue;
-    private Timer? statusCheckTimer;
+    private readonly Timer? statusCheckTimer;
 
     public CloudController(
         IMeadowCloudService cloudService,
@@ -48,15 +47,33 @@ public class CloudController : ILogProvider, IDisposable
         storageController.Records.ItemAdded += Records_ItemAdded;
 
         Resolver.Log.AddProvider(this);
+
+        // Start timer to check cloud send status
+        statusCheckTimer = new Timer(CheckCloudSendStatus, null, TimeSpan.FromMinutes(CloudFailureCheckPeriodMinutes), TimeSpan.FromMinutes(1));
     }
 
     public void Dispose()
     {
         if (!disposed)
         {
+            statusCheckTimer?.Dispose();
             storageController.Records.ItemAdded -= Records_ItemAdded;
             Resolver.Log.RemoveProvider(this);
             disposed = true;
+        }
+    }
+
+    private void CheckCloudSendStatus(object? state)
+    {
+        var timeSinceLastSend = DateTimeOffset.UtcNow - lastSuccessfulSend;
+        var timeSinceLastEvent = DateTimeOffset.UtcNow - lastEventRaised;
+
+        // If data hasn't been sent for N minutes, and if it's more than the threshold, raise event
+        if (timeSinceLastSend.TotalMinutes >= CloudFailureThresholdMinutes && timeSinceLastEvent.TotalMinutes >= CloudFailureEventCooldownMinutes)
+        {
+            lastEventRaised = DateTimeOffset.UtcNow;
+            Resolver.Log.Warn($"Cloud data has not been sent successfully for {timeSinceLastSend.TotalMinutes:F0} minutes", Constants.LoggingSource);
+            CloudSendFailure?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -79,6 +96,7 @@ public class CloudController : ILogProvider, IDisposable
             {
                 Resolver.Log.Info($"Sending {evt.Measurements.Count} values");
                 cloudService.SendEvent(evt);
+                lastSuccessfulSend = DateTimeOffset.UtcNow;
                 storageController.Records.Remove(1);
 
                 batch = storageController.Records.Peek();

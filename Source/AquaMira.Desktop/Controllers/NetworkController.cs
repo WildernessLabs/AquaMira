@@ -1,9 +1,9 @@
+using AquaMira.Core;
 using Meadow;
 using Meadow.Foundation.Sensors.Hid;
 using Meadow.Hardware;
 using System;
 using System.Threading.Tasks;
-using AquaMira.Core;
 
 namespace AquaMira.DT;
 
@@ -35,6 +35,8 @@ internal class NetworkController : INetworkController
         }
     }
 
+    public bool IsCellular => throw new NotImplementedException();
+
     public async Task Connect()
     {
         // simulate connection delay
@@ -42,5 +44,10 @@ internal class NetworkController : INetworkController
 
         SignalStrengthChanged?.Invoke(this, -99);
         IsConnected = true;
+    }
+
+    public Task ResetModem()
+    {
+        return Task.CompletedTask;
     }
 }
