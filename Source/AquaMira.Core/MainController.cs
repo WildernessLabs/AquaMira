@@ -80,7 +80,8 @@ public class MainController
         // we fail to send data to the cloud for 10 minutes. 
         cloudController.CloudSendFailure += async (s, e) =>
         {
-            Resolver.Device.PlatformOS.Reset();
+            await NetworkController.ResetModem();
+            //Resolver.Device.PlatformOS.Reset();
         };
 
         _ = Task.Run(async () =>

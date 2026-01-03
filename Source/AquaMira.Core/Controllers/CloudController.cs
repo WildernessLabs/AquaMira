@@ -67,6 +67,13 @@ public class CloudController : ILogProvider, IDisposable
         if (cloudService.LastSuccessfulSend == null)
         {
             timeSinceLastSend = DateTimeOffset.UtcNow - controllerStartTime;
+
+            // we could have a huge delta if we got NTP time between start and now
+            // check against threshold * 2 to avoid false positives
+            if (timeSinceLastSend.TotalMinutes > (CloudFailureThresholdMinutes * 2))
+            {   // not true! 
+                timeSinceLastSend = TimeSpan.Zero;
+            }
             Resolver.Log.Trace($"No sends yet. Controller started at {controllerStartTime:HH:mm:ss}, current time {DateTimeOffset.UtcNow:HH:mm:ss}, elapsed {timeSinceLastSend.TotalMinutes:F2} minutes", Constants.LoggingSource);
         }
         else
