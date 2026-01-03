@@ -79,7 +79,7 @@ namespace AquaMira.F7
         {
             if (cell != null)
             {
-                Resolver.Log.Info("Resetting cellular modem", "AquaMira");
+                Resolver.Log.Info(">>> Resetting cellular modem", "AquaMira");
 
                 // HACK HACK HACK!
                 // this is just a POC to see if this fixes it on ProjLab 3.e

@@ -18,19 +18,17 @@ public class CloudController : ILogProvider, IDisposable
     }
 
     public const int CloudFailureCheckPeriodMinutes = 1;
-    public const int CloudFailureThresholdMinutes = 30;
+    public const int CloudFailureThresholdMinutes = 10;
     public const int CloudFailureEventCooldownMinutes = 5;
 
     public event EventHandler? CloudSendFailure;
 
     private readonly IMeadowCloudService cloudService;
-    private readonly ICommandService commandService;
     private readonly StorageController storageController;
-    private readonly INetworkController networkController;
     private bool disposed = false;
 
-    private DateTimeOffset lastSuccessfulSend = DateTimeOffset.UtcNow;
     private DateTimeOffset lastEventRaised = DateTimeOffset.MinValue;
+    private readonly DateTimeOffset controllerStartTime = DateTimeOffset.UtcNow;
     private readonly Timer? statusCheckTimer;
 
     public CloudController(
@@ -40,9 +38,7 @@ public class CloudController : ILogProvider, IDisposable
         INetworkController networkController)
     {
         this.cloudService = cloudService;
-        this.commandService = commandService;
         this.storageController = storageController;
-        this.networkController = networkController;
 
         storageController.Records.ItemAdded += Records_ItemAdded;
 
@@ -65,8 +61,23 @@ public class CloudController : ILogProvider, IDisposable
 
     private void CheckCloudSendStatus(object? state)
     {
-        var timeSinceLastSend = DateTimeOffset.UtcNow - lastSuccessfulSend;
+        TimeSpan timeSinceLastSend;
+
+        // If no successful send has occurred yet, measure from controller start time
+        if (cloudService.LastSuccessfulSend == null)
+        {
+            timeSinceLastSend = DateTimeOffset.UtcNow - controllerStartTime;
+            Resolver.Log.Trace($"No sends yet. Controller started at {controllerStartTime:HH:mm:ss}, current time {DateTimeOffset.UtcNow:HH:mm:ss}, elapsed {timeSinceLastSend.TotalMinutes:F2} minutes", Constants.LoggingSource);
+        }
+        else
+        {
+            timeSinceLastSend = DateTimeOffset.UtcNow - cloudService.LastSuccessfulSend.Value;
+            Resolver.Log.Trace($"Last send at {cloudService.LastSuccessfulSend:HH:mm:ss}, current time {DateTimeOffset.UtcNow:HH:mm:ss}, elapsed {timeSinceLastSend.TotalMinutes:F2} minutes", Constants.LoggingSource);
+        }
+
         var timeSinceLastEvent = DateTimeOffset.UtcNow - lastEventRaised;
+
+        Resolver.Log.Trace($"Cloud data has not been sent for {timeSinceLastSend.TotalMinutes:F0} minutes", Constants.LoggingSource);
 
         // If data hasn't been sent for N minutes, and if it's more than the threshold, raise event
         if (timeSinceLastSend.TotalMinutes >= CloudFailureThresholdMinutes && timeSinceLastEvent.TotalMinutes >= CloudFailureEventCooldownMinutes)
@@ -96,7 +107,6 @@ public class CloudController : ILogProvider, IDisposable
             {
                 Resolver.Log.Info($"Sending {evt.Measurements.Count} values");
                 cloudService.SendEvent(evt);
-                lastSuccessfulSend = DateTimeOffset.UtcNow;
                 storageController.Records.Remove(1);
 
                 batch = storageController.Records.Peek();

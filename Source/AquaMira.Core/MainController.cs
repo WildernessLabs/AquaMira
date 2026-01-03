@@ -74,14 +74,14 @@ public class MainController
         NetworkController.NetworkConnectedChanged += OnNetworkConnectedChanged;
         NetworkController.SignalStrengthChanged += OnNetworkSignalStrengthChanged;
 
-        // if this is a cell install, watch for cloud send failures
-        if (NetworkController.IsCellular)
+        // DEV NOTE: (╯°□°)╯︵ ┻━┻
+        // the F& has a problem with HttpClient.Post hanging indefinitely.
+        // Not sure why it happens, so this is a workaround to reset the device if
+        // we fail to send data to the cloud for 10 minutes. 
+        cloudController.CloudSendFailure += async (s, e) =>
         {
-            cloudController.CloudSendFailure += async (s, e) =>
-            {
-                await NetworkController.ResetModem();
-            };
-        }
+            Resolver.Device.PlatformOS.Reset();
+        };
 
         _ = Task.Run(async () =>
         {
