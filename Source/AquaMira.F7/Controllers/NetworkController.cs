@@ -53,8 +53,11 @@ namespace AquaMira.F7
                 Resolver.Log.Error("No known Network Adapter");
             }
 
-            Resolver.Log.Info("+++ PWRKEY HIGH", "AquaMira");
-            PWRKEY.State = true; // de-assert PWRKEY - this is a bug in the native driver
+            if (!_resetDeviceOnCellError)
+            {
+                Resolver.Log.Info("+++ PWRKEY HIGH", "AquaMira");
+                PWRKEY.State = true; // de-assert PWRKEY - this is a bug in the native driver
+            }
 
             Resolver.Device.PlatformOS.NtpClient.TimeChanged += OnNtpTimeSync;
         }
@@ -91,36 +94,50 @@ namespace AquaMira.F7
             }
         }
 
+        private readonly bool _resetDeviceOnCellError = true;
+
         public Task ResetModem()
         {
             if (cell != null)
             {
-                return Task.Run(async () =>
+                if (_resetDeviceOnCellError)
                 {
-                    Resolver.Log.Info("+++ Resetting cellular modem", "AquaMira");
+                    return Task.Run(async () =>
+                    {
+                        PWRKEY.State = false;
+                        await Task.Delay(1000); // hold for 1 second
+                        Resolver.Device.PlatformOS.Reset();
+                    });
+                }
+                else
+                {
+                    return Task.Run(async () =>
+                    {
+                        Resolver.Log.Info("+++ Resetting cellular modem", "AquaMira");
 
-                    // HACK HACK HACK!
-                    // this is just a POC to see if this fixes it on ProjLab 3.e
+                        // HACK HACK HACK!
+                        // this is just a POC to see if this fixes it on ProjLab 3.e
 
-                    await Task.Delay(5000);// just a test wait
+                        await Task.Delay(5000);// just a test wait
 
-                    // according to 3.7.2.1 of the EG21-G manual
-                    // hold low for > 650ms, then 29.5s later it will power off
-                    Resolver.Log.Info("+++ PWRKEY LOW", "AquaMira");
-                    PWRKEY.State = false; // assert low to power off
-                    await Task.Delay(1000); // hold for 1 second
-                    Resolver.Log.Info("+++ PWRKEY HIGH", "AquaMira");
-                    PWRKEY.State = true; // de-assert
-                    await Task.Delay(35000); // wait 35 seconds for it to power down
-                    Resolver.Log.Info("+++ Cellular modem should be OFF", "AquaMira");
-                    await Task.Delay(1000); // wait for 5 seconds just so you can visually verify after the above message
-                    PWRKEY.State = false; // pulse it low again, for > 500ms
-                    await Task.Delay(1000); // hold for 1 second
-                    PWRKEY.State = true; // de-assert
-                    Resolver.Log.Info("+++ Cellular modem should be ON", "AquaMira");
+                        // according to 3.7.2.1 of the EG21-G manual
+                        // hold low for > 650ms, then 29.5s later it will power off
+                        Resolver.Log.Info("+++ PWRKEY LOW", "AquaMira");
+                        PWRKEY.State = false; // assert low to power off
+                        await Task.Delay(1000); // hold for 1 second
+                        Resolver.Log.Info("+++ PWRKEY HIGH", "AquaMira");
+                        PWRKEY.State = true; // de-assert
+                        await Task.Delay(35000); // wait 35 seconds for it to power down
+                        Resolver.Log.Info("+++ Cellular modem should be OFF", "AquaMira");
+                        await Task.Delay(1000); // wait for 5 seconds just so you can visually verify after the above message
+                        PWRKEY.State = false; // pulse it low again, for > 500ms
+                        await Task.Delay(1000); // hold for 1 second
+                        PWRKEY.State = true; // de-assert
+                        Resolver.Log.Info("+++ Cellular modem should be ON", "AquaMira");
 
-                    Resolver.Log.Info("+++ Cellular modem reset complete", "AquaMira");
-                });
+                        Resolver.Log.Info("+++ Cellular modem reset complete", "AquaMira");
+                    });
+                }
             }
 
             return Task.CompletedTask;
