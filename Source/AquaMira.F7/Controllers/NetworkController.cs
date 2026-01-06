@@ -102,12 +102,7 @@ namespace AquaMira.F7
             {
                 if (_resetDeviceOnCellError)
                 {
-                    return Task.Run(async () =>
-                    {
-                        PWRKEY.State = false;
-                        await Task.Delay(1000); // hold for 1 second
-                        Resolver.Device.PlatformOS.Reset();
-                    });
+                    Resolver.Device.PlatformOS.Reset();
                 }
                 else
                 {
