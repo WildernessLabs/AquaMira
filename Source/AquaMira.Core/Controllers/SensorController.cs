@@ -108,6 +108,7 @@ public class SensorController
             }
 
             // Wait for all configuration tasks to complete
+            await Task.WhenAll(configurationTasks);
             controllersLoaded = true;
         }
         finally

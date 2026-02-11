@@ -4,15 +4,25 @@ using System.Collections.Generic;
 
 namespace AquaMira.Core;
 
-public class StorageController
+public class StorageController : IDisposable
 {
     private readonly Dictionary<string, SensorRecord> _lastValues = new();
+    private bool disposed = false;
 
     public CircularBuffer<RecordBatch> Records { get; } = new CircularBuffer<RecordBatch>(50);
 
     public StorageController(ConfigurationController configurationController)
     {
         Records.Overrun += OnRecordBufferOverrun;
+    }
+
+    public void Dispose()
+    {
+        if (!disposed)
+        {
+            Records.Overrun -= OnRecordBufferOverrun;
+            disposed = true;
+        }
     }
 
     private void OnRecordBufferOverrun(object sender, EventArgs e)

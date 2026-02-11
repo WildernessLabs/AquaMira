@@ -15,6 +15,8 @@ namespace AquaMira.F7
         private readonly ICellNetworkAdapter? cell;
         private readonly AquaMiraAppSettings settings;
 
+        public bool IsCellular { get; } = false;
+
         public NetworkController(IMeadowDevice device)
         {
             device.PlatformOS.TimeChanged += (s) =>
@@ -41,6 +43,8 @@ namespace AquaMira.F7
                 cell.NetworkConnected += OnNetworkConnected;
                 cell.NetworkDisconnected += OnNetworkDisconnected;
 
+                IsCellular = true;
+
                 Resolver.Log.Info($"  IMEI: {cell.Imei}", "AquaMira");
                 Resolver.Log.Info($"  CSQ:  {cell.Csq}", "AquaMira");
             }
@@ -49,7 +53,11 @@ namespace AquaMira.F7
                 Resolver.Log.Error("No known Network Adapter");
             }
 
-            //_ = Task.Run(SignalMonitor);
+            if (!_resetDeviceOnCellError)
+            {
+                Resolver.Log.Info("+++ PWRKEY HIGH", "AquaMira");
+                PWRKEY.State = true; // de-assert PWRKEY - this is a bug in the native driver
+            }
 
             Resolver.Device.PlatformOS.NtpClient.TimeChanged += OnNtpTimeSync;
         }
@@ -67,6 +75,67 @@ namespace AquaMira.F7
         private void OnNetworkConnectFailed(INetworkAdapter sender)
         {
             Resolver.Log.Info($"{sender.GetType().Name} Network connect failed", Constants.LoggingSource);
+        }
+
+        private IDigitalOutputPort? _h10Output;
+
+        private IDigitalOutputPort PWRKEY
+        {
+            get
+            {
+                if (_h10Output == null)
+                {
+                    var ctrl = Resolver.Services.Get<ModemControl>();
+                    var pin = ctrl.ResetPin;
+                    Resolver.Log.Info($"+++ Creating PWRKEY output on pin {pin.Name}", "AquaMira");
+                    _h10Output = Resolver.Device.CreateDigitalOutputPort(pin, true);
+                }
+                return _h10Output;
+            }
+        }
+
+        private readonly bool _resetDeviceOnCellError = true;
+
+        public Task ResetModem()
+        {
+            if (cell != null)
+            {
+                if (_resetDeviceOnCellError)
+                {
+                    Resolver.Device.PlatformOS.Reset();
+                }
+                else
+                {
+                    return Task.Run(async () =>
+                    {
+                        Resolver.Log.Info("+++ Resetting cellular modem", "AquaMira");
+
+                        // HACK HACK HACK!
+                        // this is just a POC to see if this fixes it on ProjLab 3.e
+
+                        await Task.Delay(5000);// just a test wait
+
+                        // according to 3.7.2.1 of the EG21-G manual
+                        // hold low for > 650ms, then 29.5s later it will power off
+                        Resolver.Log.Info("+++ PWRKEY LOW", "AquaMira");
+                        PWRKEY.State = false; // assert low to power off
+                        await Task.Delay(1000); // hold for 1 second
+                        Resolver.Log.Info("+++ PWRKEY HIGH", "AquaMira");
+                        PWRKEY.State = true; // de-assert
+                        await Task.Delay(35000); // wait 35 seconds for it to power down
+                        Resolver.Log.Info("+++ Cellular modem should be OFF", "AquaMira");
+                        await Task.Delay(1000); // wait for 5 seconds just so you can visually verify after the above message
+                        PWRKEY.State = false; // pulse it low again, for > 500ms
+                        await Task.Delay(1000); // hold for 1 second
+                        PWRKEY.State = true; // de-assert
+                        Resolver.Log.Info("+++ Cellular modem should be ON", "AquaMira");
+
+                        Resolver.Log.Info("+++ Cellular modem reset complete", "AquaMira");
+                    });
+                }
+            }
+
+            return Task.CompletedTask;
         }
 
         private async Task SignalMonitor()

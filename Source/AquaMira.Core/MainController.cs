@@ -74,6 +74,16 @@ public class MainController
         NetworkController.NetworkConnectedChanged += OnNetworkConnectedChanged;
         NetworkController.SignalStrengthChanged += OnNetworkSignalStrengthChanged;
 
+        // DEV NOTE: (╯°□°)╯︵ ┻━┻
+        // the F& has a problem with HttpClient.Post hanging indefinitely.
+        // Not sure why it happens, so this is a workaround to reset the device if
+        // we fail to send data to the cloud for 10 minutes. 
+        cloudController.CloudSendFailure += async (s, e) =>
+        {
+            await NetworkController.ResetModem();
+            //Resolver.Device.PlatformOS.Reset();
+        };
+
         _ = Task.Run(async () =>
         {
             Resolver.Log.Debug("Reporting device startup to cloud", Constants.LoggingSource);

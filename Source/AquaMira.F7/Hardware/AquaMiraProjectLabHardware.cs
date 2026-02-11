@@ -2,6 +2,7 @@
 using AquaMira.Core.Contracts;
 using Meadow;
 using Meadow.Devices;
+using Meadow.Hardware;
 using Meadow.Modbus;
 using Meadow.Peripherals.Displays;
 using Meadow.Peripherals.Sensors;
@@ -10,6 +11,11 @@ using System;
 using System.Collections.Generic;
 
 namespace AquaMira.F7;
+
+internal class ModemControl
+{
+    public IPin ResetPin { get; set; }
+}
 
 internal class AquaMiraProjectLabHardware : IAquaMiraHardware
 {
@@ -32,6 +38,13 @@ internal class AquaMiraProjectLabHardware : IAquaMiraHardware
     public AquaMiraProjectLabHardware(IProjectLabHardware projLab)
     {
         this.projLab = projLab;
+
+        var modemControl = new ModemControl
+        {
+            ResetPin = projLab.MikroBus1.Pins.RST
+        };
+
+        Resolver.Services.Add(modemControl);
 
         InputController = new InputController(projLab);
 

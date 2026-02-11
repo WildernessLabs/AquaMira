@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace AquaMira.Core
 {
@@ -8,5 +9,8 @@ namespace AquaMira.Core
         event EventHandler<int>? SignalStrengthChanged;
 
         bool IsConnected { get; }
+        bool IsCellular { get; }
+
+        Task ResetModem();
     }
 }
