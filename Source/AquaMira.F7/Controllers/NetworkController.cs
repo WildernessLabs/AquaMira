@@ -94,7 +94,7 @@ namespace AquaMira.F7
             }
         }
 
-        private readonly bool _resetDeviceOnCellError = true;
+        private readonly bool _resetDeviceOnCellError = false;
 
         public Task ResetModem()
         {
@@ -130,7 +130,8 @@ namespace AquaMira.F7
                         PWRKEY.State = true; // de-assert
                         Resolver.Log.Info("+++ Cellular modem should be ON", "AquaMira");
 
-                        Resolver.Log.Info("+++ Cellular modem reset complete", "AquaMira");
+                        Resolver.Log.Info("+++ Cellular modem reset complete, now resetting Meadow", "AquaMira");
+                        Resolver.Log.Info("+++ Resetting cellular modem", "AquaMira");
                     });
                 }
             }
